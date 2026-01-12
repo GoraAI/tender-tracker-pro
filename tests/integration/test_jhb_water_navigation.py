@@ -147,9 +147,14 @@ async def test_screenshot_on_invalid_url(jhb_water_config, tmp_path):
     try:
         await engine.initialize()
 
-        # Try to navigate to invalid URL
-        with pytest.raises(Exception):  # Will raise some navigation error
-            await engine.navigate("https://invalid-url-that-does-not-exist.com")
+        # Try to navigate to localhost port that won't respond (guaranteed to timeout)
+        # Use shorter timeout for faster test
+        jhb_water_config["timeouts"]["page_load"] = 5  # 5 seconds
+        engine = BrowserEngine(jhb_water_config)
+        await engine.initialize()
+
+        with pytest.raises(Exception):  # Will raise NavigationTimeout or NavigationError
+            await engine.navigate("http://localhost:9999", timeout_seconds=5)
 
         # Screenshot should have been captured (check logs)
         # Note: Actual screenshot verification would require checking the filesystem
