@@ -43,48 +43,153 @@ Each layer exposes a clean API for the next layer to consume.
 
 #### `BrowserEngine`
 
-Manages Playwright browser instances and navigation.
+Manages Playwright browser instances and navigation with human-like behavior.
 
 ```python
-from src.navigator.browser_engine import BrowserEngine
+from src.navigator import BrowserEngine
 
 class BrowserEngine:
-    """Playwright-based browser automation engine."""
+    """Playwright-based browser automation engine with retry logic and human-like behavior."""
 
     def __init__(self, config: dict):
         """
         Initialize browser engine.
 
         Args:
-            config: Browser configuration from app_config.yaml
+            config: Browser configuration with keys:
+                - browser: {type: "chromium"|"firefox"|"webkit", headless: bool, viewport: {width, height}}
+                - timeouts: {page_load: int, navigation: int}
+                - delays: {min_ms: int, max_ms: int}
+                - max_retries: int
+                - screenshot_on_error: bool
         """
 
-    async def navigate(self, url: str, wait_for: str = "networkidle") -> Page:
+    async def initialize(self) -> None:
         """
-        Navigate to URL and return page object.
+        Launch browser instance.
+
+        Raises:
+            BrowserInitError: If browser fails to initialize
+        """
+
+    async def navigate(
+        self,
+        url: str,
+        wait_for: str = "networkidle",
+        timeout_seconds: Optional[int] = None
+    ) -> Page:
+        """
+        Navigate to URL with retry logic and human-like delays.
 
         Args:
             url: Target URL
             wait_for: Wait condition ("load", "networkidle", "domcontentloaded")
+            timeout_seconds: Page load timeout (default: from config)
 
         Returns:
             Playwright Page object
 
         Raises:
-            NavigationError: If navigation fails after retries
+            NavigationError: If browser not initialized
+            NavigationTimeout: If navigation exceeds timeout after retries
         """
 
-    async def close(self):
+    async def handle_cookie_consent(self, page: Page) -> bool:
+        """
+        Detect and accept cookie consent dialogs.
+
+        Args:
+            page: Playwright Page object
+
+        Returns:
+            True if consent dialog handled, False if not found
+        """
+
+    async def paginate(
+        self,
+        page: Page,
+        next_button_selectors: list[str],
+        max_pages: int = 5
+    ) -> list[Page]:
+        """
+        Paginate through results by clicking Next buttons.
+
+        Args:
+            page: Initial page
+            next_button_selectors: CSS selectors for Next button
+            max_pages: Maximum pages to load
+
+        Returns:
+            List of Page objects (one per page loaded)
+        """
+
+    async def screenshot(
+        self,
+        page: Page,
+        name: str,
+        path: str = "logs/screenshots"
+    ) -> str:
+        """
+        Capture full-page screenshot.
+
+        Args:
+            page: Playwright Page object
+            name: Screenshot name prefix
+            path: Save directory
+
+        Returns:
+            Screenshot file path
+
+        Raises:
+            ScreenshotError: If capture fails
+        """
+
+    async def close(self) -> None:
         """Close browser and clean up resources."""
 ```
 
 **Usage:**
 ```python
+from src.navigator import BrowserEngine
+
+config = {
+    "browser": {"type": "chromium", "headless": True, "viewport": {"width": 1920, "height": 1080}},
+    "timeouts": {"page_load": 30, "navigation": 60},
+    "delays": {"min_ms": 1000, "max_ms": 3000},
+    "max_retries": 3,
+    "screenshot_on_error": True
+}
+
 engine = BrowserEngine(config)
+await engine.initialize()
+
+# Navigate with automatic retry
 page = await engine.navigate("https://example.com")
-# Use page...
+
+# Handle cookie consent
+await engine.handle_cookie_consent(page)
+
+# Paginate through results
+pages = await engine.paginate(
+    page,
+    next_button_selectors=["a:has-text('Next')", ".pagination .next"],
+    max_pages=5
+)
+
+# Take screenshot
+screenshot_path = await engine.screenshot(page, "example_page")
+
+# Cleanup
 await engine.close()
 ```
+
+**Features:**
+- Automatic retry with exponential backoff (3 attempts by default)
+- Human-like random delays (1-3 seconds) between actions
+- Cookie consent detection and handling
+- Pagination support with configurable selectors
+- Screenshot capture on navigation failures
+- Structured logging for debugging
 
 ---
 

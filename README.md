@@ -141,7 +141,12 @@ python -m http.server 8080 --directory dashboard
 
 ### P0 Features (Critical for MVP1)
 
-- [ ] FR-NAV-001: Browser Navigation Engine
+- [x] **FR-NAV-001: Browser Navigation Engine** ✅
+  - Playwright-based navigation with retry logic
+  - Cookie consent handling
+  - Pagination support
+  - Human-like behavior (random delays)
+  - Screenshot capture for debugging
 - [ ] FR-NAV-002: PDF Link Discovery
 - [ ] FR-NAV-003: Direct PDF Download
 - [ ] FR-EXTRACT-001: PDF Text Extraction
@@ -161,6 +166,7 @@ python -m http.server 8080 --directory dashboard
 
 - `docs/PRD.md` - Full Product Requirements Document
 - `docs/ARCHITECTURE.md` - System architecture and design decisions
+- `docs/NAVIGATION.md` - **Browser automation tutorial** (FR-NAV-001)
 - `docs/MODEL_SETUP.md` - Gemma 3n model download and configuration
 - `docs/API.md` - Internal API documentation
 - `docs/EVALUATION.md` - AI evaluation framework
