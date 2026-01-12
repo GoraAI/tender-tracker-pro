@@ -1,0 +1,216 @@
+# Johannesburg Water - Navigation Configuration
+# Source: scm.johannesburgwater.co.za
+
+source:
+  id: "jhb-water"
+  name: "Johannesburg Water"
+  enabled: true
+  priority: "P0"
+
+  # Source metadata
+  organization: "Johannesburg Water (SOC) Ltd"
+  description: "Supply Chain Management - Request for Quotations"
+  website: "https://www.johannesburgwater.co.za/"
+
+# URLs
+urls:
+  main_site: "https://www.johannesburgwater.co.za/"
+  scm_portal: "https://scm.johannesburgwater.co.za/"
+  rfq_listing: "https://scm.johannesburgwater.co.za/supply-chain/request-for-quotations/open-rfq-2/"
+
+# Navigation configuration
+navigation:
+  # Method: browser_navigation (primary) or html_scraping (fallback)
+  method: "browser_navigation"
+
+  # Browser settings
+  browser:
+    type: "chromium"
+    headless: true
+    viewport:
+      width: 1920
+      height: 1080
+    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+  # Navigation steps
+  steps:
+    - action: "goto"
+      url: "${urls.rfq_listing}"
+      wait_for: "networkidle"
+      timeout_ms: 30000
+
+    - action: "wait_for_selector"
+      selector: "a[href*='.pdf']"
+      timeout_ms: 10000
+      optional: true  # Don't fail if no PDFs found
+
+    - action: "scroll"
+      direction: "down"
+      distance: 1000
+      optional: true  # Load lazy-loaded content
+
+  # Human-like behavior
+  delays:
+    min_ms: 1000
+    max_ms: 3000
+    between_downloads_ms: 2000
+
+  # Cookie consent handling
+  cookie_consent:
+    enabled: true
+    selectors:
+      - "button:has-text('Accept')"
+      - "button:has-text('Agree')"
+      - ".cookie-accept"
+      - "#cookie-accept"
+
+  # Pagination
+  pagination:
+    enabled: true
+    next_button_selectors:
+      - "a:has-text('Next')"
+      - "a.next"
+      - ".pagination .next"
+    max_pages: 5
+
+# PDF Discovery
+pdf_discovery:
+  # Pattern matching for PDF links
+  patterns:
+    # WordPress uploads pattern
+    - regex: "/wp-content/uploads/\\d{4}/\\d{2}/.*\\.pdf$"
+    # RFQ pattern
+    - regex: "RFQ.*\\.pdf$"
+    # Generic PDF pattern
+    - regex: ".*\\.pdf$"
+
+  # Link attributes to extract
+  extract:
+    - attribute: "href"
+      name: "url"
+    - attribute: "innerText"
+      name: "link_text"
+    - attribute: "title"
+      name: "title"
+      optional: true
+
+  # Context extraction (surrounding text)
+  extract_context:
+    enabled: true
+    parent_selector: "tr"  # Table row context
+    max_length: 500
+
+  # Deduplication key
+  dedup_key: "url"  # Use full URL for uniqueness
+
+  # Filtering
+  exclude_patterns:
+    - ".*archive.*"
+    - ".*old.*"
+    - ".*test.*"
+
+# Download Configuration
+download:
+  # Storage path template
+  path_template: "documents/downloads/${source.id}/${year}-${month}/${filename}"
+
+  # Download method
+  method: "browser_click"  # browser_click, direct_request
+
+  # Validation
+  validate:
+    min_size_bytes: 1000
+    max_size_mb: 50
+    check_pdf_header: true  # Verify %PDF-
+
+  # Retry logic
+  retry_attempts: 3
+  retry_delay_ms: 5000
+  retry_on_errors:
+    - "NetworkError"
+    - "TimeoutError"
+    - "DownloadError"
+
+  # Concurrency
+  max_concurrent: 3
+
+  # Skip existing
+  skip_existing: true
+  compare_by: "size_and_name"  # size_and_name, hash, name_only
+
+# Fallback Scraping (when navigation fails)
+fallback:
+  # Trigger condition
+  enabled: true
+  trigger_after_failures: 3
+
+  # Scraper configuration
+  scraper:
+    method: "requests_beautifulsoup"
+    parser: "lxml"
+    timeout_seconds: 30
+
+    # CSS selectors for fallback
+    selectors:
+      pdf_links: "a[href$='.pdf']"
+      tender_rows: "table tr"
+      title: ".entry-title"
+
+    # Headers
+    headers:
+      User-Agent: "TenderTracker/1.0 (Compliance; contact@example.com)"
+      Accept: "text/html,application/xhtml+xml"
+
+  # Recovery
+  recovery_hours: 24
+  alert_on_activation: true
+
+# Scheduling
+schedule:
+  # Cron expression: every 4 hours
+  cron: "0 */4 * * *"
+
+  # Specific times alternative
+  # times:
+  #   - "08:00"
+  #   - "12:00"
+  #   - "16:00"
+  #   - "20:00"
+
+  # Timezone
+  timezone: "Africa/Johannesburg"
+
+  # Skip on holidays
+  skip_holidays: false
+
+# Monitoring
+monitoring:
+  # Alert conditions
+  alert_on_consecutive_failures: 2
+  alert_on_zero_results: true
+  alert_on_slow_response: 60  # seconds
+
+  # Screenshots
+  screenshot_on_error: true
+  screenshot_path: "logs/screenshots/${source.id}_${timestamp}.png"
+
+  # Metrics
+  track_metrics:
+    - "response_time_ms"
+    - "pdf_count"
+    - "download_success_rate"
+    - "extraction_time_ms"
+
+# Expected patterns (for validation)
+expected:
+  # Typical tender count range
+  min_tenders_per_scrape: 0
+  max_tenders_per_scrape: 50
+
+  # Typical PDF sizes
+  typical_pdf_size_kb:
+    min: 50
+    max: 5000
+
+  # File naming pattern
+  filename_pattern: "RFQ[A-Z]{2}\\d+.*\\.pdf"

@@ -1,0 +1,84 @@
+# Email Notification Configuration
+# Copy to email_config.yaml and add your SMTP credentials
+
+email:
+  # SMTP Server
+  smtp:
+    host: "smtp.gmail.com"  # Gmail example
+    port: 587
+    use_tls: true
+    use_ssl: false
+
+  # Credentials (use environment variables in production)
+  credentials:
+    username: "your-email@gmail.com"
+    password: "your-app-password"  # Use app password, not account password
+
+  # Sender
+  from:
+    address: "tender-tracker@example.com"
+    name: "Tender Tracker Pro"
+
+  # Recipients
+  to:
+    - address: "your-email@example.com"
+      name: "Themba"
+
+  # CC (optional)
+  cc: []
+
+  # BCC (optional)
+  bcc: []
+
+  # Email settings
+  settings:
+    # Only send for high-priority tenders (score ≥70)
+    high_priority_only: true
+
+    # Batch multiple tenders in one email
+    batch_enabled: true
+    batch_interval_minutes: 60  # Max 1 email per hour
+
+    # Include attachments
+    attach_pdfs: false  # Set true to attach tender PDFs
+
+    # Template
+    template_path: "templates/email/tender_alert.html"
+    use_html: true
+
+  # Subject line template
+  subject_template: "🔔 {count} New High-Priority Tender{plural} - {date}"
+
+  # Retry logic
+  retry:
+    max_attempts: 3
+    delay_seconds: 10
+
+# Alternative SMTP providers
+
+# Gmail:
+# - Enable 2FA on Google Account
+# - Generate App Password: https://myaccount.google.com/apppasswords
+# - Use App Password in password field
+
+# Outlook/Office365:
+# smtp:
+#   host: "smtp.office365.com"
+#   port: 587
+#   use_tls: true
+
+# SendGrid:
+# smtp:
+#   host: "smtp.sendgrid.net"
+#   port: 587
+#   use_tls: true
+#   username: "apikey"
+#   password: "your-sendgrid-api-key"
+
+# Mailgun:
+# smtp:
+#   host: "smtp.mailgun.org"
+#   port: 587
+#   use_tls: true
+#   username: "postmaster@your-domain.mailgun.org"
+#   password: "your-mailgun-smtp-password"

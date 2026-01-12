@@ -1,0 +1,91 @@
+# Company Profile for Tender Relevance Scoring
+# Copy to company_profile.yaml and customize with your company details
+
+company:
+  name: "Themba Electrical & Construction"
+  registration_number: "2020/123456/07"
+  established_year: 2020
+
+# Primary and secondary industries
+industries:
+  primary:
+    - ELECTRICAL
+    - PLUMBING
+  secondary:
+    - BUILDING
+    - CIVIL
+
+# Detailed capabilities
+capabilities:
+  - Electrical installations (residential and commercial)
+  - Electrical maintenance and repairs
+  - Plumbing and water systems
+  - General building maintenance
+  - Civil works (small scale)
+  - HVAC installation
+
+# Certifications and accreditations
+certifications:
+  - name: "CIDB Grading"
+    level: "Grade 4"
+    categories: ["GB", "EP", "SQ"]
+    expiry_date: "2027-12-31"
+
+  - name: "Electrical Certificate of Compliance"
+    valid_until: "2027-06-30"
+
+  - name: "SARS Tax Clearance"
+    valid_until: "2026-12-31"
+
+  - name: "BEE Level"
+    level: "Level 4"
+    valid_until: "2026-09-30"
+
+# Location and service area
+location:
+  primary_city: "Johannesburg"
+  province: "Gauteng"
+  service_radius_km: 100
+
+  preferred_regions:
+    - Johannesburg
+    - Ekurhuleni
+    - Tshwane
+    - Midrand
+    - Sandton
+
+# Company capacity
+capacity:
+  # Projects
+  max_concurrent_projects: 3
+  typical_response_time_days: 5
+
+  # Financial limits
+  max_tender_value: 500000  # ZAR
+  min_tender_value: 10000  # ZAR
+
+  # Staff
+  permanent_staff: 12
+  contract_staff_available: 25
+
+# Scoring weights (must sum to 100)
+scoring_weights:
+  industry_match: 25
+  location_match: 20
+  size_fit: 20
+  capability_match: 20
+  deadline_feasibility: 15
+
+# Preferences
+preferences:
+  # Preferred tender types
+  prefer_rfq: true
+  prefer_long_term_contracts: true
+
+  # Avoid
+  avoid_industries:
+    - IT
+    - SOFTWARE
+
+  # Minimum deadline (days)
+  minimum_deadline_days: 3

@@ -1,0 +1,255 @@
+# Tender Tracker Pro - Main Application Configuration
+# Copy to app_config.yaml and customize
+
+application:
+  name: "Tender Tracker Pro"
+  version: "1.0.0"
+  environment: "development"  # development, staging, production
+
+  # Working directory
+  base_dir: "/home/goraai/tender_tracker_pro"
+
+  # Timezone
+  timezone: "Africa/Johannesburg"  # SAST (UTC+2)
+
+# Navigation Settings
+navigation:
+  # Primary method: browser navigation
+  default_method: "playwright"
+
+  # Browser settings
+  browser:
+    type: "chromium"  # chromium, firefox, webkit
+    headless: true
+    viewport:
+      width: 1920
+      height: 1080
+    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+  # Timeouts (seconds)
+  timeouts:
+    page_load: 30
+    navigation: 60
+    element_wait: 10
+
+  # Human-like behavior
+  delays:
+    min_seconds: 1.0
+    max_seconds: 3.0
+    between_downloads: 2.0
+
+  # Error handling
+  screenshot_on_error: true
+  max_retries: 3
+  retry_delay_seconds: 5
+
+# PDF Download Settings
+download:
+  # Storage path template: documents/downloads/{source}/{YYYY-MM}/
+  base_path: "documents/downloads"
+
+  # Validation
+  min_file_size_bytes: 1000
+  max_file_size_mb: 50
+  verify_pdf_header: true  # Check for %PDF-
+
+  # Concurrency
+  max_concurrent_downloads: 3
+
+  # Deduplication
+  track_downloads: true
+  tracking_file: "data/tracking/downloaded_pdfs.json"
+
+  # Cleanup
+  retention_days: 90
+
+# PDF Text Extraction
+extraction:
+  # Primary method
+  library: "pdfplumber"  # pdfplumber, pypdf2
+
+  # OCR fallback for scanned PDFs
+  ocr:
+    enabled: true
+    engine: "tesseract"
+    language: "eng"
+    confidence_threshold: 60
+
+  # Limits
+  max_text_length: 50000  # characters
+  max_tables_per_document: 20
+
+  # Output
+  output_path: "data/extracted"
+  output_format: "json"
+
+# LLM Settings (Gemma 3n)
+llm:
+  # Model files (GGUF format)
+  models:
+    e2b:
+      path: "models/gemma-3n-e2b-q4.gguf"
+      parameters: 2000000000
+      context_length: 4096
+      quantization: "Q4_K_M"
+    e4b:
+      path: "models/gemma-3n-e4b-q4.gguf"
+      parameters: 4000000000
+      context_length: 8192
+      quantization: "Q4_K_M"
+
+  # Inference engine
+  engine: "llama.cpp"  # llama.cpp, mediapipe
+
+  # Hardware
+  device: "auto"  # auto, cpu, cuda, metal
+  gpu_layers: -1  # -1 = all layers on GPU, 0 = CPU only
+  threads: 8  # CPU threads
+
+  # Generation parameters
+  generation:
+    temperature: 0.1  # Low for factual extraction
+    top_p: 0.95
+    top_k: 40
+    max_tokens: 2000
+
+  # Dynamic routing
+  routing:
+    simple_task_tokens: 2000  # <2000 tokens → E2B
+    complex_task_tokens: 2000  # >2000 tokens → E4B
+
+  # Performance targets
+  targets:
+    e2b_ttft_ms: 500
+    e4b_ttft_ms: 800
+    e2b_tokens_per_sec: 40
+    e4b_tokens_per_sec: 25
+
+  # Timeout
+  inference_timeout_seconds: 30
+
+  # Request queue
+  max_concurrent_requests: 3
+  queue_timeout_seconds: 300
+
+# Scoring
+scoring:
+  # Profile source
+  company_profile_path: "config/company_profile.yaml"
+
+  # Thresholds
+  high_priority_threshold: 70
+  medium_priority_threshold: 40
+
+  # Weights (must sum to 100)
+  weights:
+    industry_match: 25
+    location_match: 20
+    size_fit: 20
+    capability_match: 20
+    deadline_feasibility: 15
+
+# Reporting
+reporting:
+  # CSV reports
+  csv:
+    enabled: true
+    output_path: "data/reports"
+    filename_template: "tenders_{date}.csv"
+    encoding: "utf-8-sig"  # UTF-8 with BOM for Excel
+
+  # Dashboard
+  dashboard:
+    enabled: true
+    path: "dashboard"
+    auto_refresh_hours: 4
+
+# Notifications
+notifications:
+  # Email
+  email:
+    enabled: true
+    config_file: "config/email_config.yaml"
+    high_priority_only: true  # Only send for score ≥70
+    batch_interval_minutes: 60  # Max 1 email per hour
+    template: "templates/email/tender_alert.html"
+
+  # Discord
+  discord:
+    enabled: false
+    config_file: "config/discord_config.yaml"
+    webhook_url: ""
+    rate_limit_per_minute: 5
+
+# Scheduling
+schedule:
+  # Run every 4 hours
+  enabled: true
+  cron_expression: "0 */4 * * *"
+
+  # Or specific times
+  # cron_expression: "0 8,12,16,20 * * *"  # 8am, 12pm, 4pm, 8pm
+
+  # Timezone for schedule
+  timezone: "Africa/Johannesburg"
+
+# Fallback Scraping
+fallback:
+  # Trigger conditions
+  enabled: true
+  trigger_after_failures: 3
+  recovery_hours: 24
+
+  # Scraper settings
+  library: "beautifulsoup4"
+  parser: "lxml"
+  timeout_seconds: 30
+
+  # Alerts
+  alert_on_activation: true
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "json"  # json, text
+
+  # Log files
+  files:
+    navigator: "logs/navigator.log"
+    extraction: "logs/extraction.log"
+    llm: "logs/llm.log"
+    notification: "logs/notification.log"
+
+  # Rotation
+  rotation:
+    max_bytes: 10485760  # 10MB
+    backup_count: 5
+
+  # Screenshots
+  screenshot_path: "logs/screenshots"
+
+# Monitoring
+monitoring:
+  # Prometheus metrics
+  prometheus:
+    enabled: false
+    port: 9090
+
+  # Health endpoint
+  health_check:
+    enabled: false
+    port: 8080
+    path: "/health"
+
+# Data Storage
+storage:
+  # Database (optional)
+  database:
+    enabled: false
+    url: "sqlite:///data/tenders.db"
+
+  # JSON storage (default)
+  json:
+    enabled: true
+    processed_path: "data/processed"
+    pretty_print: true
