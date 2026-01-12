@@ -590,6 +590,180 @@ pip show playwright
 
 ---
 
+## PDF Discovery
+
+After navigating to tender pages, discover PDF links for download.
+
+### Quick Start
+
+```python
+from pathlib import Path
+from src.navigator import BrowserEngine, PDFDiscovery
+
+async def discover_tender_pdfs():
+    # Load configuration
+    config = load_source_config("jhb_water")
+
+    # Initialize
+    engine = BrowserEngine(config["browser_config"])
+    discovery = PDFDiscovery(
+        config["pdf_discovery"],
+        tracking_file=Path("data/tracking/jhb_water_pdfs.json")
+    )
+
+    await engine.initialize()
+
+    # Navigate
+    page = await engine.navigate("https://example.com/tenders")
+    await engine.handle_cookie_consent(page)
+
+    # Discover PDFs
+    pdf_links = await discovery.discover_pdfs(page, source_id="jhb-water")
+    print(f"Found {len(pdf_links)} new PDFs")
+
+    # Save tracking
+    discovery.save_tracking(pdf_links)
+
+    await engine.close()
+```
+
+### Pattern Configuration
+
+```yaml
+# config/sources/jhb_water.yaml
+pdf_discovery:
+  patterns:
+    - regex: "/wp-content/uploads/\\d{4}/\\d{2}/.*\\.pdf$"
+    - regex: "RFQ.*\\.pdf$"
+    - regex: ".*\\.pdf$"  # Fallback: any PDF
+
+  exclude_patterns:
+    - ".*archive.*"
+    - ".*old.*"
+    - ".*test.*"
+
+  extract_context:
+    enabled: true
+    parent_selector: "tr"  # Table row
+    max_length: 500
+
+  dedup_key: "url"
+```
+
+### Multi-Page Discovery
+
+```python
+async def discover_all_tenders():
+    engine = BrowserEngine(config["browser_config"])
+    discovery = PDFDiscovery(config["pdf_discovery"], tracking_file)
+
+    await engine.initialize()
+
+    # Navigate to first page
+    page = await engine.navigate(url)
+    await engine.handle_cookie_consent(page)
+
+    # Paginate
+    pages = await engine.paginate(page, selectors=[...], max_pages=5)
+
+    # Discover on all pages
+    all_pdfs = []
+    for i, p in enumerate(pages, 1):
+        pdfs = await discovery.discover_pdfs(p, source_id="jhb-water")
+        all_pdfs.extend(pdfs)
+        print(f"Page {i}: {len(pdfs)} PDFs")
+
+    # Save tracking
+    discovery.save_tracking(all_pdfs)
+
+    await engine.close()
+```
+
+### PDFLink Data Model
+
+```python
+@dataclass
+class PDFLink:
+    url: str              # Full absolute URL
+    link_text: str        # Anchor text
+    title: Optional[str]  # Link title attribute
+    context: str          # Parent element text
+    discovered_at: datetime
+    source_url: str       # Page URL
+    source_id: str        # e.g., "jhb-water"
+
+# Serialization
+pdf_dict = pdf_link.to_dict()
+restored = PDFLink.from_dict(pdf_dict)
+```
+
+### Tracking File
+
+PDFs are tracked in `data/tracking/{source_id}_pdfs.json`:
+
+```json
+{
+  "version": "1.0",
+  "last_updated": "2026-01-12T14:30:00Z",
+  "discovered_pdfs": {
+    "https://example.com/rfq123.pdf": {
+      "first_seen": "2026-01-12T14:30:00Z",
+      "link_text": "RFQ123",
+      "source_id": "jhb-water",
+      "downloaded": false
+    }
+  }
+}
+```
+
+### Deduplication
+
+```python
+# First run: Discovers 10 PDFs
+pdfs_run1 = await discovery.discover_pdfs(page, "jhb-water")
+discovery.save_tracking(pdfs_run1)  # Saves to tracking file
+
+# Second run: Same page, returns 0 PDFs (all already tracked)
+pdfs_run2 = await discovery.discover_pdfs(page, "jhb-water")
+assert len(pdfs_run2) == 0
+```
+
+### Troubleshooting
+
+**Problem:** No PDFs discovered
+
+**Solutions:**
+1. Check patterns match URLs:
+   ```python
+   # Test pattern matching
+   assert discovery._matches_patterns("https://example.com/rfq.pdf")
+   ```
+
+2. Check exclude patterns aren't blocking:
+   ```python
+   # URLs should NOT match exclude patterns
+   assert not discovery._matches_exclude_patterns("https://example.com/rfq.pdf")
+   ```
+
+**Problem:** Context not extracted
+
+**Solutions:**
+1. Verify parent selector:
+   ```yaml
+   extract_context:
+     enabled: true
+     parent_selector: "tr"  # Try "div", "td", etc.
+   ```
+
+**Problem:** Tracking file corrupted
+
+**Solution:**
+- Discovery automatically backs up corrupted files
+- Check `data/tracking/{source_id}_pdfs.backup.json`
+- Tracking file can be regenerated (will rediscover PDFs)
+
+---
+
 ## Next Steps
 
 - **Extracting Data:** See [EXTRACTION.md](EXTRACTION.md) for PDF parsing

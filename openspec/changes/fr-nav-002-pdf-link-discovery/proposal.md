@@ -1,6 +1,6 @@
 # FR-NAV-002: PDF Link Discovery
 
-**Status:** 🟡 PROPOSED
+**Status:** 🟢 APPROVED
 **Priority:** P0 (Critical for MVP1)
 **Depends On:** FR-NAV-001 (Browser Navigation Engine) ✅
 **Blocks:** FR-NAV-003 (Direct PDF Download)

@@ -147,7 +147,12 @@ python -m http.server 8080 --directory dashboard
   - Pagination support
   - Human-like behavior (random delays)
   - Screenshot capture for debugging
-- [ ] FR-NAV-002: PDF Link Discovery
+- [x] **FR-NAV-002: PDF Link Discovery** ✅
+  - Pattern-based URL matching (regex)
+  - Context extraction from parent elements
+  - Deduplication against JSON tracking file
+  - Exclude pattern support
+  - Multi-page discovery integration
 - [ ] FR-NAV-003: Direct PDF Download
 - [ ] FR-EXTRACT-001: PDF Text Extraction
 - [ ] FR-LLM-001: Gemma 3n Model Management

@@ -195,44 +195,194 @@ await engine.close()
 
 #### `PDFDiscovery`
 
-Discovers PDF links on loaded pages.
+Discovers PDF links on web pages using pattern matching and tracks them to avoid reprocessing.
 
 ```python
-from src.navigator.pdf_discovery import PDFDiscovery
+from pathlib import Path
+from src.navigator import PDFDiscovery, PDFLink
 
 class PDFDiscovery:
-    """Discovers PDF links on web pages."""
+    """
+    Discovers PDF links using pattern matching with deduplication.
 
-    def __init__(self, patterns: list[str]):
+    Features:
+    - Regex pattern matching
+    - Exclude pattern support
+    - Context extraction from parent elements
+    - Deduplication against JSON tracking file
+    - Atomic tracking file updates
+    """
+
+    def __init__(self, config: dict, tracking_file: Path):
         """
-        Initialize PDF discovery.
+        Initialize PDF discovery engine.
 
         Args:
-            patterns: List of regex patterns for PDF URLs
+            config: pdf_discovery section from source config with keys:
+                - patterns: List[dict] with "regex" key
+                - exclude_patterns: List[str] (optional)
+                - extract_context: dict with enabled, parent_selector, max_length
+                - dedup_key: str (default "url")
+            tracking_file: Path to JSON tracking file
         """
 
-    async def find_pdfs(self, page: Page) -> list[PDFLink]:
+    async def discover_pdfs(self, page: Page, source_id: str) -> List[PDFLink]:
         """
-        Find all PDF links on page.
+        Discover all new PDF links on a page.
 
         Args:
             page: Playwright Page object
+            source_id: Source identifier (e.g., "jhb-water")
 
         Returns:
-            List of PDFLink objects with URL, text, context
+            List of PDFLink objects (deduplicated, filtered by patterns)
+
+        Process:
+        1. Query all <a> tags
+        2. Filter by patterns
+        3. Extract metadata and context
+        4. Deduplicate against tracking file
+        5. Return new links only
         """
 
-    def deduplicate(self, pdf_links: list[PDFLink]) -> list[PDFLink]:
+    async def extract_context(
+        self,
+        element: ElementHandle,
+        context_config: dict
+    ) -> str:
         """
-        Remove previously downloaded PDFs.
+        Extract surrounding context for a PDF link.
 
         Args:
-            pdf_links: Discovered PDF links
+            element: The anchor element
+            context_config: Configuration with:
+                - enabled: bool
+                - parent_selector: str (e.g., "tr")
+                - max_length: int
 
         Returns:
-            New PDF links only
+            Context string (truncated to max_length)
+        """
+
+    def deduplicate(self, pdf_links: List[PDFLink]) -> List[PDFLink]:
+        """
+        Filter out previously discovered PDFs.
+
+        Args:
+            pdf_links: List of discovered PDFLinks
+
+        Returns:
+            List of new PDFLinks (not in tracking file)
+        """
+
+    def load_tracking(self) -> Dict[str, Any]:
+        """
+        Load tracking file.
+
+        Returns:
+            Tracking dict with discovered PDFs
+        """
+
+    def save_tracking(self, pdf_links: List[PDFLink]) -> None:
+        """
+        Update tracking file with new PDFLinks.
+
+        Uses atomic write (write to temp, then rename).
+
+        Args:
+            pdf_links: List of PDFLinks to add to tracking
         """
 ```
+
+**PDFLink Data Model:**
+```python
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Optional
+
+@dataclass
+class PDFLink:
+    """Represents a discovered PDF link with metadata."""
+
+    url: str  # Full absolute URL to PDF
+    link_text: str  # Anchor text (innerText)
+    title: Optional[str]  # Link title attribute
+    context: str  # Surrounding text (e.g., from parent <tr>)
+    discovered_at: datetime  # Discovery timestamp
+    source_url: str  # Page URL where found
+    source_id: str  # Source identifier
+
+    def to_dict(self) -> dict:
+        """Convert to dictionary for JSON serialization."""
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "PDFLink":
+        """Create PDFLink from dictionary."""
+```
+
+**Usage:**
+```python
+from pathlib import Path
+from src.navigator import BrowserEngine, PDFDiscovery
+
+# Load configuration
+config = load_source_config("jhb_water")
+
+# Initialize
+engine = BrowserEngine(config["browser_config"])
+discovery = PDFDiscovery(
+    config["pdf_discovery"],
+    tracking_file=Path("data/tracking/jhb_water_pdfs.json")
+)
+
+await engine.initialize()
+
+# Navigate to page
+page = await engine.navigate("https://example.com/tenders")
+await engine.handle_cookie_consent(page)
+
+# Discover PDFs
+pdf_links = await discovery.discover_pdfs(page, source_id="jhb-water")
+print(f"Found {len(pdf_links)} new PDFs")
+
+# Discover across multiple pages
+pages = await engine.paginate(page, selectors=[...], max_pages=5)
+all_pdfs = []
+for p in pages:
+    pdfs = await discovery.discover_pdfs(p, source_id="jhb-water")
+    all_pdfs.extend(pdfs)
+
+# Save tracking
+discovery.save_tracking(all_pdfs)
+
+await engine.close()
+```
+
+**Tracking File Format** (`data/tracking/{source_id}_pdfs.json`):
+```json
+{
+  "version": "1.0",
+  "last_updated": "2026-01-12T14:30:00Z",
+  "discovered_pdfs": {
+    "https://example.com/rfq123.pdf": {
+      "first_seen": "2026-01-12T14:30:00Z",
+      "link_text": "RFQ123 - Water Supply",
+      "source_id": "jhb-water",
+      "source_url": "https://example.com/tenders",
+      "downloaded": false
+    }
+  }
+}
+```
+
+**Features:**
+- Pattern-based URL matching (regex)
+- Exclude pattern support (skip archived/test PDFs)
+- Context extraction from parent elements
+- Deduplication against JSON tracking file
+- Atomic file writes (prevents corruption)
+- Automatic backup on corrupted tracking file
+- Structured logging for discovery metrics
 
 ---
 
