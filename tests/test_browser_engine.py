@@ -12,13 +12,17 @@ Tests cover:
 """
 
 import asyncio
-from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from playwright.async_api import Page
 
-from src.navigator import BrowserEngine, BrowserInitError, NavigationError, NavigationTimeout
+from src.navigator import (
+    BrowserEngine,
+    BrowserInitError,
+    NavigationError,
+    NavigationTimeout,
+)
 
 
 @pytest.fixture
@@ -292,6 +296,7 @@ async def test_human_like_delay_range(browser_config):
 
 
 # Additional tests for coverage
+
 
 @pytest.mark.asyncio
 async def test_close_browser(browser_config):

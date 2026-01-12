@@ -12,9 +12,20 @@ from pathlib import Path
 from typing import Optional
 
 import structlog
-from playwright.async_api import Browser, BrowserContext, Page, Playwright, async_playwright
+from playwright.async_api import (
+    Browser,
+    BrowserContext,
+    Page,
+    Playwright,
+    async_playwright,
+)
 
-from .exceptions import BrowserInitError, NavigationError, NavigationTimeout, ScreenshotError
+from .exceptions import (
+    BrowserInitError,
+    NavigationError,
+    NavigationTimeout,
+    ScreenshotError,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -236,7 +247,9 @@ class BrowserEngine:
                 backoff_ms = 2**attempt * 1000
                 await asyncio.sleep(backoff_ms / 1000)
 
-        raise NavigationError(f"Navigation failed after {self.max_retries} attempts: {url}")
+        raise NavigationError(
+            f"Navigation failed after {self.max_retries} attempts: {url}"
+        )
 
     async def handle_cookie_consent(self, page: Page) -> bool:
         """

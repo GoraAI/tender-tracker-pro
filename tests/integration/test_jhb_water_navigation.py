@@ -18,7 +18,9 @@ from src.navigator import BrowserEngine
 def jhb_water_config():
     """Load actual JHB Water configuration."""
     # Load app config
-    config_path = Path(__file__).parent.parent.parent / "config" / "sources" / "jhb_water.yaml"
+    config_path = (
+        Path(__file__).parent.parent.parent / "config" / "sources" / "jhb_water.yaml"
+    )
 
     if not config_path.exists():
         pytest.skip("JHB Water config not found")
@@ -109,7 +111,9 @@ async def test_handle_jhb_water_cookies(jhb_water_config, jhb_water_url):
 # Task 8.3: Test pagination on JHB Water listings
 @pytest.mark.asyncio
 @pytest.mark.integration
-@pytest.mark.skip(reason="Pagination depends on tender count - may not always be present")
+@pytest.mark.skip(
+    reason="Pagination depends on tender count - may not always be present"
+)
 async def test_pagination_on_jhb_water(jhb_water_config, jhb_water_url):
     """
     Test pagination on JHB Water listings.
@@ -153,7 +157,9 @@ async def test_screenshot_on_invalid_url(jhb_water_config, tmp_path):
         engine = BrowserEngine(jhb_water_config)
         await engine.initialize()
 
-        with pytest.raises(Exception):  # Will raise NavigationTimeout or NavigationError
+        with pytest.raises(
+            Exception
+        ):  # Will raise NavigationTimeout or NavigationError
             await engine.navigate("http://localhost:9999", timeout_seconds=5)
 
         # Screenshot should have been captured (check logs)
@@ -194,10 +200,12 @@ async def test_full_navigation_pipeline(jhb_water_config, jhb_water_url):
         assert len(content) > 0
 
         # Step 5: Take screenshot (for verification)
-        screenshot_path = await engine.screenshot(page, "jhb_water_test", str(tmp_path := Path("/tmp")))
+        screenshot_path = await engine.screenshot(
+            page, "jhb_water_test", "/tmp"
+        )
         assert Path(screenshot_path).exists()
 
-        print(f"✓ Full pipeline complete")
+        print("✓ Full pipeline complete")
         print(f"✓ Screenshot saved: {screenshot_path}")
 
     finally:
@@ -207,6 +215,7 @@ async def test_full_navigation_pipeline(jhb_water_config, jhb_water_url):
 
 
 # Additional helper tests
+
 
 @pytest.mark.asyncio
 @pytest.mark.integration
