@@ -1,5 +1,7 @@
 package com.tendertracker.app.ui.screens.chat
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,18 +26,30 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tendertracker.app.ui.components.TypingIndicator
+import com.tendertracker.app.ui.theme.GlassBorder
+import com.tendertracker.app.ui.theme.GlassCardBackground
+import com.tendertracker.app.ui.theme.GlassEffect
+import com.tendertracker.app.ui.theme.GlassPrimary
+import com.tendertracker.app.ui.theme.GlassSecondary
+import com.tendertracker.app.ui.theme.GlassSurface
 import com.tendertracker.domain.model.ChatMessage
 import com.tendertracker.domain.model.MessageRole
 
@@ -54,9 +68,20 @@ fun ChatScreen(
     }
 
     Scaffold(
+        containerColor = Color.Transparent,  // Glass effect background
         topBar = {
+            // Glassmorphism TopAppBar
             TopAppBar(
-                title = { Text("AI Assistant") }
+                title = {
+                    Text(
+                        text = "AI Assistant",
+                        fontWeight = FontWeight.SemiBold
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                )
             )
         }
     ) { padding ->
@@ -69,8 +94,8 @@ fun ChatScreen(
             LazyColumn(
                 state = listState,
                 modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                contentPadding = PaddingValues(GlassEffect.screenPadding),  // 24dp
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(state.messages) { message ->
                     MessageBubble(message = message)
@@ -83,21 +108,33 @@ fun ChatScreen(
                 }
             }
 
-            // Input
+            // Input area with glass styling
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp),
+                    .padding(horizontal = GlassEffect.screenPadding, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedTextField(
                     value = state.inputText,
                     onValueChange = { viewModel.onInputChange(it) },
-                    placeholder = { Text("Type a message...") },
+                    placeholder = {
+                        Text(
+                            "Type a message...",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
                     modifier = Modifier.weight(1f),
                     enabled = !state.isTyping,
                     maxLines = 4,
-                    shape = RoundedCornerShape(24.dp)
+                    shape = RoundedCornerShape(24.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = GlassPrimary,
+                        unfocusedBorderColor = GlassBorder,
+                        focusedContainerColor = GlassSurface.copy(alpha = 0.5f),
+                        unfocusedContainerColor = GlassSurface.copy(alpha = 0.3f),
+                        cursorColor = GlassPrimary
+                    )
                 )
 
                 IconButton(
@@ -108,7 +145,7 @@ fun ChatScreen(
                         Icons.AutoMirrored.Filled.Send,
                         contentDescription = "Send",
                         tint = if (state.inputText.isNotBlank() && !state.isTyping) {
-                            MaterialTheme.colorScheme.primary
+                            GlassPrimary  // Purple when enabled
                         } else {
                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         }
@@ -119,6 +156,11 @@ fun ChatScreen(
     }
 }
 
+/**
+ * Message Bubble with Glassmorphism styling
+ * User messages: Purple gradient background
+ * AI messages: Glass card background
+ */
 @Composable
 fun MessageBubble(
     message: ChatMessage,
@@ -130,37 +172,55 @@ fun MessageBubble(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
     ) {
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = if (isUser) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.surfaceVariant
+        if (isUser) {
+            // User message with gradient background (Purple to Pink)
+            Box(
+                modifier = Modifier
+                    .widthIn(max = 280.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(GlassPrimary, GlassSecondary)
+                        )
+                    )
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        text = message.content,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = formatTimestamp(message.timestamp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White.copy(alpha = 0.7f),
+                        modifier = Modifier.align(Alignment.End)
+                    )
                 }
-            ),
-            modifier = Modifier.widthIn(max = 280.dp)
-        ) {
-            Column(modifier = Modifier.padding(12.dp)) {
-                Text(
-                    text = message.content,
-                    color = if (isUser) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    }
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = formatTimestamp(message.timestamp),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (isUser) {
-                        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    },
-                    modifier = Modifier.align(Alignment.End)
-                )
+            }
+        } else {
+            // AI message with glass card background
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = GlassCardBackground
+                ),
+                border = BorderStroke(1.dp, GlassBorder),
+                modifier = Modifier.widthIn(max = 280.dp)
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        text = message.content,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = formatTimestamp(message.timestamp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        modifier = Modifier.align(Alignment.End)
+                    )
+                }
             }
         }
     }

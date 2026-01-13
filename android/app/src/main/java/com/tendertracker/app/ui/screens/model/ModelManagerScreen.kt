@@ -1,8 +1,11 @@
 package com.tendertracker.app.ui.screens.model
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
@@ -19,7 +23,9 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,16 +36,27 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tendertracker.app.gemma.model.GemmaModel
 import com.tendertracker.app.gemma.model.ModelInfo
 import com.tendertracker.app.gemma.model.ModelState
+import com.tendertracker.app.ui.theme.GlassBorder
+import com.tendertracker.app.ui.theme.GlassCardBackground
+import com.tendertracker.app.ui.theme.GlassEffect
+import com.tendertracker.app.ui.theme.GlassPrimary
+import com.tendertracker.app.ui.theme.GlassSecondary
+import com.tendertracker.app.ui.theme.StatusSuccess
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,14 +67,26 @@ fun ModelManagerScreen(
     val state by viewModel.state.collectAsState()
 
     Scaffold(
+        containerColor = Color.Transparent,  // Glass effect background
         topBar = {
+            // Glassmorphism TopAppBar
             TopAppBar(
-                title = { Text("AI Models") },
+                title = {
+                    Text(
+                        text = "AI Models",
+                        fontWeight = FontWeight.SemiBold
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                ),
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = "Back",
+                            tint = GlassPrimary
                         )
                     }
                 }
@@ -67,14 +96,15 @@ fun ModelManagerScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(padding),
+            contentPadding = PaddingValues(GlassEffect.screenPadding),
+            verticalArrangement = Arrangement.spacedBy(GlassEffect.itemSpacing)
         ) {
             item {
                 Text(
                     text = "Available Models",
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
                 )
                 Text(
                     text = "Download a model to enable on-device AI features",
@@ -95,12 +125,19 @@ fun ModelManagerScreen(
             }
 
             item {
-                Spacer(modifier = Modifier.height(16.dp))
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                Spacer(modifier = Modifier.height(8.dp))
+                // Info Card - Glassmorphism
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(GlassEffect.cornerRadius),
+                    colors = CardDefaults.cardColors(containerColor = GlassCardBackground),
+                    border = BorderStroke(GlassEffect.borderWidth, GlassBorder)
+                ) {
+                    Column(modifier = Modifier.padding(GlassEffect.cardPadding)) {
                         Text(
                             text = "About Gemma 3n",
-                            style = MaterialTheme.typography.titleSmall
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
@@ -117,6 +154,9 @@ fun ModelManagerScreen(
     }
 }
 
+/**
+ * Model Card with Glassmorphism styling
+ */
 @Composable
 fun ModelCard(
     modelInfo: ModelInfo,
@@ -126,8 +166,14 @@ fun ModelCard(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(modifier = modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
+    // Glassmorphism Card
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(GlassEffect.cornerRadius),
+        colors = CardDefaults.cardColors(containerColor = GlassCardBackground),
+        border = BorderStroke(GlassEffect.borderWidth, GlassBorder)
+    ) {
+        Column(modifier = Modifier.padding(GlassEffect.cardPadding)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -138,14 +184,16 @@ fun ModelCard(
                         Icon(
                             Icons.Default.Memory,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = GlassPrimary  // Purple
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = modelInfo.model.name,
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = modelInfo.model.description,
                         style = MaterialTheme.typography.bodySmall,
@@ -164,23 +212,40 @@ fun ModelCard(
                     Icon(
                         Icons.Default.CheckCircle,
                         contentDescription = "Active",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = StatusSuccess  // Green checkmark
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // State-specific UI
+            // State-specific UI with gradient buttons
             when (val state = modelInfo.state) {
                 is ModelState.NotDownloaded -> {
-                    Button(
-                        onClick = onDownload,
-                        modifier = Modifier.fillMaxWidth()
+                    // Gradient Download Button
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(GlassPrimary, GlassSecondary)
+                                )
+                            )
                     ) {
-                        Icon(Icons.Default.Download, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Download")
+                        Button(
+                            onClick = onDownload,
+                            modifier = Modifier.fillMaxSize(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Icon(Icons.Default.Download, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Download", fontWeight = FontWeight.SemiBold)
+                        }
                     }
                 }
 
@@ -188,12 +253,15 @@ fun ModelCard(
                     Column {
                         LinearProgressIndicator(
                             progress = { state.progress / 100f },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            color = GlassPrimary,
+                            trackColor = GlassBorder
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "Downloading: ${state.progress}%",
-                            style = MaterialTheme.typography.labelSmall
+                            style = MaterialTheme.typography.labelSmall,
+                            color = GlassPrimary
                         )
                     }
                 }
@@ -203,13 +271,36 @@ fun ModelCard(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Button(
-                            onClick = onLoad,
-                            modifier = Modifier.weight(1f)
+                        // Gradient Load Button
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    brush = Brush.linearGradient(
+                                        colors = listOf(GlassPrimary, GlassSecondary)
+                                    )
+                                )
                         ) {
-                            Text("Load Model")
+                            Button(
+                                onClick = onLoad,
+                                modifier = Modifier.fillMaxSize(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color.Transparent,
+                                    contentColor = Color.White
+                                )
+                            ) {
+                                Text("Load Model", fontWeight = FontWeight.SemiBold)
+                            }
                         }
-                        OutlinedButton(onClick = onDelete) {
+                        OutlinedButton(
+                            onClick = onDelete,
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error
+                            ),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
+                        ) {
                             Icon(Icons.Default.Delete, contentDescription = "Delete")
                         }
                     }
@@ -221,9 +312,15 @@ fun ModelCard(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        CircularProgressIndicator(modifier = Modifier.padding(8.dp))
+                        CircularProgressIndicator(
+                            modifier = Modifier.padding(8.dp),
+                            color = GlassPrimary
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Loading model...")
+                        Text(
+                            text = "Loading model...",
+                            color = GlassPrimary
+                        )
                     }
                 }
 
@@ -235,12 +332,19 @@ fun ModelCard(
                         Text(
                             text = "Ready",
                             style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.SemiBold,
+                            color = StatusSuccess,  // Green
                             modifier = Modifier
                                 .weight(1f)
                                 .align(Alignment.CenterVertically)
                         )
-                        OutlinedButton(onClick = onDelete) {
+                        OutlinedButton(
+                            onClick = onDelete,
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error
+                            ),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
+                        ) {
                             Icon(Icons.Default.Delete, contentDescription = "Delete")
                         }
                     }
@@ -254,7 +358,12 @@ fun ModelCard(
                             color = MaterialTheme.colorScheme.error
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Button(onClick = onDownload) {
+                        Button(
+                            onClick = onDownload,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = GlassPrimary
+                            )
+                        ) {
                             Text("Retry Download")
                         }
                     }

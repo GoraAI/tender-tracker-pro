@@ -1,5 +1,6 @@
 package com.tendertracker.app.ui.screens.settings
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Cloud
@@ -16,21 +20,31 @@ import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.tendertracker.app.ui.theme.GlassBorder
+import com.tendertracker.app.ui.theme.GlassCardBackground
+import com.tendertracker.app.ui.theme.GlassEffect
+import com.tendertracker.app.ui.theme.GlassPrimary
+import com.tendertracker.app.ui.theme.GlassSecondary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,9 +55,20 @@ fun SettingsScreen(
     val state by viewModel.state.collectAsState()
 
     Scaffold(
+        containerColor = Color.Transparent,  // Glass effect background
         topBar = {
+            // Glassmorphism TopAppBar
             TopAppBar(
-                title = { Text("Settings") }
+                title = {
+                    Text(
+                        text = "Settings",
+                        fontWeight = FontWeight.SemiBold
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                )
             )
         }
     ) { padding ->
@@ -51,9 +76,10 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(GlassEffect.screenPadding)  // 24dp
         ) {
-            // Model Manager
+            // Model Manager - Glassmorphism Card
             SettingsCard(
                 title = "AI Model",
                 subtitle = state.modelStatus,
@@ -61,14 +87,20 @@ fun SettingsScreen(
                 onClick = onModelManagerClick
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
 
-            // Sync Settings
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
+            // Sync Settings - Glassmorphism Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(GlassEffect.cornerRadius),
+                colors = CardDefaults.cardColors(containerColor = GlassCardBackground),
+                border = BorderStroke(GlassEffect.borderWidth, GlassBorder)
+            ) {
+                Column(modifier = Modifier.padding(GlassEffect.cardPadding)) {
                     Text(
                         text = "Sync Settings",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -90,14 +122,20 @@ fun SettingsScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
 
-            // Notifications
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
+            // Notifications - Glassmorphism Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(GlassEffect.cornerRadius),
+                colors = CardDefaults.cardColors(containerColor = GlassCardBackground),
+                border = BorderStroke(GlassEffect.borderWidth, GlassBorder)
+            ) {
+                Column(modifier = Modifier.padding(GlassEffect.cardPadding)) {
                     Text(
                         text = "Notifications",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -111,14 +149,20 @@ fun SettingsScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
 
-            // App Info
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
+            // App Info - Glassmorphism Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(GlassEffect.cornerRadius),
+                colors = CardDefaults.cardColors(containerColor = GlassCardBackground),
+                border = BorderStroke(GlassEffect.borderWidth, GlassBorder)
+            ) {
+                Column(modifier = Modifier.padding(GlassEffect.cardPadding)) {
                     Text(
                         text = "About",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -137,6 +181,9 @@ fun SettingsScreen(
     }
 }
 
+/**
+ * Settings Card with Glassmorphism styling
+ */
 @Composable
 fun SettingsCard(
     title: String,
@@ -148,22 +195,29 @@ fun SettingsCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(GlassEffect.cornerRadius),
+        colors = CardDefaults.cardColors(containerColor = GlassCardBackground),
+        border = BorderStroke(GlassEffect.borderWidth, GlassBorder)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(GlassEffect.cardPadding),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+                tint = GlassPrimary  // Purple
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
@@ -173,12 +227,16 @@ fun SettingsCard(
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = GlassPrimary  // Purple
             )
         }
     }
 }
 
+/**
+ * Settings Toggle with Glassmorphism styling
+ * Purple switch when enabled
+ */
 @Composable
 fun SettingsToggle(
     title: String,
@@ -197,17 +255,30 @@ fun SettingsToggle(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary
+            tint = GlassPrimary  // Purple
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium
+            )
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = GlassPrimary,
+                uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                uncheckedTrackColor = GlassBorder
+            )
+        )
     }
 }

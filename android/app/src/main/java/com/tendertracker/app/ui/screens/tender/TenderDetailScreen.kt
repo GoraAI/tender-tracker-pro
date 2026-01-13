@@ -1,5 +1,7 @@
 package com.tendertracker.app.ui.screens.tender
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,29 +12,42 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tendertracker.app.ui.components.ScoreBadge
+import com.tendertracker.app.ui.theme.GlassBorder
+import com.tendertracker.app.ui.theme.GlassCardBackground
+import com.tendertracker.app.ui.theme.GlassEffect
+import com.tendertracker.app.ui.theme.GlassPrimary
+import com.tendertracker.app.ui.theme.GlassSecondary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,21 +63,41 @@ fun TenderDetailScreen(
     }
 
     Scaffold(
+        containerColor = Color.Transparent,  // Transparent for glass effect
         topBar = {
+            // Glassmorphism TopAppBar
             TopAppBar(
-                title = { Text(state.tender?.reference ?: "Tender") },
+                title = {
+                    Text(
+                        text = state.tender?.reference ?: "Tender",
+                        fontWeight = FontWeight.SemiBold
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                ),
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = "Back",
+                            tint = GlassPrimary  // Purple
                         )
                     }
                 }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { viewModel.onAskAI() }) {
+            // Gradient FAB matching web
+            FloatingActionButton(
+                onClick = { viewModel.onAskAI() },
+                containerColor = GlassPrimary,
+                contentColor = Color.White,
+                elevation = FloatingActionButtonDefaults.elevation(
+                    defaultElevation = 8.dp
+                )
+            ) {
                 Icon(Icons.Default.Chat, contentDescription = "Ask AI")
             }
         }
@@ -95,24 +130,31 @@ fun TenderDetailScreen(
                         .fillMaxSize()
                         .padding(padding)
                         .verticalScroll(rememberScrollState())
-                        .padding(16.dp)
+                        .padding(GlassEffect.screenPadding)  // 24dp
                 ) {
-                    // Score Card
+                    // Score Card - Glassmorphism
                     tender.score?.let { score ->
-                        Card(modifier = Modifier.fillMaxWidth()) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(GlassEffect.cornerRadius),
+                            colors = CardDefaults.cardColors(containerColor = GlassCardBackground),
+                            border = BorderStroke(GlassEffect.borderWidth, GlassBorder)
+                        ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(16.dp),
+                                    .padding(GlassEffect.cardPadding),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column {
                                     Text(
                                         text = "Relevance Score",
-                                        style = MaterialTheme.typography.titleMedium
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold
                                     )
                                     tender.scoreExplanation?.let { explanation ->
+                                        Spacer(modifier = Modifier.height(4.dp))
                                         Text(
                                             text = explanation,
                                             style = MaterialTheme.typography.bodySmall,
@@ -123,27 +165,34 @@ fun TenderDetailScreen(
                                 ScoreBadge(score = score, large = true)
                             }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
                     }
 
                     // Title
                     Text(
                         text = tender.title,
-                        style = MaterialTheme.typography.headlineSmall
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Reference
+                    // Reference with purple color
                     Text(
                         text = "Reference: ${tender.reference}",
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary
+                        fontWeight = FontWeight.SemiBold,
+                        color = GlassPrimary
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
 
-                    // Details Card
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Column(modifier = Modifier.padding(16.dp)) {
+                    // Details Card - Glassmorphism
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(GlassEffect.cornerRadius),
+                        colors = CardDefaults.cardColors(containerColor = GlassCardBackground),
+                        border = BorderStroke(GlassEffect.borderWidth, GlassBorder)
+                    ) {
+                        Column(modifier = Modifier.padding(GlassEffect.cardPadding)) {
                             DetailRow("Source", tender.sourceId)
                             tender.deadline?.let {
                                 DetailRow("Deadline", it)
@@ -153,20 +202,26 @@ fun TenderDetailScreen(
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
 
                     // Requirements Summary
                     tender.requirementsSummary?.let { summary ->
                         Text(
                             text = "Requirements Summary",
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Card(modifier = Modifier.fillMaxWidth()) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(GlassEffect.cornerRadius),
+                            colors = CardDefaults.cardColors(containerColor = GlassCardBackground),
+                            border = BorderStroke(GlassEffect.borderWidth, GlassBorder)
+                        ) {
                             Text(
                                 text = summary,
                                 style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(16.dp)
+                                modifier = Modifier.padding(GlassEffect.cardPadding)
                             )
                         }
                     }
