@@ -83,6 +83,10 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
 
+    // Room Database (for DatabaseModule)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+
     // On-Device AI
     implementation(libs.litertlm)
     implementation(libs.mediapipe.tasks.genai)
