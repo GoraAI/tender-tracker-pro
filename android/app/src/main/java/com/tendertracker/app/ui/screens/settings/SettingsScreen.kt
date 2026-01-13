@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Sync
@@ -50,6 +51,7 @@ import com.tendertracker.app.ui.theme.GlassSecondary
 @Composable
 fun SettingsScreen(
     onModelManagerClick: () -> Unit,
+    onLogoutClick: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -177,6 +179,16 @@ fun SettingsScreen(
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
+
+            // Logout Button - Glassmorphism Card
+            SettingsCard(
+                title = "Sign Out",
+                subtitle = "Sign out of your account",
+                icon = Icons.Default.ExitToApp,
+                onClick = onLogoutClick
+            )
         }
     }
 }

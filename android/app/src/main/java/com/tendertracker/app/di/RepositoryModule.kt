@@ -1,8 +1,10 @@
 package com.tendertracker.app.di
 
+import com.tendertracker.data.repository.AuthRepositoryImpl
 import com.tendertracker.data.repository.ChatRepositoryImpl
 import com.tendertracker.data.repository.SettingsRepositoryImpl
 import com.tendertracker.data.repository.TenderRepositoryImpl
+import com.tendertracker.domain.repository.AuthRepository
 import com.tendertracker.domain.repository.ChatRepository
 import com.tendertracker.domain.repository.SettingsRepository
 import com.tendertracker.domain.repository.TenderRepository
@@ -33,4 +35,10 @@ abstract class RepositoryModule {
     abstract fun bindSettingsRepository(
         impl: SettingsRepositoryImpl
     ): SettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAuthRepository(
+        impl: AuthRepositoryImpl
+    ): AuthRepository
 }

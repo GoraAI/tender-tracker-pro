@@ -1,11 +1,13 @@
 package com.tendertracker.data.remote.api
 
 import com.tendertracker.data.remote.dto.LoginRequest
+import com.tendertracker.data.remote.dto.RegisterRequest
 import com.tendertracker.data.remote.dto.ScoreResponse
 import com.tendertracker.data.remote.dto.ScoreSubmission
 import com.tendertracker.data.remote.dto.TenderListResponse
 import com.tendertracker.data.remote.dto.TenderResponse
 import com.tendertracker.data.remote.dto.TokenResponse
+import com.tendertracker.data.remote.dto.UserResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -37,6 +39,14 @@ interface TenderApi {
         @Body credentials: LoginRequest
     ): Response<TokenResponse>
 
+    @POST("auth/register")
+    suspend fun register(
+        @Body request: RegisterRequest
+    ): Response<UserResponse>
+
     @POST("auth/refresh")
     suspend fun refreshToken(): Response<TokenResponse>
+
+    @GET("auth/me")
+    suspend fun getCurrentUser(): Response<UserResponse>
 }

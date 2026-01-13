@@ -77,3 +77,18 @@ data class TokenResponse(
     @SerializedName("refresh_token") val refreshToken: String,
     @SerializedName("expires_in") val expiresIn: Long
 )
+
+data class RegisterRequest(
+    @SerializedName("email") val email: String,
+    @SerializedName("password") val password: String,
+    @SerializedName("full_name") val fullName: String?,
+    @SerializedName("company_name") val companyName: String?
+)
+
+data class UserResponse(
+    @SerializedName("id") val id: String,
+    @SerializedName("email") val email: String,
+    @SerializedName("full_name") val fullName: String?,
+    @SerializedName("company_name") val companyName: String?,
+    @SerializedName("is_active") val isActive: Boolean
+)

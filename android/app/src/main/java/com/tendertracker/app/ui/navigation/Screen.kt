@@ -4,6 +4,14 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed class Screen {
+    // Auth screens
+    @Serializable
+    data object Login : Screen()
+
+    @Serializable
+    data object Register : Screen()
+
+    // Main screens
     @Serializable
     data object TenderList : Screen()
 
