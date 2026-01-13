@@ -214,3 +214,25 @@ expected:
 
   # File naming pattern
   filename_pattern: "RFQ[A-Z]{2}\\d+.*\\.pdf"
+
+# Text Extraction Configuration
+extraction:
+  # Extraction method: "auto", "pdfplumber", or "ocr"
+  # auto = detect if scanned, use appropriate method
+  method: "auto"
+
+  # OCR settings (for scanned PDFs)
+  ocr_language: "eng"  # pytesseract language code
+  ocr_confidence_threshold: 0.7  # Minimum confidence to accept
+
+  # Validation
+  min_text_length: 100  # Minimum characters to consider valid
+
+  # Performance
+  max_concurrent: 3  # Max PDFs to extract simultaneously
+
+  # Caching
+  skip_existing: true  # Skip if already extracted
+
+  # Output
+  output_base_path: "documents/extracted"
