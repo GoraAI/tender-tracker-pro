@@ -1,0 +1,34 @@
+Score this tender for relevance to our company:
+
+COMPANY PROFILE:
+- Name: {company_name}
+- Industry: {industry}
+- Capabilities: {capabilities}
+
+PREFERENCES:
+- Sectors: {preferred_sectors}
+- Locations: {preferred_locations}
+- Value range: R{value_min:,} - R{value_max:,}
+- Keywords: {keywords}
+
+TENDER TO SCORE:
+- Title: {tender_title}
+- Reference: {tender_reference}
+- Deadline: {tender_deadline}
+- Estimated Value: {tender_value}
+- Requirements Summary: {tender_requirements}
+
+Consider:
+1. Do we have the capabilities for this tender?
+2. Does it match our preferred sectors?
+3. Is the location suitable?
+4. Is the value in our range?
+5. Do keywords align with our interests?
+
+Return JSON:
+{{
+  "score": <integer 0-100>,
+  "explanation": "<brief reason for score, max 200 chars>"
+}}
+
+Return only JSON, no other text.

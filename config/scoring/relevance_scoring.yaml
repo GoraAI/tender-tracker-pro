@@ -1,0 +1,32 @@
+# Relevance Scoring Configuration
+
+scoring:
+  # Model to use
+  model: "gemma-3n"
+
+  # Generation parameters
+  max_tokens: 512       # Shorter output than extraction
+  temperature: 0.2      # Slightly higher for reasoning
+  top_p: 0.9
+  top_k: 40
+  repeat_penalty: 1.1
+
+  # Prompt files
+  system_prompt_file: "prompts/relevance_scoring_system.txt"
+  user_prompt_template: "prompts/relevance_scoring_user.txt"
+
+  # Processing
+  max_concurrent: 5
+  timeout_seconds: 30
+  retry_attempts: 2
+  retry_delay_ms: 1000
+
+  # Filtering and sorting
+  min_score_threshold: 50   # Default minimum score
+  sort_by_score: true       # Sort descending
+  max_results: 100          # Limit returned results
+
+  # Output
+  save_scores: true
+  log_score_distribution: true
+  score_cache_ttl_hours: 24  # Cache scores for 24 hours

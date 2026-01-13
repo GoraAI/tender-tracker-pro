@@ -1,0 +1,32 @@
+# Tender Information Extraction Configuration
+
+extraction:
+  # Model to use (from ModelManager)
+  model: "gemma-3n"
+
+  # Generation parameters
+  max_tokens: 2048
+  temperature: 0.1      # Low for structured output
+  top_p: 0.9
+  top_k: 40
+  repeat_penalty: 1.1
+
+  # Prompt files
+  system_prompt_file: "prompts/tender_extraction_system.txt"
+  user_prompt_template: "prompts/tender_extraction_user.txt"
+
+  # Processing
+  max_concurrent: 3
+  timeout_seconds: 60
+  retry_attempts: 2
+  retry_delay_ms: 1000
+
+  # Quality thresholds
+  min_confidence: 0.5   # Warn if below
+  require_title: true
+  require_reference: true
+
+  # Output
+  save_raw_response: true
+  log_extraction_quality: true
+  output_format: "json"

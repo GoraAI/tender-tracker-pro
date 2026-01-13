@@ -1,0 +1,48 @@
+# User Criteria for Tender Relevance Scoring
+
+user_criteria:
+  # Company profile
+  company_name: "ABC Construction (Pty) Ltd"
+  industry: "Construction & Civil Engineering"
+
+  capabilities:
+    - "Road construction and maintenance"
+    - "Water pipeline installation and repair"
+    - "Building construction (residential and commercial)"
+    - "Civil engineering projects"
+    - "Project management and supervision"
+
+  # Preferences
+  preferred_sectors:
+    - "Water and sanitation"
+    - "Infrastructure development"
+    - "Municipal services"
+    - "Roads and transport"
+
+  preferred_locations:
+    - "Gauteng"
+    - "Johannesburg"
+    - "Pretoria"
+
+  # Value range (ZAR)
+  value_range:
+    min: 100000       # R100k minimum
+    max: 5000000      # R5m maximum
+
+  # Keywords of interest
+  keywords:
+    - "water"
+    - "pipeline"
+    - "construction"
+    - "maintenance"
+    - "infrastructure"
+    - "civil"
+    - "engineering"
+
+  # Scoring weights (must sum to 1.0)
+  weights:
+    capability_match: 0.4     # Most important
+    sector_match: 0.2
+    location_match: 0.1
+    value_match: 0.1
+    keyword_match: 0.2

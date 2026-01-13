@@ -1,115 +1,182 @@
 # Active OpenSpec Proposals
 
-**Last Updated:** 2026-01-12
+**Last Updated:** 2026-01-13
 
 ---
 
-## Currently Proposed (Awaiting Approval)
+## Backend Complete
 
 ### FR-NAV-001: Browser Navigation Engine
-- **Status:** 🟡 PROPOSED
-- **Priority:** P0 (Critical)
-- **Created:** 2026-01-12
-- **Location:** `openspec/changes/fr-nav-001-browser-navigation-engine/`
-- **Summary:** Playwright-based browser navigation engine with human-like behavior
-- **Dependencies:** None
-- **Blocks:** FR-NAV-002, FR-NAV-003
-- **Action Required:** Review and approve proposal.md
-
----
-
-## Upcoming P0 Proposals (To Be Created)
+- **Status:** COMPLETE
+- **Implemented:** 2026-01-12
 
 ### FR-NAV-002: PDF Link Discovery
-- **Status:** ⚪ NOT STARTED
-- **Priority:** P0 (Critical)
-- **Dependencies:** FR-NAV-001 (must be approved first)
-- **Summary:** Discover PDF links on loaded pages using pattern matching
+- **Status:** COMPLETE
+- **Implemented:** 2026-01-12
 
 ### FR-NAV-003: Direct PDF Download
-- **Status:** ⚪ NOT STARTED
-- **Priority:** P0 (Critical)
-- **Dependencies:** FR-NAV-001, FR-NAV-002
-- **Summary:** Download PDFs via browser with integrity verification
+- **Status:** COMPLETE
+- **Implemented:** 2026-01-12
 
 ### FR-EXTRACT-001: PDF Text Extraction
-- **Status:** ⚪ NOT STARTED
-- **Priority:** P0 (Critical)
-- **Dependencies:** FR-NAV-003
-- **Summary:** Extract text from PDFs using pdfplumber + Tesseract OCR
+- **Status:** COMPLETE
+- **Implemented:** 2026-01-12
 
 ### FR-LLM-001: Gemma 3n Model Management
-- **Status:** ⚪ NOT STARTED
-- **Priority:** P0 (Critical)
-- **Dependencies:** None (parallel track)
-- **Summary:** Load and manage Gemma 3n E2B/E4B models via llama.cpp
+- **Status:** COMPLETE
+- **Implemented:** 2026-01-12
 
-### FR-LLM-002: PDF-Based Tender Information Extraction
-- **Status:** ⚪ NOT STARTED
-- **Priority:** P0 (Critical)
-- **Dependencies:** FR-EXTRACT-001, FR-LLM-001
-- **Summary:** Extract structured tender info from PDF text using Gemma E4B
+### FR-LLM-002: Tender Information Extraction
+- **Status:** COMPLETE
+- **Implemented:** 2026-01-12
 
-### FR-LLM-003: Relevance Scoring
-- **Status:** ⚪ NOT STARTED
-- **Priority:** P0 (Critical)
-- **Dependencies:** FR-LLM-001, FR-LLM-002
-- **Summary:** Score tender relevance 0-100 based on company profile
+### FR-LLM-003: Tender Relevance Scoring
+- **Status:** COMPLETE
+- **Implemented:** 2026-01-12
+
+**Backend P0 Features:** 7/7 Complete (100%)
 
 ---
 
-## Workflow
+## Web Frontend Complete
 
-### Proposal Lifecycle
+### FR-WEB-001: Database and API Foundation
+- **Status:** COMPLETE
+- **Priority:** P0 (Critical)
+- **Implemented:** 2026-01-12
+- **Summary:** PostgreSQL database with SQLAlchemy ORM, FastAPI REST API with JWT authentication
 
-```
-⚪ NOT STARTED → 🟡 PROPOSED → ✅ APPROVED → 🔵 IN PROGRESS → ✅ COMPLETE → 📦 ARCHIVED
-```
+### FR-WEB-002: React Frontend Core
+- **Status:** COMPLETE
+- **Priority:** P0 (Critical)
+- **Implemented:** 2026-01-12
+- **Summary:** React + Material UI + Glassmorphism theme, auth pages, dashboard, tender list
 
-### Commands
+### FR-WEB-003: Pipeline and Settings
+- **Status:** COMPLETE
+- **Priority:** P1 (High)
+- **Implemented:** 2026-01-12
+- **Summary:** Pipeline control UI, WebSocket job streaming, criteria editor, source manager
 
-1. **Create Proposal:** `/openspec-proposal <feature-name>`
-2. **Review:** Review `proposal.md`, `tasks.md`, `spec-delta.md`
-3. **Approve:** Update proposal status to ✅ APPROVED
-4. **Implement:** `/openspec-apply <change-name>`
-5. **Complete:** `/openspec-archive <change-name>`
-
----
-
-## P0 Feature Dependency Graph
-
-```
-Navigation Track:
-FR-NAV-001 (Browser Engine)
-    ↓
-FR-NAV-002 (PDF Discovery)
-    ↓
-FR-NAV-003 (PDF Download)
-    ↓
-FR-EXTRACT-001 (Text Extraction)
-    ↓
-    ├→ FR-LLM-002 (Tender Info Extraction)
-
-AI Track (Parallel):
-FR-LLM-001 (Model Management)
-    ↓
-FR-LLM-002 (Tender Info Extraction)
-    ↓
-FR-LLM-003 (Relevance Scoring)
-
-Integration:
-FR-LLM-002 + FR-LLM-003 → End-to-End Pipeline
-```
+**Web Frontend P0/P1 Features:** 3/3 Complete (100%)
 
 ---
 
-## Next Actions
+## Mobile App - PROPOSED (Awaiting Approval)
 
-1. **Review FR-NAV-001 proposal** (this is the active task)
-2. Approve or request changes
-3. Once approved, implement with `/openspec-apply fr-nav-001-browser-navigation-engine`
-4. After FR-NAV-001 complete, create FR-NAV-002 proposal
-5. Continue through P0 features in dependency order
+### FR-MOBILE-001: Android App Foundation
+- **Status:** PROPOSED
+- **Priority:** P0 (Critical)
+- **Created:** 2026-01-13
+- **Location:** `openspec/changes/fr-mobile-001-android-foundation/`
+- **Summary:** Android project with Kotlin, Jetpack Compose, Clean Architecture, MVI, Room database, Hilt DI
+- **Tasks:** 36 tasks
+
+### FR-MOBILE-002: On-Device Gemma Integration
+- **Status:** PROPOSED
+- **Priority:** P0 (Critical)
+- **Created:** 2026-01-13
+- **Location:** `openspec/changes/fr-mobile-002-on-device-gemma/`
+- **Dependencies:** FR-MOBILE-001
+- **Summary:** MediaPipe LLM integration for Gemma 3n (E2B 2B params, E4B 4B params) on-device inference
+- **Tasks:** 30 tasks
+
+### FR-MOBILE-003: Conversational Chat Interface
+- **Status:** PROPOSED
+- **Priority:** P0 (Critical)
+- **Created:** 2026-01-13
+- **Location:** `openspec/changes/fr-mobile-003-chat-interface/`
+- **Dependencies:** FR-MOBILE-001, FR-MOBILE-002
+- **Summary:** Natural language chat with AI for tender queries, summaries, and score explanations
+- **Tasks:** 26 tasks
+
+### FR-MOBILE-004: Tender Sync and Offline Database
+- **Status:** PROPOSED
+- **Priority:** P0 (Critical)
+- **Created:** 2026-01-13
+- **Location:** `openspec/changes/fr-mobile-004-tender-sync/`
+- **Dependencies:** FR-MOBILE-001
+- **Summary:** Backend sync, offline-first database, WorkManager background sync, FCM push notifications
+- **Tasks:** 36 tasks
+
+**Mobile App Proposals:** 4 proposals, 128 total tasks
+
+---
+
+## Overall Progress
+
+| Track | Features | Complete | Proposed | Progress |
+|-------|----------|----------|----------|----------|
+| Backend | 7 | 7 | 0 | 100% |
+| Web Frontend | 3 | 3 | 0 | 100% |
+| Mobile App | 4 | 0 | 4 | 0% |
+| **Total** | **14** | **10** | **4** | **71%** |
+
+---
+
+## Project Status
+
+### Completed Platforms
+
+#### Web Application (Production Ready)
+- Python 3.12 with FastAPI
+- PostgreSQL 15 with SQLAlchemy 2.0 async
+- JWT authentication with bcrypt
+- React 18 with TypeScript
+- Material UI v7 with Glassmorphism design
+- React Query + Zustand
+- WebSocket for real-time updates
+
+**Features:**
+- User authentication (login/register/profile)
+- Dashboard with stats and recent tenders
+- Tender list with filters and pagination
+- Tender detail with score breakdown
+- Pipeline control (discover, download, extract, score)
+- Scoring criteria management
+- Source management
+
+### Proposed Platforms
+
+#### Android Mobile App
+**Architecture:**
+- Kotlin + Jetpack Compose
+- Clean Architecture (Presentation, Domain, Data)
+- MVI state management
+- Room + SQLite FTS5 for offline database
+- Hilt dependency injection
+- MediaPipe for on-device Gemma LLM
+- WorkManager for background sync
+- Firebase Cloud Messaging for push
+
+**Features (Proposed):**
+- On-device AI with Gemma 3n (E2B/E4B)
+- Conversational chat interface
+- Offline-first tender database
+- Background sync with server
+- Push notifications for new tenders
+- Natural language search
+- AI-powered summaries and Q&A
+
+---
+
+## Next Steps
+
+1. **Review Mobile Proposals**
+   - FR-MOBILE-001: Android Foundation
+   - FR-MOBILE-002: On-Device Gemma
+   - FR-MOBILE-003: Chat Interface
+   - FR-MOBILE-004: Tender Sync
+
+2. **Approve or Iterate**
+   - Say "approved" to start implementation
+   - Or provide feedback for iteration
+
+3. **Implementation Order** (if approved)
+   1. FR-MOBILE-001 (Foundation) - 36 tasks
+   2. FR-MOBILE-004 (Sync) - 36 tasks (parallel with Gemma)
+   3. FR-MOBILE-002 (Gemma) - 30 tasks
+   4. FR-MOBILE-003 (Chat) - 26 tasks
 
 ---
 

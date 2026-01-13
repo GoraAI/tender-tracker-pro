@@ -200,9 +200,7 @@ async def test_full_navigation_pipeline(jhb_water_config, jhb_water_url):
         assert len(content) > 0
 
         # Step 5: Take screenshot (for verification)
-        screenshot_path = await engine.screenshot(
-            page, "jhb_water_test", "/tmp"
-        )
+        screenshot_path = await engine.screenshot(page, "jhb_water_test", "/tmp")
         assert Path(screenshot_path).exists()
 
         print("✓ Full pipeline complete")

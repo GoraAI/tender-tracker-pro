@@ -73,7 +73,9 @@ dependencies {
     // Hilt DI
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.hilt.work)
     kapt(libs.hilt.android.compiler)
+    kapt(libs.hilt.work.compiler)
 
     // On-Device AI
     implementation(libs.litertlm)

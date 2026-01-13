@@ -1,0 +1,16 @@
+Extract tender information from this document:
+
+{tender_text}
+
+Return JSON with these exact fields:
+{{
+  "title": "string - tender title or subject",
+  "reference": "string - RFQ/RFP/tender reference number",
+  "deadline": "string|null - submission deadline in YYYY-MM-DD format",
+  "estimated_value": "number|null - estimated value in ZAR",
+  "requirements_summary": "string|null - key requirements, max 500 chars",
+  "contact_name": "string|null - contact person name",
+  "contact_email": "string|null - contact email address"
+}}
+
+Return only the JSON object, no other text.

@@ -32,7 +32,9 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
+    implementation(libs.hilt.work)
     kapt(libs.hilt.android.compiler)
+    kapt(libs.hilt.work.compiler)
 
     // Room Database
     implementation(libs.androidx.room.runtime)

@@ -115,7 +115,7 @@ download:
   path_template: "documents/downloads/${source.id}/${year}-${month}/${filename}"
 
   # Download method
-  method: "browser_click"  # browser_click, direct_request
+  method: "auto"  # auto, direct, browser
 
   # Validation
   validate:
