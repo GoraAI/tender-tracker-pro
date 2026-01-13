@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Tender Tracker</string>
+
+    <!-- Navigation -->
+    <string name="nav_tenders">Tenders</string>
+    <string name="nav_chat">Chat</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Screens -->
+    <string name="screen_tender_list">Tenders</string>
+    <string name="screen_tender_detail">Tender Details</string>
+    <string name="screen_chat">AI Assistant</string>
+    <string name="screen_settings">Settings</string>
+    <string name="screen_model_manager">Model Manager</string>
+
+    <!-- Actions -->
+    <string name="action_sync">Sync</string>
+    <string name="action_search">Search</string>
+    <string name="action_filter">Filter</string>
+    <string name="action_send">Send</string>
+    <string name="action_download">Download</string>
+    <string name="action_delete">Delete</string>
+
+    <!-- Status -->
+    <string name="status_syncing">Syncing...</string>
+    <string name="status_offline">Offline</string>
+    <string name="status_online">Online</string>
+    <string name="status_loading">Loading...</string>
+
+    <!-- Model -->
+    <string name="model_not_loaded">Model not loaded</string>
+    <string name="model_loading">Loading model...</string>
+    <string name="model_ready">Model ready</string>
+    <string name="model_download_progress">Downloading: %1$d%%</string>
+
+    <!-- Chat -->
+    <string name="chat_hint">Type a message...</string>
+    <string name="chat_thinking">Thinking...</string>
+
+    <!-- Errors -->
+    <string name="error_network">Network error. Please check your connection.</string>
+    <string name="error_model_load">Failed to load AI model.</string>
+    <string name="error_sync_failed">Sync failed. Will retry automatically.</string>
+</resources>

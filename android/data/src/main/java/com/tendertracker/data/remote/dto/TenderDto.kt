@@ -1,0 +1,79 @@
+package com.tendertracker.data.remote.dto
+
+import com.google.gson.annotations.SerializedName
+import com.tendertracker.data.local.entity.TenderEntity
+
+data class TenderListResponse(
+    @SerializedName("tenders") val tenders: List<TenderDto>,
+    @SerializedName("total") val total: Int,
+    @SerializedName("page") val page: Int,
+    @SerializedName("has_more") val hasMore: Boolean
+)
+
+data class TenderResponse(
+    @SerializedName("tender") val tender: TenderDto
+)
+
+data class TenderDto(
+    @SerializedName("id") val id: String,
+    @SerializedName("title") val title: String,
+    @SerializedName("reference") val reference: String,
+    @SerializedName("source_id") val sourceId: String,
+    @SerializedName("deadline") val deadline: String?,
+    @SerializedName("estimated_value") val estimatedValue: Double?,
+    @SerializedName("requirements_summary") val requirementsSummary: String?,
+    @SerializedName("score") val score: Int?,
+    @SerializedName("score_explanation") val scoreExplanation: String?,
+    @SerializedName("pdf_url") val pdfUrl: String,
+    @SerializedName("created_at") val createdAt: String,
+    @SerializedName("updated_at") val updatedAt: String
+) {
+    fun toEntity(): TenderEntity = TenderEntity(
+        id = id,
+        title = title,
+        reference = reference,
+        sourceId = sourceId,
+        deadline = deadline,
+        estimatedValue = estimatedValue,
+        requirementsSummary = requirementsSummary,
+        score = score,
+        scoreExplanation = scoreExplanation,
+        pdfUrl = pdfUrl,
+        localPdfPath = null,
+        extractedText = null,
+        createdAt = parseTimestamp(createdAt),
+        syncedAt = System.currentTimeMillis()
+    )
+
+    private fun parseTimestamp(timestamp: String): Long {
+        return try {
+            java.time.Instant.parse(timestamp).toEpochMilli()
+        } catch (e: Exception) {
+            System.currentTimeMillis()
+        }
+    }
+}
+
+data class ScoreSubmission(
+    @SerializedName("score") val score: Int,
+    @SerializedName("explanation") val explanation: String,
+    @SerializedName("scored_at") val scoredAt: String
+)
+
+data class ScoreResponse(
+    @SerializedName("tender_id") val tenderId: String,
+    @SerializedName("score") val score: Int,
+    @SerializedName("explanation") val explanation: String,
+    @SerializedName("synced_at") val syncedAt: String
+)
+
+data class LoginRequest(
+    @SerializedName("email") val email: String,
+    @SerializedName("password") val password: String
+)
+
+data class TokenResponse(
+    @SerializedName("access_token") val accessToken: String,
+    @SerializedName("refresh_token") val refreshToken: String,
+    @SerializedName("expires_in") val expiresIn: Long
+)

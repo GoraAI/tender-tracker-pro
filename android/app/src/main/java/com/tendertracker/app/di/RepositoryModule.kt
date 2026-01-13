@@ -1,0 +1,36 @@
+package com.tendertracker.app.di
+
+import com.tendertracker.data.repository.ChatRepositoryImpl
+import com.tendertracker.data.repository.SettingsRepositoryImpl
+import com.tendertracker.data.repository.TenderRepositoryImpl
+import com.tendertracker.domain.repository.ChatRepository
+import com.tendertracker.domain.repository.SettingsRepository
+import com.tendertracker.domain.repository.TenderRepository
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindTenderRepository(
+        impl: TenderRepositoryImpl
+    ): TenderRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindChatRepository(
+        impl: ChatRepositoryImpl
+    ): ChatRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSettingsRepository(
+        impl: SettingsRepositoryImpl
+    ): SettingsRepository
+}
