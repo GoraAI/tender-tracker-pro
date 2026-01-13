@@ -77,6 +77,12 @@ dependencies {
     kapt(libs.hilt.android.compiler)
     kapt(libs.hilt.work.compiler)
 
+    // Networking (for NetworkModule)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+
     // On-Device AI
     implementation(libs.litertlm)
     implementation(libs.mediapipe.tasks.genai)
