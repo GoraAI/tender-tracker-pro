@@ -19,40 +19,49 @@ data class TenderResponse(
 
 data class TenderDto(
     @SerializedName("id") val id: String,
-    @SerializedName("title") val title: String,
-    @SerializedName("reference") val reference: String,
+    @SerializedName("title") val title: String?,
+    @SerializedName("reference") val reference: String?,
     @SerializedName("source_id") val sourceId: String,
     @SerializedName("deadline") val deadline: String?,
-    @SerializedName("estimated_value") val estimatedValue: Double?,
-    @SerializedName("requirements_summary") val requirementsSummary: String?,
-    @SerializedName("score") val score: Int?,
-    @SerializedName("score_explanation") val scoreExplanation: String?,
-    @SerializedName("pdf_url") val pdfUrl: String,
-    @SerializedName("created_at") val createdAt: String,
-    @SerializedName("updated_at") val updatedAt: String
+    @SerializedName("estimated_value") val estimatedValue: String?, // API returns as string
+    @SerializedName("requirements_summary") val requirementsSummary: String? = null,
+    @SerializedName("score") val score: Int? = null,
+    @SerializedName("score_explanation") val scoreExplanation: String? = null,
+    @SerializedName("relevance_category") val relevanceCategory: String? = null,
+    @SerializedName("pdf_url") val pdfUrl: String? = null,
+    @SerializedName("discovered_at") val discoveredAt: String? = null
 ) {
     fun toEntity(): TenderEntity = TenderEntity(
         id = id,
-        title = title,
-        reference = reference,
+        title = title ?: "Untitled Tender",
+        reference = reference ?: "",
         sourceId = sourceId,
         deadline = deadline,
-        estimatedValue = estimatedValue,
+        estimatedValue = estimatedValue?.toDoubleOrNull(),
         requirementsSummary = requirementsSummary,
         score = score,
         scoreExplanation = scoreExplanation,
-        pdfUrl = pdfUrl,
+        pdfUrl = pdfUrl ?: "",
         localPdfPath = null,
         extractedText = null,
-        createdAt = parseTimestamp(createdAt),
+        createdAt = parseTimestamp(discoveredAt),
         syncedAt = System.currentTimeMillis()
     )
 
-    private fun parseTimestamp(timestamp: String): Long {
+    private fun parseTimestamp(timestamp: String?): Long {
+        if (timestamp == null) return System.currentTimeMillis()
         return try {
             java.time.Instant.parse(timestamp).toEpochMilli()
         } catch (e: Exception) {
-            System.currentTimeMillis()
+            try {
+                // Try parsing as local datetime
+                java.time.LocalDateTime.parse(timestamp)
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli()
+            } catch (e2: Exception) {
+                System.currentTimeMillis()
+            }
         }
     }
 }
