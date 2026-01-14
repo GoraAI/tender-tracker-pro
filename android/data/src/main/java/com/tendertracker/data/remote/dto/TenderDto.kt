@@ -4,11 +4,14 @@ import com.google.gson.annotations.SerializedName
 import com.tendertracker.data.local.entity.TenderEntity
 
 data class TenderListResponse(
-    @SerializedName("tenders") val tenders: List<TenderDto>,
+    @SerializedName("items") val tenders: List<TenderDto>,
     @SerializedName("total") val total: Int,
     @SerializedName("page") val page: Int,
-    @SerializedName("has_more") val hasMore: Boolean
-)
+    @SerializedName("per_page") val perPage: Int = 20,
+    @SerializedName("pages") val pages: Int = 0
+) {
+    val hasMore: Boolean get() = page < pages
+}
 
 data class TenderResponse(
     @SerializedName("tender") val tender: TenderDto
