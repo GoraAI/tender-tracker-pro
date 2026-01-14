@@ -33,7 +33,7 @@ class AuthRepositoryImpl @Inject constructor(
             if (response.isSuccessful) {
                 val tokenResponse = response.body()!!
                 tokenManager.setAccessToken(tokenResponse.accessToken)
-                tokenManager.setRefreshToken(tokenResponse.refreshToken)
+                tokenResponse.refreshToken?.let { tokenManager.setRefreshToken(it) }
 
                 // Fetch user info
                 val userResponse = api.getCurrentUser()
@@ -42,14 +42,23 @@ class AuthRepositoryImpl @Inject constructor(
                     _currentUser.value = user
                     Result.success(user)
                 } else {
-                    Result.failure(Exception("Failed to get user info"))
+                    // Still logged in even if we can't get user info
+                    val placeholderUser = User(
+                        id = "unknown",
+                        email = email,
+                        fullName = null,
+                        companyName = null,
+                        isActive = true
+                    )
+                    _currentUser.value = placeholderUser
+                    Result.success(placeholderUser)
                 }
             } else {
                 val errorBody = response.errorBody()?.string() ?: "Login failed"
-                Result.failure(Exception(errorBody))
+                Result.failure(Exception(parseErrorMessage(errorBody)))
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Connection failed: ${e.message}"))
         }
     }
 
@@ -69,15 +78,34 @@ class AuthRepositoryImpl @Inject constructor(
                 )
             )
             if (response.isSuccessful) {
-                val user = response.body()!!.toUser()
-                // After registration, login to get tokens
-                login(email, password)
+                // Registration returns a token directly
+                val tokenResponse = response.body()!!
+                tokenManager.setAccessToken(tokenResponse.accessToken)
+                tokenResponse.refreshToken?.let { tokenManager.setRefreshToken(it) }
+
+                // Fetch user info
+                val userResponse = api.getCurrentUser()
+                if (userResponse.isSuccessful) {
+                    val user = userResponse.body()!!.toUser()
+                    _currentUser.value = user
+                    Result.success(user)
+                } else {
+                    val placeholderUser = User(
+                        id = "unknown",
+                        email = email,
+                        fullName = fullName,
+                        companyName = companyName,
+                        isActive = true
+                    )
+                    _currentUser.value = placeholderUser
+                    Result.success(placeholderUser)
+                }
             } else {
                 val errorBody = response.errorBody()?.string() ?: "Registration failed"
-                Result.failure(Exception(errorBody))
+                Result.failure(Exception(parseErrorMessage(errorBody)))
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Connection failed: ${e.message}"))
         }
     }
 
@@ -92,7 +120,7 @@ class AuthRepositoryImpl @Inject constructor(
             if (response.isSuccessful) {
                 val tokenResponse = response.body()!!
                 tokenManager.setAccessToken(tokenResponse.accessToken)
-                tokenManager.setRefreshToken(tokenResponse.refreshToken)
+                tokenResponse.refreshToken?.let { tokenManager.setRefreshToken(it) }
                 Result.success(Unit)
             } else {
                 // Token refresh failed, clear tokens
@@ -114,4 +142,40 @@ class AuthRepositoryImpl @Inject constructor(
         companyName = companyName,
         isActive = isActive
     )
+
+    /**
+     * Parse error message from API response JSON
+     */
+    private fun parseErrorMessage(errorBody: String): String {
+        return try {
+            // Try to extract "detail" from JSON like {"detail":"message"} or {"detail":[{"msg":"..."}]}
+            if (errorBody.contains("\"detail\"")) {
+                val detailStart = errorBody.indexOf("\"detail\"")
+                val afterDetail = errorBody.substring(detailStart + 9)
+                when {
+                    afterDetail.trimStart().startsWith("[") -> {
+                        // Array format: extract first "msg"
+                        val msgStart = afterDetail.indexOf("\"msg\"")
+                        if (msgStart >= 0) {
+                            val msgValue = afterDetail.substring(msgStart + 6)
+                            val start = msgValue.indexOf("\"") + 1
+                            val end = msgValue.indexOf("\"", start)
+                            if (end > start) msgValue.substring(start, end) else errorBody
+                        } else errorBody
+                    }
+                    afterDetail.trimStart().startsWith("\"") -> {
+                        // String format: extract value
+                        val start = afterDetail.indexOf("\"") + 1
+                        val end = afterDetail.indexOf("\"", start)
+                        if (end > start) afterDetail.substring(start, end) else errorBody
+                    }
+                    else -> errorBody
+                }
+            } else {
+                errorBody
+            }
+        } catch (e: Exception) {
+            errorBody
+        }
+    }
 }

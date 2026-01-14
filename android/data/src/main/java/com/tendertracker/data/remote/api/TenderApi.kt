@@ -42,7 +42,7 @@ interface TenderApi {
     @POST("auth/register")
     suspend fun register(
         @Body request: RegisterRequest
-    ): Response<UserResponse>
+    ): Response<TokenResponse>
 
     @POST("auth/refresh")
     suspend fun refreshToken(): Response<TokenResponse>
