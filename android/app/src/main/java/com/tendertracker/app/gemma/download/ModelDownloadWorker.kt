@@ -11,6 +11,8 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileOutputStream
+import java.net.HttpURLConnection
 import java.net.URL
 
 @HiltWorker
@@ -30,29 +32,36 @@ class ModelDownloadWorker @AssistedInject constructor(
                 workDataOf(KEY_ERROR to "Missing download URL")
             )
 
+        val fallbackUrl = inputData.getString(KEY_FALLBACK_URL)
+
         try {
             val modelDir = File(applicationContext.filesDir, "models/$modelId")
             modelDir.mkdirs()
 
-            // For now, create placeholder - actual download will use HF API
-            val placeholderFile = File(modelDir, "model.bin")
+            val modelFile = File(modelDir, "model.litertlm")
 
-            setProgress(workDataOf(KEY_PROGRESS to 10))
+            setProgress(workDataOf(KEY_PROGRESS to 0))
 
-            // Simulate download progress
-            for (progress in 20..100 step 10) {
-                setProgress(workDataOf(KEY_PROGRESS to progress))
-                kotlinx.coroutines.delay(100)
+            // Try primary URL first
+            var downloadResult = downloadFromUrl(downloadUrl, modelFile)
+
+            // If primary fails and fallback exists, try fallback
+            if (!downloadResult && fallbackUrl != null) {
+                downloadResult = downloadFromUrl(fallbackUrl, modelFile)
             }
 
-            // Create marker file for downloaded state
-            placeholderFile.writeText("Model placeholder for $modelId")
-
-            Result.success(
-                workDataOf(
-                    KEY_MODEL_PATH to modelDir.absolutePath
+            if (downloadResult) {
+                Result.success(
+                    workDataOf(
+                        KEY_MODEL_PATH to modelDir.absolutePath
+                    )
                 )
-            )
+            } else {
+                modelFile.delete()
+                Result.failure(
+                    workDataOf(KEY_ERROR to "Download failed from all sources")
+                )
+            }
         } catch (e: Exception) {
             Result.failure(
                 workDataOf(KEY_ERROR to (e.message ?: "Download failed"))
@@ -60,9 +69,53 @@ class ModelDownloadWorker @AssistedInject constructor(
         }
     }
 
+    private suspend fun downloadFromUrl(urlString: String, targetFile: File): Boolean {
+        return try {
+            val url = URL(urlString)
+            val connection = url.openConnection() as HttpURLConnection
+            connection.connectTimeout = 30000
+            connection.readTimeout = 60000
+            connection.requestMethod = "GET"
+            connection.setRequestProperty("User-Agent", "TenderTracker/1.0")
+
+            val responseCode = connection.responseCode
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                connection.disconnect()
+                return false
+            }
+
+            val totalSize = connection.contentLengthLong
+            var downloadedSize = 0L
+
+            connection.inputStream.use { input ->
+                FileOutputStream(targetFile).use { output ->
+                    val buffer = ByteArray(8192)
+                    var bytesRead: Int
+
+                    while (input.read(buffer).also { bytesRead = it } != -1) {
+                        output.write(buffer, 0, bytesRead)
+                        downloadedSize += bytesRead
+
+                        // Update progress
+                        if (totalSize > 0) {
+                            val progress = ((downloadedSize * 100) / totalSize).toInt()
+                            setProgress(workDataOf(KEY_PROGRESS to progress))
+                        }
+                    }
+                }
+            }
+
+            connection.disconnect()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     companion object {
         const val KEY_MODEL_ID = "model_id"
         const val KEY_DOWNLOAD_URL = "download_url"
+        const val KEY_FALLBACK_URL = "fallback_url"
         const val KEY_PROGRESS = "progress"
         const val KEY_MODEL_PATH = "model_path"
         const val KEY_ERROR = "error"

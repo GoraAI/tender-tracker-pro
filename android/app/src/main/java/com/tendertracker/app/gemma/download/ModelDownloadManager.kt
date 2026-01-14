@@ -28,6 +28,7 @@ class ModelDownloadManager @Inject constructor(
         val inputData = Data.Builder()
             .putString(ModelDownloadWorker.KEY_MODEL_ID, model.id)
             .putString(ModelDownloadWorker.KEY_DOWNLOAD_URL, model.downloadUrl)
+            .putString(ModelDownloadWorker.KEY_FALLBACK_URL, model.fallbackUrl)
             .build()
 
         val constraints = Constraints.Builder()
