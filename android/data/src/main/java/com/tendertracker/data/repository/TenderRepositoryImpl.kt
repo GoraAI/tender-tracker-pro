@@ -2,6 +2,7 @@ package com.tendertracker.data.repository
 
 import com.tendertracker.data.local.dao.TenderDao
 import com.tendertracker.data.local.entity.TenderEntity
+import com.tendertracker.data.remote.api.TenderApi
 import com.tendertracker.domain.model.Tender
 import com.tendertracker.domain.repository.TenderRepository
 import kotlinx.coroutines.flow.Flow
@@ -9,7 +10,8 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class TenderRepositoryImpl @Inject constructor(
-    private val tenderDao: TenderDao
+    private val tenderDao: TenderDao,
+    private val tenderApi: TenderApi
 ) : TenderRepository {
 
     override fun getAllTenders(): Flow<List<Tender>> =
@@ -40,5 +42,26 @@ class TenderRepositoryImpl @Inject constructor(
 
     override suspend fun deleteTender(id: String) {
         tenderDao.deleteTender(id)
+    }
+
+    /**
+     * Sync tenders from the API and cache them locally.
+     * Returns the number of new/updated tenders.
+     */
+    override suspend fun syncFromApi(): Result<Int> {
+        return try {
+            val response = tenderApi.getTenders(page = 1, limit = 100)
+            if (response.isSuccessful) {
+                val tenderList = response.body()!!
+                val entities = tenderList.tenders.map { it.toEntity() }
+                tenderDao.insertTenders(entities)
+                Result.success(entities.size)
+            } else {
+                val errorBody = response.errorBody()?.string() ?: "Failed to fetch tenders"
+                Result.failure(Exception(errorBody))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

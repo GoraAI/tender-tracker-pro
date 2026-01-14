@@ -69,9 +69,19 @@ class TenderListViewModel @Inject constructor(
 
     fun onSyncClick() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-            // Sync will be implemented in FR-MOBILE-004
-            _state.update { it.copy(isLoading = false) }
+            _state.update { it.copy(isLoading = true, error = null) }
+            tenderRepository.syncFromApi()
+                .onSuccess { count ->
+                    _state.update { it.copy(isLoading = false) }
+                }
+                .onFailure { e ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = e.message ?: "Sync failed"
+                        )
+                    }
+                }
         }
     }
 }

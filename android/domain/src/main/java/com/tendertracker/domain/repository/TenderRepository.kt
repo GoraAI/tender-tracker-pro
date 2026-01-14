@@ -11,4 +11,5 @@ interface TenderRepository {
     suspend fun insertTender(tender: Tender)
     suspend fun updateScore(id: String, score: Int, explanation: String)
     suspend fun deleteTender(id: String)
+    suspend fun syncFromApi(): Result<Int>
 }
