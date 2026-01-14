@@ -1,13 +1,15 @@
 package com.tendertracker.app.gemma.engine
 
 import android.content.Context
+import android.util.Log
+import com.google.mediapipe.tasks.genai.llminference.LlmInference
 import com.tendertracker.app.gemma.model.GemmaModel
-import com.tendertracker.app.gemma.model.InferenceBackend
 import com.tendertracker.app.gemma.model.InferenceConfig
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -19,31 +21,44 @@ typealias ResultListener = (text: String, done: Boolean) -> Unit
 class GemmaInferenceEngine @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
+    companion object {
+        private const val TAG = "GemmaInferenceEngine"
+    }
+
     private var currentModel: GemmaModel? = null
     private var modelPath: String? = null
     private var isInitialized = false
-
-    // LiteRT LM engine instance will be created here
-    // private var engine: Engine? = null
-    // private var conversation: Conversation? = null
+    private var llmInference: LlmInference? = null
 
     suspend fun initialize(model: GemmaModel, path: String): Result<Unit> =
         withContext(Dispatchers.IO) {
             try {
-                // TODO: Initialize LiteRT LM Engine
-                // val engineConfig = EngineConfig(
-                //     modelPath = path,
-                //     backend = Backend.CPU,
-                //     maxNumTokens = 2048
-                // )
-                // engine = Engine(engineConfig)
-                // engine?.initialize()
+                Log.d(TAG, "Initializing LLM with model: ${model.name} at path: $path")
+
+                // Clean up any existing instance
+                cleanup()
+
+                // Build options for LLM inference
+                val options = LlmInference.LlmInferenceOptions.builder()
+                    .setModelPath(path)
+                    .setMaxTokens(model.contextLength)
+                    .setTopK(40)
+                    .setTemperature(0.8f)
+                    .setRandomSeed(42)
+                    .build()
+
+                // Create the inference instance
+                llmInference = LlmInference.createFromOptions(context, options)
 
                 currentModel = model
                 modelPath = path
                 isInitialized = true
+
+                Log.d(TAG, "LLM initialized successfully")
                 Result.success(Unit)
             } catch (e: Exception) {
+                Log.e(TAG, "Failed to initialize LLM", e)
+                isInitialized = false
                 Result.failure(e)
             }
         }
@@ -52,27 +67,21 @@ class GemmaInferenceEngine @Inject constructor(
         prompt: String,
         config: InferenceConfig = InferenceConfig()
     ): Result<String> = withContext(Dispatchers.IO) {
-        if (!isInitialized) {
+        if (!isInitialized || llmInference == null) {
             return@withContext Result.failure(
-                IllegalStateException("Engine not initialized")
+                IllegalStateException("Engine not initialized. Please load a model first.")
             )
         }
 
         try {
-            // TODO: Use actual LiteRT LM inference
-            // conversation = engine?.createConversation(ConversationConfig(
-            //     samplerConfig = SamplerConfig(
-            //         topK = config.topK,
-            //         topP = config.topP,
-            //         temperature = config.temperature
-            //     )
-            // ))
-            // val result = conversation?.sendMessage(Message.of(prompt))
+            Log.d(TAG, "Generating response for prompt: ${prompt.take(50)}...")
 
-            // Placeholder response for testing
-            val response = generatePlaceholderResponse(prompt)
+            val response = llmInference!!.generateResponse(prompt)
+
+            Log.d(TAG, "Generated response: ${response.take(100)}...")
             Result.success(response)
         } catch (e: Exception) {
+            Log.e(TAG, "Failed to generate response", e)
             Result.failure(e)
         }
     }
@@ -80,28 +89,26 @@ class GemmaInferenceEngine @Inject constructor(
     fun generateTextStream(
         prompt: String,
         config: InferenceConfig = InferenceConfig()
-    ): Flow<String> = flow {
-        if (!isInitialized) {
-            throw IllegalStateException("Engine not initialized")
+    ): Flow<String> = callbackFlow {
+        if (!isInitialized || llmInference == null) {
+            throw IllegalStateException("Engine not initialized. Please load a model first.")
         }
 
-        // TODO: Implement streaming with LiteRT LM MessageCallback
-        // conversation?.sendMessageAsync(
-        //     Message.of(prompt),
-        //     object : MessageCallback {
-        //         override fun onMessage(message: Message) {
-        //             emit(message.toString())
-        //         }
-        //         override fun onDone() { }
-        //     }
-        // )
+        Log.d(TAG, "Starting streaming generation for prompt: ${prompt.take(50)}...")
 
-        // Placeholder streaming for testing
-        val response = generatePlaceholderResponse(prompt)
-        val words = response.split(" ")
-        for (word in words) {
-            emit("$word ")
-            kotlinx.coroutines.delay(50)
+        // Set up result listener for streaming
+        llmInference!!.generateResponseAsync(prompt) { partialResult, done ->
+            if (partialResult.isNotEmpty()) {
+                trySend(partialResult)
+            }
+            if (done) {
+                Log.d(TAG, "Streaming generation complete")
+                close()
+            }
+        }
+
+        awaitClose {
+            Log.d(TAG, "Streaming flow closed")
         }
     }.flowOn(Dispatchers.IO)
 
@@ -110,48 +117,37 @@ class GemmaInferenceEngine @Inject constructor(
         config: InferenceConfig,
         listener: ResultListener
     ) = withContext(Dispatchers.IO) {
-        if (!isInitialized) {
-            listener("Error: Engine not initialized", true)
+        if (!isInitialized || llmInference == null) {
+            listener("Error: Engine not initialized. Please load a model first.", true)
             return@withContext
         }
 
-        // TODO: Implement with LiteRT LM
-        val response = generatePlaceholderResponse(prompt)
-        listener(response, true)
+        try {
+            Log.d(TAG, "Generating response with listener for prompt: ${prompt.take(50)}...")
+
+            llmInference!!.generateResponseAsync(prompt) { partialResult, done ->
+                listener(partialResult, done)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to generate response", e)
+            listener("Error: ${e.message}", true)
+        }
     }
 
     fun cleanup() {
-        // TODO: Clean up LiteRT LM resources
-        // conversation?.close()
-        // engine?.close()
+        Log.d(TAG, "Cleaning up LLM inference engine")
+        try {
+            llmInference?.close()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error closing LLM inference", e)
+        }
+        llmInference = null
         isInitialized = false
         currentModel = null
         modelPath = null
     }
 
-    fun isReady(): Boolean = isInitialized
+    fun isReady(): Boolean = isInitialized && llmInference != null
 
     fun getCurrentModel(): GemmaModel? = currentModel
-
-    private fun generatePlaceholderResponse(prompt: String): String {
-        // Placeholder responses for testing UI
-        return when {
-            prompt.contains("summarize", ignoreCase = true) ->
-                "This tender involves procurement of goods/services. " +
-                "Key requirements include meeting specifications and timelines."
-
-            prompt.contains("score", ignoreCase = true) ||
-            prompt.contains("relevant", ignoreCase = true) ->
-                "Based on analysis, this tender has moderate relevance. " +
-                "Recommended score: 65/100."
-
-            prompt.contains("deadline", ignoreCase = true) ->
-                "Please check the tender document for specific deadlines."
-
-            else ->
-                "I'm the Gemma AI assistant. Model loading is in progress. " +
-                "Once fully loaded, I can help analyze tenders, " +
-                "summarize documents, and answer questions."
-        }
-    }
 }

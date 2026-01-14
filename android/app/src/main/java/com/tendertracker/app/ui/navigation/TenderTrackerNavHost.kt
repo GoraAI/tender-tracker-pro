@@ -1,13 +1,13 @@
 package com.tendertracker.app.ui.navigation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
@@ -37,11 +37,11 @@ import com.tendertracker.app.ui.screens.auth.AuthViewModel
 import com.tendertracker.app.ui.screens.auth.LoginScreen
 import com.tendertracker.app.ui.screens.auth.RegisterScreen
 import com.tendertracker.app.ui.screens.chat.ChatScreen
-import com.tendertracker.app.ui.screens.settings.SettingsScreen
+import com.tendertracker.app.ui.screens.dashboard.DashboardScreen
 import com.tendertracker.app.ui.screens.model.ModelManagerScreen
+import com.tendertracker.app.ui.screens.settings.SettingsScreen
 import com.tendertracker.app.ui.screens.tender.TenderDetailScreen
 import com.tendertracker.app.ui.screens.tender.TenderListScreen
-import com.tendertracker.app.ui.theme.GlassBackground
 import com.tendertracker.app.ui.theme.GlassBorder
 import com.tendertracker.app.ui.theme.GlassCardBackground
 import com.tendertracker.app.ui.theme.GlassPrimary
@@ -61,13 +61,14 @@ fun TenderTrackerNavHost(
     val authState by authViewModel.state.collectAsState()
     val navController = rememberNavController()
     val navItems = listOf(
+        BottomNavItem(Screen.Dashboard, Icons.Default.Home, "Home"),
         BottomNavItem(Screen.TenderList, Icons.Default.List, "Tenders"),
-        BottomNavItem(Screen.Chat, Icons.Default.Chat, "Chat"),
+        BottomNavItem(Screen.Chat, Icons.AutoMirrored.Filled.Chat, "Chat"),
         BottomNavItem(Screen.Settings, Icons.Default.Settings, "Settings")
     )
 
     // Determine start destination based on auth state
-    val startDestination: Screen = if (authState.isLoggedIn) Screen.TenderList else Screen.Login
+    val startDestination: Screen = if (authState.isLoggedIn) Screen.Dashboard else Screen.Login
 
     // Apply glass background to entire scaffold
     Box(
@@ -87,7 +88,7 @@ fun TenderTrackerNavHost(
                         navController.navigate(Screen.Register)
                     },
                     onLoginSuccess = {
-                        navController.navigate(Screen.TenderList) {
+                        navController.navigate(Screen.Dashboard) {
                             popUpTo(Screen.Login) { inclusive = true }
                         }
                     }
@@ -100,14 +101,42 @@ fun TenderTrackerNavHost(
                         navController.popBackStack()
                     },
                     onRegisterSuccess = {
-                        navController.navigate(Screen.TenderList) {
+                        navController.navigate(Screen.Dashboard) {
                             popUpTo(Screen.Login) { inclusive = true }
                         }
                     }
                 )
             }
 
-            // Main screens with bottom nav
+            // Dashboard - home screen
+            composable<Screen.Dashboard> {
+                MainScaffold(
+                    navController = navController,
+                    navItems = navItems,
+                    currentScreen = Screen.Dashboard
+                ) {
+                    DashboardScreen(
+                        onTenderClick = { tenderId ->
+                            navController.navigate(Screen.TenderDetail(tenderId))
+                        },
+                        onViewAllTenders = {
+                            navController.navigate(Screen.TenderList) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onChatClick = {
+                            navController.navigate(Screen.Chat) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onModelManagerClick = {
+                            navController.navigate(Screen.ModelManager)
+                        }
+                    )
+                }
+            }
+
+            // Tender List screen
             composable<Screen.TenderList> {
                 MainScaffold(
                     navController = navController,

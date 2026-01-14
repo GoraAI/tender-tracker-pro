@@ -13,6 +13,9 @@ sealed class Screen {
 
     // Main screens
     @Serializable
+    data object Dashboard : Screen()
+
+    @Serializable
     data object TenderList : Screen()
 
     @Serializable
