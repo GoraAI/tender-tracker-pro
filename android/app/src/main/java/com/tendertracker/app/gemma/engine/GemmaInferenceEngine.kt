@@ -42,9 +42,6 @@ class GemmaInferenceEngine @Inject constructor(
                 val options = LlmInference.LlmInferenceOptions.builder()
                     .setModelPath(path)
                     .setMaxTokens(model.contextLength)
-                    .setTopK(40)
-                    .setTemperature(0.8f)
-                    .setRandomSeed(42)
                     .build()
 
                 // Create the inference instance
