@@ -61,12 +61,9 @@ fun ChatScreen(
     val state by viewModel.state.collectAsState()
     val listState = rememberLazyListState()
 
-    // Only scroll when message count increases (new message added)
-    val messageCount = state.messages.size
-    LaunchedEffect(messageCount) {
-        if (messageCount > 0) {
-            // Use non-animated scroll to prevent flickering
-            listState.scrollToItem(messageCount - 1)
+    LaunchedEffect(state.messages.size) {
+        if (state.messages.isNotEmpty()) {
+            listState.animateScrollToItem(state.messages.size - 1)
         }
     }
 
@@ -100,15 +97,12 @@ fun ChatScreen(
                 contentPadding = PaddingValues(GlassEffect.screenPadding),  // 24dp
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(
-                    items = state.messages,
-                    key = { it.id }  // Stable key prevents unnecessary recomposition
-                ) { message ->
+                items(state.messages) { message ->
                     MessageBubble(message = message)
                 }
 
                 if (state.isTyping) {
-                    item(key = "typing_indicator") {
+                    item {
                         TypingIndicator()
                     }
                 }
