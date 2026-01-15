@@ -86,12 +86,13 @@ class ModelDownloadManager @Inject constructor(
     }
 
     fun getModelPath(modelId: String): String {
-        return java.io.File(getModelDirectory(), modelId).absolutePath
+        // Return the actual model file path, not just the directory
+        return java.io.File(java.io.File(getModelDirectory(), modelId), "model.litertlm").absolutePath
     }
 
     fun isModelDownloaded(modelId: String): Boolean {
-        val modelDir = java.io.File(getModelDirectory(), modelId)
-        return modelDir.exists() && modelDir.isDirectory && modelDir.listFiles()?.isNotEmpty() == true
+        val modelFile = java.io.File(java.io.File(getModelDirectory(), modelId), "model.litertlm")
+        return modelFile.exists() && modelFile.isFile && modelFile.length() > 0
     }
 
     fun deleteModel(modelId: String): Boolean {
