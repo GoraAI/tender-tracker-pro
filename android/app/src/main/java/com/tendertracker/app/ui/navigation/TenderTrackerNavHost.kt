@@ -224,9 +224,9 @@ private fun MainScaffold(
                 val currentDestination = navBackStackEntry?.destination
 
                 navItems.forEach { item ->
-                    val selected = currentDestination?.hierarchy?.any {
-                        it.route == item.screen::class.qualifiedName
-                    } == true
+                    // Compare using the route string pattern for type-safe navigation
+                    val itemRoute = item.screen::class.qualifiedName
+                    val selected = currentDestination?.route?.contains(itemRoute ?: "") == true
 
                     NavigationBarItem(
                         icon = { Icon(item.icon, contentDescription = item.label) },

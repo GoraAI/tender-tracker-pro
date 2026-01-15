@@ -48,7 +48,14 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
-            // Load all tenders
+            // First sync from API to get latest tenders
+            tenderRepository.syncFromApi()
+                .onFailure { e ->
+                    // Log sync failure but continue to show local data
+                    _state.update { it.copy(error = "Sync failed: ${e.message}") }
+                }
+
+            // Load all tenders from local database
             tenderRepository.getAllTenders()
                 .catch { e ->
                     _state.update {
