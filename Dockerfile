@@ -1,6 +1,7 @@
 # Tender Tracker Pro - Production Dockerfile for Railway
 # Based on: https://playwright.dev/python/docs/docker
 # and https://docs.railway.com/guides/fastapi
+# Cache bust: 2026-01-16-v2
 
 # Use Python 3.12 bookworm (recommended by Playwright docs)
 FROM python:3.12-bookworm
