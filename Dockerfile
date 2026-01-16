@@ -1,35 +1,24 @@
 # Tender Tracker Pro - Production Dockerfile for Railway
-FROM python:3.10-slim
+# Based on: https://playwright.dev/python/docs/docker
+# and https://docs.railway.com/guides/fastapi
 
-# Set environment variables
+# Use Python 3.12 bookworm (recommended by Playwright docs)
+FROM python:3.12-bookworm
+
+# Set Python environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    # Playwright browser path - critical for user context
+    PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+    # Memory optimization for containers
+    MALLOC_ARENA_MAX=2
 
-# Install system dependencies for Playwright
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget \
-    gnupg \
-    ca-certificates \
-    libnss3 \
-    libnspr4 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libdbus-1-3 \
-    libxkbcommon0 \
-    libatspi2.0-0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxfixes3 \
-    libxrandr2 \
-    libgbm1 \
-    libasound2 \
-    libpango-1.0-0 \
-    libcairo2 \
-    && rm -rf /var/lib/apt/lists/*
+# Create virtual environment (Railway best practice)
+RUN python -m venv /opt/venv
+ENV PATH=/opt/venv/bin:$PATH
+
+# Upgrade pip
+RUN pip install --upgrade pip
 
 # Set work directory
 WORKDIR /app
@@ -38,26 +27,28 @@ WORKDIR /app
 COPY requirements-prod.txt .
 
 # Install Python dependencies
-RUN pip install --upgrade pip && \
-    pip install -r requirements-prod.txt
+RUN pip install --no-cache-dir -r requirements-prod.txt
 
-# Install Playwright browsers
-RUN playwright install chromium
+# Install Playwright with all system dependencies
+# --with-deps installs browser AND system dependencies automatically
+RUN playwright install chromium --with-deps
 
 # Copy application code
 COPY . .
 
-# Create non-root user for security
+# Create startup script for Railway (supports IPv6)
+RUN printf '#!/bin/bash\n\
+RUN_PORT="${PORT:-8000}"\n\
+exec uvicorn src.api.main:app --host "[::]" --port "$RUN_PORT"\n' > /app/start.sh && \
+    chmod +x /app/start.sh
+
+# Clean up apt cache to reduce image size
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Run as non-root user for security (Playwright recommendation)
 RUN useradd -m -u 1000 appuser && \
-    chown -R appuser:appuser /app
+    chown -R appuser:appuser /app /opt/venv /ms-playwright
 USER appuser
 
-# Expose port (Railway sets PORT env var)
-EXPOSE 8000
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
-
 # Start command
-CMD ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["/app/start.sh"]
