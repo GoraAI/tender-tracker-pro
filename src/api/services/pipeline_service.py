@@ -267,41 +267,47 @@ class PipelineService:
                 await service.update_job_status(job_id, "running", total_items=total)
                 await service.add_log(job_id, f"Found {total} PDFs to download")
 
-                # Import downloader
+                # Import downloader and models
                 from src.navigator import PDFDownloader
+                from src.navigator.models import PDFLink
+                from datetime import datetime
 
                 download_config = config.get("download", {})
                 downloader = PDFDownloader(download_config)
 
                 downloaded = 0
-                for i, tender in enumerate(tenders):
-                    try:
-                        # Create PDFLink-like object
-                        pdf_link = type('PDFLink', (), {
-                            'url': tender.pdf_url,
-                            'filename': tender.reference or f"tender_{tender.id}.pdf"
-                        })()
+                async with downloader:
+                    for i, tender in enumerate(tenders):
+                        try:
+                            # Create proper PDFLink object
+                            pdf_link = PDFLink(
+                                url=tender.pdf_url,
+                                link_text=tender.title or "",
+                                title=tender.reference,
+                                context=tender.description or "",
+                                discovered_at=tender.created_at or datetime.utcnow(),
+                                source_url=config.get("urls", {}).get("rfq_listing", ""),
+                                source_id=source_id,
+                            )
 
-                        result = await asyncio.to_thread(
-                            downloader.download, pdf_link, source_id
-                        )
+                            result = await downloader.download_single(pdf_link)
 
-                        if result.success:
-                            tender.pdf_path = str(result.path)
-                            await db.commit()
-                            downloaded += 1
+                            if result.success and result.file_path:
+                                tender.pdf_path = str(result.file_path)
+                                await db.commit()
+                                downloaded += 1
 
-                        progress = int((i + 1) / total * 100)
-                        await service.update_job_status(
-                            job_id, "running", progress=progress, processed_items=downloaded
-                        )
-                        await service.add_log(job_id, f"Downloaded: {tender.reference}")
+                            progress = int((i + 1) / total * 100)
+                            await service.update_job_status(
+                                job_id, "running", progress=progress, processed_items=downloaded
+                            )
+                            await service.add_log(job_id, f"Downloaded: {tender.reference}")
 
-                    except Exception as e:
-                        await service.add_log(
-                            job_id, f"Failed to download {tender.reference}: {e}",
-                            level="warning"
-                        )
+                        except Exception as e:
+                            await service.add_log(
+                                job_id, f"Failed to download {tender.reference}: {e}",
+                                level="warning"
+                            )
 
                 await service.update_job_status(job_id, "completed")
                 await service.add_log(job_id, f"Download complete: {downloaded}/{total} files")
