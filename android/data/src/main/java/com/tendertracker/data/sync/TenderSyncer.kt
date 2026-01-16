@@ -23,7 +23,7 @@ class TenderSyncer @Inject constructor(
         do {
             val response = tenderApi.getTenders(
                 page = page,
-                limit = SyncConfig.SYNC_PAGE_SIZE
+                perPage = SyncConfig.SYNC_PAGE_SIZE
             )
             if (!response.isSuccessful) {
                 throw SyncException("Failed to fetch tenders: ${response.code()}")
