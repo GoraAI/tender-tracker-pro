@@ -18,10 +18,13 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
+    // Production URL (Railway)
+    private const val BASE_URL = "https://tender-tracker-pro-production.up.railway.app/api/v1/"
+
+    // Development URLs:
     // For emulator use: http://10.0.2.2:8000/api/v1/
     // For physical device via adb reverse: http://127.0.0.1:8000/api/v1/
-    // For physical device on same network, use host IP: http://192.168.2.74:8000/api/v1/
-    private const val BASE_URL = "http://127.0.0.1:8000/api/v1/"
+    // For physical device on same network, use host IP: http://192.168.x.x:8000/api/v1/
 
     @Provides
     @Singleton
