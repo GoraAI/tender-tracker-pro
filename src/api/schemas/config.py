@@ -74,3 +74,12 @@ class SourceResponse(BaseModel):
 class SourceToggle(BaseModel):
     """Schema for toggling source."""
     is_active: Optional[bool] = None
+
+
+class SourceCreate(BaseModel):
+    """Schema for creating a source."""
+    id: str
+    name: str
+    url: str
+    config_path: Optional[str] = None
+    is_active: bool = True

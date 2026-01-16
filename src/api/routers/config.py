@@ -15,6 +15,7 @@ from ..schemas.config import (
     CriteriaCreate,
     CriteriaUpdate,
     CriteriaResponse,
+    SourceCreate,
     SourceResponse,
     SourceToggle,
 )
@@ -167,6 +168,37 @@ async def list_sources(
         select(Source).order_by(Source.name)
     )
     return result.scalars().all()
+
+
+@router.post("/sources", response_model=SourceResponse, status_code=status.HTTP_201_CREATED)
+async def create_source(
+    data: SourceCreate,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    """Create a new tender source."""
+    # Check if source already exists
+    result = await db.execute(
+        select(Source).where(Source.id == data.id)
+    )
+    existing = result.scalar_one_or_none()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Source with id '{data.id}' already exists",
+        )
+
+    source = Source(
+        id=data.id,
+        name=data.name,
+        url=data.url,
+        config_path=data.config_path,
+        is_active=data.is_active,
+    )
+    db.add(source)
+    await db.commit()
+    await db.refresh(source)
+    return source
 
 
 @router.put("/sources/{source_id}/toggle", response_model=SourceResponse)
