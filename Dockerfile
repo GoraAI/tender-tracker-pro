@@ -37,10 +37,10 @@ RUN playwright install chromium --with-deps
 # Copy application code
 COPY . .
 
-# Create startup script for Railway (supports IPv6)
+# Create startup script for Railway
 RUN printf '#!/bin/bash\n\
 RUN_PORT="${PORT:-8000}"\n\
-exec uvicorn src.api.main:app --host "[::]" --port "$RUN_PORT"\n' > /app/start.sh && \
+exec uvicorn src.api.main:app --host 0.0.0.0 --port "$RUN_PORT"\n' > /app/start.sh && \
     chmod +x /app/start.sh
 
 # Clean up apt cache to reduce image size
