@@ -52,7 +52,7 @@ class TenderRepositoryImpl @Inject constructor(
      */
     override suspend fun syncFromApi(): Result<Int> {
         return try {
-            val response = tenderApi.getTenders(page = 1, limit = 100)
+            val response = tenderApi.getTenders(page = 1, perPage = 100)
             if (response.isSuccessful) {
                 val tenderList = response.body()!!
                 val entities = tenderList.tenders.map { it.toEntity() }

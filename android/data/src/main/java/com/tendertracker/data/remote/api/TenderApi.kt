@@ -22,7 +22,7 @@ interface TenderApi {
     suspend fun getTenders(
         @Query("since") since: String? = null,
         @Query("page") page: Int = 1,
-        @Query("limit") limit: Int = 100
+        @Query("per_page") perPage: Int = 100
     ): Response<TenderListResponse>
 
     @GET("tenders/{id}")
