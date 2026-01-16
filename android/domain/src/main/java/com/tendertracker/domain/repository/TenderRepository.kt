@@ -12,4 +12,15 @@ interface TenderRepository {
     suspend fun updateScore(id: String, score: Int, explanation: String)
     suspend fun deleteTender(id: String)
     suspend fun syncFromApi(): Result<Int>
+
+    /**
+     * Run the pipeline to discover new tenders, wait for completion, then sync.
+     * @param sourceId The source to scrape (e.g., "jhb-water")
+     * @param onProgress Callback for progress updates (0-100)
+     * @return Result with number of tenders synced
+     */
+    suspend fun runPipelineAndSync(
+        sourceId: String = "jhb-water",
+        onProgress: (Int) -> Unit = {}
+    ): Result<Int>
 }

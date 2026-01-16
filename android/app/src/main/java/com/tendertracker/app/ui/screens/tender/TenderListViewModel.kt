@@ -16,6 +16,9 @@ import javax.inject.Inject
 data class TenderListState(
     val tenders: List<Tender> = emptyList(),
     val isLoading: Boolean = false,
+    val isSyncing: Boolean = false,
+    val syncProgress: Int = 0,
+    val syncMessage: String? = null,
     val error: String? = null,
     val isSearchVisible: Boolean = false,
     val searchQuery: String = ""
@@ -68,20 +71,51 @@ class TenderListViewModel @Inject constructor(
     }
 
     fun onSyncClick() {
+        if (_state.value.isSyncing) return // Prevent multiple syncs
+
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-            tenderRepository.syncFromApi()
-                .onSuccess { count ->
-                    _state.update { it.copy(isLoading = false) }
-                }
-                .onFailure { e ->
+            _state.update {
+                it.copy(
+                    isSyncing = true,
+                    syncProgress = 0,
+                    syncMessage = "Starting pipeline...",
+                    error = null
+                )
+            }
+
+            tenderRepository.runPipelineAndSync(
+                sourceId = "jhb-water",
+                onProgress = { progress ->
+                    val message = when {
+                        progress < 10 -> "Starting pipeline..."
+                        progress < 80 -> "Discovering tenders... $progress%"
+                        progress < 100 -> "Syncing tenders..."
+                        else -> "Complete!"
+                    }
                     _state.update {
-                        it.copy(
-                            isLoading = false,
-                            error = e.message ?: "Sync failed"
-                        )
+                        it.copy(syncProgress = progress, syncMessage = message)
                     }
                 }
+            ).onSuccess { count ->
+                _state.update {
+                    it.copy(
+                        isSyncing = false,
+                        syncProgress = 100,
+                        syncMessage = "Synced $count tenders"
+                    )
+                }
+                // Reload tenders
+                loadTenders()
+            }.onFailure { e ->
+                _state.update {
+                    it.copy(
+                        isSyncing = false,
+                        syncProgress = 0,
+                        syncMessage = null,
+                        error = "Sync failed: ${e.message}"
+                    )
+                }
+            }
         }
     }
 }

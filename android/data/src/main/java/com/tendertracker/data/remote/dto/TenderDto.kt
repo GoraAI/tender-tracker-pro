@@ -105,3 +105,23 @@ data class UserResponse(
     @SerializedName("company_name") val companyName: String?,
     @SerializedName("is_active") val isActive: Boolean
 )
+
+// Pipeline DTOs
+data class PipelineRequest(
+    @SerializedName("source_id") val sourceId: String
+)
+
+data class PipelineJobResponse(
+    @SerializedName("id") val id: String,
+    @SerializedName("job_type") val jobType: String,
+    @SerializedName("source_id") val sourceId: String?,
+    @SerializedName("status") val status: String,
+    @SerializedName("progress") val progress: Int,
+    @SerializedName("total_items") val totalItems: Int?,
+    @SerializedName("processed_items") val processedItems: Int,
+    @SerializedName("error_message") val errorMessage: String?,
+    @SerializedName("created_at") val createdAt: String
+) {
+    val isComplete: Boolean get() = status == "completed" || status == "failed"
+    val isSuccess: Boolean get() = status == "completed"
+}

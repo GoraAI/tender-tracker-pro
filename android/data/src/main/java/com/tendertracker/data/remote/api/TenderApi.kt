@@ -1,6 +1,8 @@
 package com.tendertracker.data.remote.api
 
 import com.tendertracker.data.remote.dto.LoginRequest
+import com.tendertracker.data.remote.dto.PipelineJobResponse
+import com.tendertracker.data.remote.dto.PipelineRequest
 import com.tendertracker.data.remote.dto.RegisterRequest
 import com.tendertracker.data.remote.dto.ScoreResponse
 import com.tendertracker.data.remote.dto.ScoreSubmission
@@ -49,4 +51,20 @@ interface TenderApi {
 
     @GET("auth/me")
     suspend fun getCurrentUser(): Response<UserResponse>
+
+    // Pipeline endpoints
+    @POST("pipeline/discover")
+    suspend fun runDiscoverPipeline(
+        @Body request: PipelineRequest
+    ): Response<PipelineJobResponse>
+
+    @POST("pipeline/full")
+    suspend fun runFullPipeline(
+        @Body request: PipelineRequest
+    ): Response<PipelineJobResponse>
+
+    @GET("pipeline/jobs/{jobId}")
+    suspend fun getPipelineJob(
+        @Path("jobId") jobId: String
+    ): Response<PipelineJobResponse>
 }

@@ -21,7 +21,10 @@ data class DashboardState(
     val modelStatus: ModelStatus = ModelStatus.NOT_LOADED,
     val recentTenders: List<Tender> = emptyList(),
     val isLoading: Boolean = true,
-    val error: String? = null
+    val isSyncing: Boolean = false,
+    val syncProgress: Int = 0,
+    val error: String? = null,
+    val syncMessage: String? = null
 )
 
 enum class ModelStatus(val displayName: String) {
@@ -47,13 +50,6 @@ class DashboardViewModel @Inject constructor(
     fun loadDashboardData() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
-
-            // First sync from API to get latest tenders
-            tenderRepository.syncFromApi()
-                .onFailure { e ->
-                    // Log sync failure but continue to show local data
-                    _state.update { it.copy(error = "Sync failed: ${e.message}") }
-                }
 
             // Load all tenders from local database
             tenderRepository.getAllTenders()
@@ -92,6 +88,58 @@ class DashboardViewModel @Inject constructor(
                         )
                     }
                 }
+        }
+    }
+
+    /**
+     * Run the pipeline to discover new tenders, then sync to local database.
+     */
+    fun runPipelineSync() {
+        if (_state.value.isSyncing) return // Prevent multiple syncs
+
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isSyncing = true,
+                    syncProgress = 0,
+                    syncMessage = "Starting pipeline...",
+                    error = null
+                )
+            }
+
+            tenderRepository.runPipelineAndSync(
+                sourceId = "jhb-water",
+                onProgress = { progress ->
+                    val message = when {
+                        progress < 10 -> "Starting pipeline..."
+                        progress < 80 -> "Discovering tenders... $progress%"
+                        progress < 100 -> "Syncing tenders..."
+                        else -> "Complete!"
+                    }
+                    _state.update {
+                        it.copy(syncProgress = progress, syncMessage = message)
+                    }
+                }
+            ).onSuccess { count ->
+                _state.update {
+                    it.copy(
+                        isSyncing = false,
+                        syncProgress = 100,
+                        syncMessage = "Synced $count tenders"
+                    )
+                }
+                // Reload dashboard data to show updated counts
+                loadDashboardData()
+            }.onFailure { e ->
+                _state.update {
+                    it.copy(
+                        isSyncing = false,
+                        syncProgress = 0,
+                        syncMessage = null,
+                        error = "Sync failed: ${e.message}"
+                    )
+                }
+            }
         }
     }
 

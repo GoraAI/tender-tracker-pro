@@ -25,11 +25,13 @@ import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PriorityHigh
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -91,7 +93,20 @@ fun DashboardScreen(
             ) {
                 // Header
                 item {
-                    DashboardHeader(onRefresh = { viewModel.loadDashboardData() })
+                    DashboardHeader(
+                        onRefresh = { viewModel.runPipelineSync() },
+                        isSyncing = state.isSyncing
+                    )
+                }
+
+                // Sync Progress Banner
+                if (state.isSyncing || state.syncMessage != null) {
+                    item {
+                        SyncProgressBanner(
+                            progress = state.syncProgress,
+                            message = state.syncMessage ?: "Syncing..."
+                        )
+                    }
                 }
 
                 // Stats Grid
@@ -161,7 +176,10 @@ fun DashboardScreen(
 }
 
 @Composable
-private fun DashboardHeader(onRefresh: () -> Unit) {
+private fun DashboardHeader(
+    onRefresh: () -> Unit,
+    isSyncing: Boolean = false
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -182,15 +200,68 @@ private fun DashboardHeader(onRefresh: () -> Unit) {
         }
         IconButton(
             onClick = onRefresh,
+            enabled = !isSyncing,
             modifier = Modifier
                 .clip(CircleShape)
                 .background(GlassEffect.cardBackground)
         ) {
-            Icon(
-                imageVector = Icons.Default.Refresh,
-                contentDescription = "Refresh",
-                tint = GlassPrimary
-            )
+            if (isSyncing) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = GlassPrimary,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Sync,
+                    contentDescription = "Sync Tenders",
+                    tint = GlassPrimary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SyncProgressBanner(
+    progress: Int,
+    message: String
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .glassCard()
+            .padding(16.dp)
+    ) {
+        Column {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Sync,
+                    contentDescription = null,
+                    tint = GlassPrimary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = GlassTextPrimary
+                )
+            }
+            if (progress > 0 && progress < 100) {
+                Spacer(modifier = Modifier.height(8.dp))
+                LinearProgressIndicator(
+                    progress = { progress / 100f },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp)),
+                    color = GlassPrimary,
+                    trackColor = GlassPrimary.copy(alpha = 0.2f)
+                )
+            }
         }
     }
 }
