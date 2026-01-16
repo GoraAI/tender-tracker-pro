@@ -1,9 +1,10 @@
 """API Configuration - Environment-based settings."""
 
+import os
 from functools import lru_cache
 from typing import List
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -15,6 +16,16 @@ class Settings(BaseSettings):
         default="postgresql+asyncpg://tender_user:tender_pass@localhost:5432/tender_tracker",
         description="PostgreSQL connection URL",
     )
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def fix_database_url(cls, v: str) -> str:
+        """Convert Railway's postgres:// to postgresql+asyncpg:// format."""
+        if v and v.startswith("postgres://"):
+            v = v.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif v and v.startswith("postgresql://"):
+            v = v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v
 
     # JWT Authentication
     jwt_secret_key: str = Field(

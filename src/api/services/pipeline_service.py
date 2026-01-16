@@ -174,14 +174,16 @@ class PipelineService:
                     # Navigate to RFQ listing
                     rfq_url = config["urls"]["rfq_listing"]
                     await service.add_log(job_id, f"Navigating to: {rfq_url}")
-                    await engine.navigate(rfq_url)
+                    page = await engine.navigate(rfq_url)
 
-                    # Discover PDF links
+                    # Set up PDF discovery with tracking file
                     discovery_config = config.get("pdf_discovery", {})
-                    discovery = PDFDiscovery(engine, discovery_config)
+                    tracking_file = Path(f"data/tracking/{source_id}_pdfs.json")
+                    tracking_file.parent.mkdir(parents=True, exist_ok=True)
+                    discovery = PDFDiscovery(discovery_config, tracking_file)
 
                     await service.add_log(job_id, "Discovering PDF links...")
-                    pdf_links = await discovery.discover()
+                    pdf_links = await discovery.discover_pdfs(page, source_id)
 
                     total = len(pdf_links)
                     await service.update_job_status(
@@ -201,15 +203,22 @@ class PipelineService:
                         if existing.scalar_one_or_none():
                             continue
 
+                        # Extract filename from URL for reference
+                        filename = link.url.split("/")[-1].split("?")[0]
+
                         tender = Tender(
                             source_id=source_id,
                             pdf_url=link.url,
-                            title=link.link_text or link.filename,
-                            reference=link.filename,
+                            title=link.link_text or link.title or filename,
+                            reference=filename,
                         )
                         db.add(tender)
 
                     await db.commit()
+
+                    # Save discovered PDFs to tracking file
+                    discovery.save_tracking(pdf_links)
+
                     await service.update_job_status(job_id, "completed", processed_items=total)
                     await service.add_log(job_id, "Discovery complete")
 
