@@ -38,9 +38,10 @@ RUN playwright install chromium --with-deps
 COPY . .
 
 # Create startup script for Railway
+# Using --loop asyncio to avoid uvloop DNS resolution issues
 RUN printf '#!/bin/bash\n\
 RUN_PORT="${PORT:-8000}"\n\
-exec uvicorn src.api.main:app --host 0.0.0.0 --port "$RUN_PORT"\n' > /app/start.sh && \
+exec uvicorn src.api.main:app --host 0.0.0.0 --port "$RUN_PORT" --loop asyncio\n' > /app/start.sh && \
     chmod +x /app/start.sh
 
 # Clean up apt cache to reduce image size
