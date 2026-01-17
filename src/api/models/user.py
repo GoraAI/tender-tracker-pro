@@ -14,6 +14,11 @@ if TYPE_CHECKING:
     from src.api.models.criteria import UserCriteria
     from src.api.models.job import Job
     from src.api.models.score import Score
+    from src.api.models.company_profile import CompanyProfile
+    from src.api.models.compliance_registration import ComplianceRegistration
+    from src.api.models.cost_item import CostItem
+    from src.api.models.tender_outcome import TenderOutcome
+    from src.api.models.pipeline_tender import PipelineTender
 
 
 class User(Base):
@@ -46,6 +51,22 @@ class User(Base):
     )
     jobs: Mapped[List["Job"]] = relationship(
         "Job", back_populates="user", cascade="all, delete-orphan"
+    )
+    # Analytics relationships
+    company_profile: Mapped["CompanyProfile"] = relationship(
+        "CompanyProfile", back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
+    compliance_registrations: Mapped[List["ComplianceRegistration"]] = relationship(
+        "ComplianceRegistration", back_populates="user", cascade="all, delete-orphan"
+    )
+    cost_items: Mapped[List["CostItem"]] = relationship(
+        "CostItem", back_populates="user", cascade="all, delete-orphan"
+    )
+    tender_outcomes: Mapped[List["TenderOutcome"]] = relationship(
+        "TenderOutcome", back_populates="user", cascade="all, delete-orphan"
+    )
+    pipeline_tenders: Mapped[List["PipelineTender"]] = relationship(
+        "PipelineTender", back_populates="user", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:

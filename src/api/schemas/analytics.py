@@ -1,6 +1,11 @@
-"""Analytics schemas for tender visualization skill."""
-from datetime import date, datetime
+"""Analytics schemas for tender visualization skill.
+
+Updated to use UUID types and support empty state for new users.
+NO MOCK DATA - real database queries only.
+"""
+from datetime import date as date_type, datetime
 from typing import Optional
+from uuid import UUID
 from pydantic import BaseModel, Field
 
 
@@ -22,8 +27,9 @@ class FunnelAnalytics(BaseModel):
     win_rate: float = Field(ge=0, le=1)
     cost_per_win: float = 0.0
     avg_days_to_award: int = 0
-    period_start: date
-    period_end: date
+    period_start: date_type
+    period_end: date_type
+    is_empty: bool = False  # True when user has no data
 
 
 # =============================================================================
@@ -35,15 +41,27 @@ class CostItemCreate(BaseModel):
     category: str = Field(..., description="Cost category: platform, compliance, preparation, submission, opportunity")
     description: str
     amount: float = Field(gt=0)
-    date: date = Field(default_factory=date.today)
-    tender_id: Optional[str] = None
+    date: date_type = Field(default_factory=date_type.today)
+    tender_id: Optional[UUID] = None
+    recurring: bool = False
+    frequency: Optional[str] = None  # annual, monthly, quarterly
 
 
-class CostItem(CostItemCreate):
-    """Cost item with ID."""
-    id: str
-    user_id: str
+class CostItemResponse(BaseModel):
+    """Cost item response."""
+    id: UUID
+    user_id: UUID
+    tender_id: Optional[UUID] = None
+    category: str
+    description: str
+    amount: float
+    date: date_type
+    recurring: bool
+    frequency: Optional[str] = None
     created_at: datetime
+
+    class Config:
+        from_attributes = True
 
 
 class CostCategory(BaseModel):
@@ -51,7 +69,7 @@ class CostCategory(BaseModel):
     name: str
     amount: float
     percentage: float = Field(ge=0, le=1)
-    items: list[CostItem] = []
+    items: list[CostItemResponse] = []
 
 
 class CostAnalytics(BaseModel):
@@ -60,8 +78,9 @@ class CostAnalytics(BaseModel):
     total_spent: float
     tenders_won: int
     cost_per_win: float
-    period_start: date
-    period_end: date
+    period_start: date_type
+    period_end: date_type
+    is_empty: bool = False
 
 
 # =============================================================================
@@ -70,31 +89,48 @@ class CostAnalytics(BaseModel):
 
 class ComplianceItemCreate(BaseModel):
     """Create/update a compliance item."""
-    registration_type: str = Field(..., description="Type: csd, cidb, bbbee, sars, uif, coid")
+    type: str = Field(..., description="Type: csd, cidb, bbbee, sars, uif, coid")
     name: str
     short_name: str
-    expiry_date: Optional[date] = None
+    registration_number: str
+    issue_date: date_type
+    expiry_date: Optional[date_type] = None
+    expiry_type: str = "annual"  # annual, perpetual, continuous
     renewal_url: Optional[str] = None
-    notes: Optional[str] = None
+    documents: Optional[list[dict]] = None
 
 
-class ComplianceItem(ComplianceItemCreate):
-    """Compliance item with computed fields."""
-    id: str
-    user_id: str
-    days_remaining: int
+class ComplianceItemResponse(BaseModel):
+    """Compliance item response with computed fields."""
+    id: UUID
+    user_id: UUID
+    type: str
+    name: str
+    short_name: str
+    registration_number: str
+    issue_date: date_type
+    expiry_date: Optional[date_type] = None
+    expiry_type: str
+    renewal_url: Optional[str] = None
+    documents: Optional[list[dict]] = None
+    days_remaining: Optional[int]  # Computed - None for perpetual
+    is_expired: bool
     is_valid: bool
     created_at: datetime
     updated_at: datetime
 
+    class Config:
+        from_attributes = True
+
 
 class ComplianceStatus(BaseModel):
     """Overall compliance status."""
-    items: list[ComplianceItem]
+    items: list[ComplianceItemResponse]
     valid_count: int
     total_count: int
-    days_to_next_expiry: int
-    next_expiry_item: str
+    days_to_next_expiry: Optional[int] = None
+    next_expiry_item: Optional[str] = None
+    is_empty: bool = False
 
 
 # =============================================================================
@@ -109,6 +145,7 @@ class PaymentDelayData(BaseModel):
     avg_days_to_payment: int
     sample_size: int = 0
     trend: float = 0.0  # Positive = getting worse
+    source: str = "reference"  # "reference" or "user" to indicate data source
 
 
 class PaymentDelayAnalytics(BaseModel):
@@ -116,6 +153,8 @@ class PaymentDelayAnalytics(BaseModel):
     by_province: list[PaymentDelayData]
     by_department: list[PaymentDelayData]
     overall_average: int
+    user_data_available: bool = False  # True when user has payment data
+    reference_data_source: str = "National Treasury Reports 2024-2025"
 
 
 # =============================================================================
@@ -125,38 +164,58 @@ class PaymentDelayAnalytics(BaseModel):
 class PipelinePhase(BaseModel):
     """Phase in tender preparation."""
     name: str
-    start_date: date
-    end_date: date
+    start_date: date_type
+    end_date: Optional[date_type] = None
     is_complete: bool = False
 
 
 class PipelineTenderCreate(BaseModel):
     """Add tender to pipeline."""
-    tender_id: str
-    status: str = "considering"  # considering, preparing, reviewing, ready_to_submit, submitted, awarded, lost
+    tender_id: UUID
+    status: str = "discovered"  # discovered, qualified, preparation, review, submission, submitted
+    assigned_to: Optional[str] = None
+    notes: Optional[str] = None
 
 
-class PipelineTender(BaseModel):
+class PipelineTenderUpdate(BaseModel):
+    """Update pipeline tender."""
+    status: Optional[str] = None
+    assigned_to: Optional[str] = None
+    notes: Optional[str] = None
+    phases: Optional[list[dict]] = None
+    has_conflict: Optional[bool] = None
+
+
+class PipelineTenderResponse(BaseModel):
     """Tender in user's pipeline."""
-    id: str
-    tender_id: str
-    user_id: str
-    title: str
-    reference: str
-    deadline: date
+    id: UUID
+    user_id: UUID
+    tender_id: UUID
+    # Tender details (joined from tender table)
+    title: Optional[str] = None
+    reference: Optional[str] = None
+    deadline: Optional[datetime] = None
+    # Pipeline fields
     status: str
-    start_date: date
-    phases: list[PipelinePhase] = []
+    start_date: Optional[date_type] = None
+    phases: Optional[list[dict]] = None
+    assigned_to: Optional[str] = None
+    notes: Optional[str] = None
     has_conflict: bool = False
-    conflict_message: str = ""
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
 
 
 class PipelineStatus(BaseModel):
     """Pipeline status summary."""
-    tenders: list[PipelineTender]
+    tenders: list[PipelineTenderResponse]
     active_count: int
     due_this_week: int
     has_conflicts: bool
+    is_empty: bool = False
 
 
 # =============================================================================
@@ -165,19 +224,31 @@ class PipelineStatus(BaseModel):
 
 class TenderOutcomeCreate(BaseModel):
     """Record tender outcome."""
-    tender_id: str
+    tender_id: UUID
     outcome: str = Field(..., description="won, lost, withdrawn, cancelled")
+    reason_code: Optional[str] = None  # price, functionality, bbbee, disqualified, other
+    reason_details: Optional[str] = None
+    award_date: date_type
+    award_amount: Optional[float] = None
+    payment_received_date: Optional[date_type] = None
+
+
+class TenderOutcomeResponse(BaseModel):
+    """Tender outcome response."""
+    id: UUID
+    user_id: UUID
+    tender_id: UUID
+    outcome: str
     reason_code: Optional[str] = None
     reason_details: Optional[str] = None
-    award_date: Optional[date] = None
+    award_date: date_type
     award_amount: Optional[float] = None
-
-
-class TenderOutcome(TenderOutcomeCreate):
-    """Tender outcome with metadata."""
-    id: str
-    user_id: str
+    payment_received_date: Optional[date_type] = None
+    days_to_payment: Optional[int] = None
     created_at: datetime
+
+    class Config:
+        from_attributes = True
 
 
 class OutcomeAnalytics(BaseModel):
@@ -185,7 +256,49 @@ class OutcomeAnalytics(BaseModel):
     total_submitted: int
     total_won: int
     total_lost: int
+    total_withdrawn: int = 0
+    total_cancelled: int = 0
     win_rate: float
+    total_award_amount: float = 0.0
+    avg_days_to_payment: Optional[int] = None
     outcomes_by_reason: dict[str, int]
-    period_start: date
-    period_end: date
+    period_start: date_type
+    period_end: date_type
+    is_empty: bool = False
+
+
+# =============================================================================
+# COMPANY PROFILE
+# =============================================================================
+
+class CompanyProfileCreate(BaseModel):
+    """Create/update company profile."""
+    legal_name: str
+    trading_name: Optional[str] = None
+    industry: str
+    capabilities: Optional[list[str]] = None
+    preferred_sectors: Optional[list[str]] = None
+    preferred_provinces: Optional[list[str]] = None
+    keywords: Optional[list[str]] = None
+    value_range_min: Optional[float] = None
+    value_range_max: Optional[float] = None
+
+
+class CompanyProfileResponse(BaseModel):
+    """Company profile response."""
+    id: UUID
+    user_id: UUID
+    legal_name: str
+    trading_name: Optional[str] = None
+    industry: str
+    capabilities: Optional[list[str]] = None
+    preferred_sectors: Optional[list[str]] = None
+    preferred_provinces: Optional[list[str]] = None
+    keywords: Optional[list[str]] = None
+    value_range_min: Optional[float] = None
+    value_range_max: Optional[float] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True

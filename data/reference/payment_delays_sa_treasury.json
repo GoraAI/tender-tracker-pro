@@ -1,0 +1,198 @@
+{
+  "_metadata": {
+    "description": "South African Government Payment Delay Statistics",
+    "sources": [
+      {
+        "name": "National Treasury Annual Report 2024/25",
+        "url": "https://treasury.gov.za/legislation/pfma/Compliance%20on%20Payment%20of%20Suppliers/",
+        "date_accessed": "2026-01-17"
+      },
+      {
+        "name": "National Treasury Q2 2025/26 Report",
+        "url": "https://dfa.co.za/south-african/2025-12-24-national-treasurys-plan-to-tackle-late-payments-six-provinces-under-scrutiny/",
+        "date_accessed": "2026-01-17"
+      },
+      {
+        "name": "Accounting Weekly - Government Late Payments",
+        "url": "https://www.accountingweekly.com/trending-news/government-late-on-r61-billion-in-supplier-payments",
+        "date_accessed": "2026-01-17"
+      }
+    ],
+    "last_updated": "2026-01-17",
+    "notes": "Data from official National Treasury reports. These are reference statistics - user's actual payment experiences will be tracked separately and can override these over time."
+  },
+  "summary_2024_25": {
+    "invoices_paid_late": 464188,
+    "late_payment_value_billions": 43.6,
+    "unpaid_invoices": 142801,
+    "unpaid_value_billions": 18.2,
+    "increase_vs_prior_year": {
+      "late_payments_percent": 28,
+      "unpaid_invoices_percent": 24
+    }
+  },
+  "provincial_vs_national": {
+    "provincial_late_payment_share_percent": 75,
+    "provincial_unpaid_share_percent": 97,
+    "national_late_payment_share_percent": 25,
+    "national_unpaid_share_percent": 3
+  },
+  "by_province": [
+    {
+      "id": "GP",
+      "name": "Gauteng",
+      "short_name": "GP",
+      "late_payment_value_billions": 1.385,
+      "unpaid_value_billions": 4.31,
+      "risk_level": "high",
+      "notes": "Second highest late payments, highest unpaid invoices"
+    },
+    {
+      "id": "KZN",
+      "name": "KwaZulu-Natal",
+      "short_name": "KZN",
+      "late_payment_value_billions": 3.32,
+      "unpaid_value_billions": 1.48,
+      "risk_level": "critical",
+      "notes": "Highest late payments by value"
+    },
+    {
+      "id": "EC",
+      "name": "Eastern Cape",
+      "short_name": "EC",
+      "late_payment_value_billions": 1.034,
+      "unpaid_value_billions": 3.78,
+      "risk_level": "critical",
+      "notes": "Identified as worst performer along with Gauteng"
+    },
+    {
+      "id": "NW",
+      "name": "North West",
+      "short_name": "NW",
+      "late_payment_value_billions": 1.384,
+      "unpaid_value_billions": 0.5,
+      "risk_level": "high",
+      "notes": "Identified as major contributor to late payments"
+    },
+    {
+      "id": "FS",
+      "name": "Free State",
+      "short_name": "FS",
+      "late_payment_value_billions": 0.4,
+      "unpaid_value_billions": 0.3,
+      "risk_level": "medium",
+      "notes": "Identified as contributor but lower than worst performers"
+    },
+    {
+      "id": "NC",
+      "name": "Northern Cape",
+      "short_name": "NC",
+      "late_payment_value_billions": 0.3,
+      "unpaid_value_billions": 1.02,
+      "risk_level": "high",
+      "notes": "High unpaid invoices relative to province size"
+    },
+    {
+      "id": "LP",
+      "name": "Limpopo",
+      "short_name": "LP",
+      "late_payment_value_billions": 0.35,
+      "unpaid_value_billions": 0.4,
+      "risk_level": "medium",
+      "notes": "Not listed among worst offenders"
+    },
+    {
+      "id": "MP",
+      "name": "Mpumalanga",
+      "short_name": "MP",
+      "late_payment_value_billions": 0.3,
+      "unpaid_value_billions": 0.35,
+      "risk_level": "medium",
+      "notes": "Not listed among worst offenders"
+    },
+    {
+      "id": "WC",
+      "name": "Western Cape",
+      "short_name": "WC",
+      "late_payment_value_billions": 0.15,
+      "unpaid_value_billions": 0.1,
+      "risk_level": "low",
+      "notes": "Not listed among six worst provinces. Generally better payment compliance."
+    }
+  ],
+  "by_department_national": [
+    {
+      "id": "DOD",
+      "name": "Department of Defence",
+      "short_name": "Defence",
+      "risk_level": "critical",
+      "notes": "Listed as top offender for delayed payments at national level"
+    },
+    {
+      "id": "DCS",
+      "name": "Department of Correctional Services",
+      "short_name": "Correctional",
+      "risk_level": "critical",
+      "notes": "Listed as top offender for delayed payments at national level"
+    },
+    {
+      "id": "DPW",
+      "name": "Department of Public Works",
+      "short_name": "Public Works",
+      "risk_level": "critical",
+      "notes": "Listed as worst performer at national level, includes Trading Account"
+    },
+    {
+      "id": "DEL",
+      "name": "Department of Employment and Labour",
+      "short_name": "Labour",
+      "risk_level": "high",
+      "notes": "Listed as worst performer at national level"
+    },
+    {
+      "id": "DOH",
+      "name": "Department of Health",
+      "short_name": "Health",
+      "risk_level": "medium",
+      "notes": "Provincial health departments contribute to provincial statistics"
+    },
+    {
+      "id": "DBE",
+      "name": "Department of Basic Education",
+      "short_name": "Education",
+      "risk_level": "medium",
+      "notes": "Provincial education departments contribute to provincial statistics"
+    }
+  ],
+  "legal_requirement": {
+    "regulation": "Treasury Regulation 8.2.3",
+    "requirement_days": 30,
+    "description": "All payments due to creditors must be settled within 30 days from receipt of an invoice or, in the case of civil claims, from the date of settlement or court judgement",
+    "revised_instruction_expected": "2025/26 financial year"
+  },
+  "common_causes_of_delay": [
+    "Misfiled or misplaced invoices",
+    "Unrecorded invoices",
+    "Inadequate internal control deficiencies",
+    "Budget constraints",
+    "Verification delays"
+  ],
+  "risk_levels": {
+    "critical": {
+      "description": "High probability of payment delays >90 days",
+      "recommendation": "Factor significant cash flow buffer or avoid"
+    },
+    "high": {
+      "description": "Expect payment delays 60-90 days",
+      "recommendation": "Build 90-day cash flow buffer"
+    },
+    "medium": {
+      "description": "Expect payment delays 30-60 days",
+      "recommendation": "Build 60-day cash flow buffer"
+    },
+    "low": {
+      "description": "Generally pays within 30-45 days",
+      "recommendation": "Standard payment terms acceptable"
+    }
+  }
+}

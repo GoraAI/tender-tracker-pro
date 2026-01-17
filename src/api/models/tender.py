@@ -14,6 +14,9 @@ from src.api.database import Base
 if TYPE_CHECKING:
     from src.api.models.score import Score
     from src.api.models.source import Source
+    from src.api.models.cost_item import CostItem
+    from src.api.models.tender_outcome import TenderOutcome
+    from src.api.models.pipeline_tender import PipelineTender
 
 
 class Tender(Base):
@@ -58,6 +61,16 @@ class Tender(Base):
     source: Mapped["Source"] = relationship("Source", back_populates="tenders")
     scores: Mapped[List["Score"]] = relationship(
         "Score", back_populates="tender", cascade="all, delete-orphan"
+    )
+    # Analytics relationships
+    cost_items: Mapped[List["CostItem"]] = relationship(
+        "CostItem", back_populates="tender", cascade="all, delete-orphan"
+    )
+    outcomes: Mapped[List["TenderOutcome"]] = relationship(
+        "TenderOutcome", back_populates="tender", cascade="all, delete-orphan"
+    )
+    pipeline_entries: Mapped[List["PipelineTender"]] = relationship(
+        "PipelineTender", back_populates="tender", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:

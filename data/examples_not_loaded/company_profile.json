@@ -1,0 +1,125 @@
+{
+  "company": {
+    "legal_name": "TechFlow Solutions (Pty) Ltd",
+    "trading_name": "TechFlow Solutions",
+    "registration_number": "2019/123456/07",
+    "vat_number": "4012345678",
+    "founding_date": "2019-03-15",
+    "industry": "Information Technology",
+    "company_type": "Private Company",
+    "registered_address": {
+      "street": "42 Innovation Drive",
+      "suburb": "Sandton",
+      "city": "Johannesburg",
+      "province": "Gauteng",
+      "postal_code": "2196",
+      "country": "South Africa"
+    },
+    "postal_address": {
+      "po_box": "P.O. Box 12345",
+      "city": "Sandton",
+      "postal_code": "2146"
+    },
+    "contact": {
+      "phone": "+27 11 234 5678",
+      "fax": "+27 11 234 5679",
+      "email": "info@techflowsolutions.co.za",
+      "website": "https://www.techflowsolutions.co.za"
+    },
+    "directors": [
+      {
+        "name": "Thabo Molefe",
+        "id_number": "8502155012088",
+        "position": "Managing Director",
+        "nationality": "South African",
+        "email": "thabo.molefe@techflowsolutions.co.za"
+      },
+      {
+        "name": "Nokuthula Dlamini",
+        "id_number": "8710120234089",
+        "position": "Finance Director",
+        "nationality": "South African",
+        "email": "nokuthula.dlamini@techflowsolutions.co.za"
+      }
+    ],
+    "employees": {
+      "total": 45,
+      "full_time": 38,
+      "part_time": 4,
+      "contractors": 3,
+      "demographics": {
+        "black_african": 28,
+        "coloured": 5,
+        "indian": 4,
+        "white": 8,
+        "female": 18,
+        "male": 27,
+        "disabled": 2,
+        "youth_under_35": 22
+      }
+    },
+    "annual_turnover": {
+      "2024": 18500000,
+      "2023": 15200000,
+      "2022": 12800000,
+      "2021": 9500000
+    },
+    "capabilities": [
+      "IT Infrastructure Design and Implementation",
+      "Network Installation and Maintenance",
+      "Server Administration",
+      "Cybersecurity Solutions",
+      "Software Development",
+      "Cloud Migration Services",
+      "Database Management",
+      "IT Support and Helpdesk Services",
+      "System Integration",
+      "VoIP and Telecommunications"
+    ],
+    "certifications": [
+      "ISO 9001:2015 Quality Management",
+      "ISO 27001 Information Security",
+      "Microsoft Gold Partner",
+      "Cisco Certified Partner"
+    ],
+    "banking_details": {
+      "bank_name": "First National Bank",
+      "branch_name": "Sandton City",
+      "branch_code": "250655",
+      "account_type": "Business Current Account",
+      "account_number": "62012345678"
+    }
+  },
+  "tender_preferences": {
+    "preferred_sectors": [
+      "Government - National",
+      "Government - Provincial",
+      "State-Owned Enterprises",
+      "Municipalities",
+      "Education",
+      "Healthcare"
+    ],
+    "preferred_provinces": [
+      "Gauteng",
+      "Western Cape",
+      "KwaZulu-Natal"
+    ],
+    "value_range": {
+      "min": 250000,
+      "max": 15000000,
+      "currency": "ZAR"
+    },
+    "keywords": [
+      "ICT",
+      "IT infrastructure",
+      "network",
+      "server",
+      "cybersecurity",
+      "software development",
+      "cloud",
+      "database",
+      "support",
+      "telecommunications"
+    ]
+  }
+}

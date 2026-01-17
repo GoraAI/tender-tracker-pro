@@ -1,0 +1,164 @@
+{
+  "company_id": "techflow-solutions",
+  "last_updated": "2026-01-17T10:00:00Z",
+  "registrations": [
+    {
+      "type": "csd",
+      "name": "Central Supplier Database",
+      "short_name": "CSD",
+      "registration_number": "MAAA0123456",
+      "status": "active",
+      "issue_date": "2023-04-15",
+      "expiry_date": null,
+      "expiry_type": "perpetual",
+      "renewal_url": "https://secure.csd.gov.za",
+      "notes": "CSD registration does not expire but requires annual verification",
+      "verification_date": "2025-04-15",
+      "next_verification": "2026-04-15",
+      "documents": [
+        {
+          "name": "CSD Registration Summary",
+          "filename": "csd_registration_summary.pdf",
+          "uploaded_at": "2025-04-15"
+        }
+      ]
+    },
+    {
+      "type": "cidb",
+      "name": "Construction Industry Development Board",
+      "short_name": "CIDB",
+      "registration_number": "CIDB-123456",
+      "status": "active",
+      "issue_date": "2025-03-01",
+      "expiry_date": "2026-03-01",
+      "expiry_type": "annual",
+      "grading": {
+        "category": "GB",
+        "level": 6,
+        "description": "General Building Grade 6"
+      },
+      "renewal_url": "https://www.cidb.org.za",
+      "renewal_fee": 2400,
+      "documents": [
+        {
+          "name": "CIDB Registration Certificate",
+          "filename": "cidb_certificate_2025.pdf",
+          "uploaded_at": "2025-03-01"
+        }
+      ]
+    },
+    {
+      "type": "bbbee",
+      "name": "Broad-Based Black Economic Empowerment Certificate",
+      "short_name": "B-BBEE",
+      "registration_number": "BBBEE-2025-78901",
+      "status": "active",
+      "issue_date": "2025-01-29",
+      "expiry_date": "2026-01-29",
+      "expiry_type": "annual",
+      "level": 1,
+      "scorecard": {
+        "ownership": 25.0,
+        "management_control": 19.0,
+        "skills_development": 20.0,
+        "enterprise_supplier_development": 40.0,
+        "socio_economic_development": 5.0,
+        "total": 109.0
+      },
+      "verification_agency": {
+        "name": "Empowerdex (Pty) Ltd",
+        "contact": "011 123 4567",
+        "accreditation": "SANAS"
+      },
+      "renewal_url": null,
+      "documents": [
+        {
+          "name": "B-BBEE Certificate",
+          "filename": "bbbee_certificate_level1_2025.pdf",
+          "uploaded_at": "2025-01-29"
+        },
+        {
+          "name": "B-BBEE Scorecard",
+          "filename": "bbbee_scorecard_2025.pdf",
+          "uploaded_at": "2025-01-29"
+        }
+      ]
+    },
+    {
+      "type": "sars",
+      "name": "South African Revenue Service Tax Clearance",
+      "short_name": "Tax Clearance",
+      "registration_number": "TCP-2025-123456789",
+      "pin": "123456789",
+      "status": "active",
+      "issue_date": "2025-09-15",
+      "expiry_date": null,
+      "expiry_type": "continuous",
+      "renewal_url": "https://www.sarsefiling.co.za",
+      "notes": "Tax clearance is continuous and based on compliance status. Status changes immediately upon non-compliance.",
+      "tax_numbers": {
+        "income_tax": "9012345678",
+        "vat": "4012345678",
+        "paye": "7012345678",
+        "uif": "U012345678",
+        "sdl": "L012345678"
+      },
+      "documents": [
+        {
+          "name": "Tax Clearance Certificate",
+          "filename": "sars_tax_clearance_2025.pdf",
+          "uploaded_at": "2025-09-15"
+        }
+      ]
+    },
+    {
+      "type": "uif",
+      "name": "Unemployment Insurance Fund Letter of Good Standing",
+      "short_name": "UIF",
+      "registration_number": "UIF-123456789",
+      "status": "active",
+      "issue_date": "2025-04-25",
+      "expiry_date": "2026-04-25",
+      "expiry_type": "annual",
+      "renewal_url": "https://www.ufiling.co.za",
+      "documents": [
+        {
+          "name": "UIF Letter of Good Standing",
+          "filename": "uif_letter_of_good_standing_2025.pdf",
+          "uploaded_at": "2025-04-25"
+        }
+      ]
+    },
+    {
+      "type": "coid",
+      "name": "Compensation for Occupational Injuries and Diseases Letter of Good Standing",
+      "short_name": "COID",
+      "registration_number": "COID-W123456",
+      "status": "active",
+      "issue_date": "2025-06-22",
+      "expiry_date": "2026-06-22",
+      "expiry_type": "annual",
+      "renewal_url": null,
+      "employer_number": "W123456",
+      "documents": [
+        {
+          "name": "COID Letter of Good Standing",
+          "filename": "coid_letter_of_good_standing_2025.pdf",
+          "uploaded_at": "2025-06-22"
+        }
+      ]
+    }
+  ],
+  "compliance_summary": {
+    "total_registrations": 6,
+    "active": 6,
+    "expired": 0,
+    "expiring_soon": 1,
+    "next_expiry": {
+      "type": "bbbee",
+      "name": "B-BBEE Certificate",
+      "expiry_date": "2026-01-29",
+      "days_remaining": 12
+    }
+  }
+}

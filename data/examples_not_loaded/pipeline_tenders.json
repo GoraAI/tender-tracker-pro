@@ -1,0 +1,161 @@
+{
+  "company_id": "techflow-solutions",
+  "last_updated": "2026-01-17T10:00:00Z",
+  "pipeline": [
+    {
+      "id": "pipeline-001",
+      "tender_id": "jhb-water-rfq-2026-001",
+      "title": "ICT Infrastructure Maintenance - JHB Water Phase 2",
+      "reference": "JHB-WATER/RFQ/2026/001",
+      "client": "Johannesburg Water (SOC) Ltd",
+      "source": "jhb-water",
+      "estimated_value": 2500000.00,
+      "deadline": "2026-01-22",
+      "status": "preparation",
+      "start_date": "2026-01-10",
+      "relevance_score": 85,
+      "score_explanation": "Strong match: ICT infrastructure is core capability, existing relationship with JHB Water",
+      "phases": [
+        {
+          "name": "preparation",
+          "start_date": "2026-01-10",
+          "end_date": "2026-01-18",
+          "status": "in_progress",
+          "completion": 70
+        },
+        {
+          "name": "review",
+          "start_date": "2026-01-19",
+          "end_date": "2026-01-20",
+          "status": "pending",
+          "completion": 0
+        },
+        {
+          "name": "submission",
+          "start_date": "2026-01-21",
+          "end_date": "2026-01-22",
+          "status": "pending",
+          "completion": 0
+        }
+      ],
+      "assigned_to": "Thabo Molefe",
+      "notes": "Follow-up from 2024 contract. Client relationship strong."
+    },
+    {
+      "id": "pipeline-002",
+      "tender_id": "jhb-water-rfq-2026-002",
+      "title": "Network Security Assessment - JHB Water",
+      "reference": "JHB-WATER/RFQ/2026/002",
+      "client": "Johannesburg Water (SOC) Ltd",
+      "source": "jhb-water",
+      "estimated_value": 890000.00,
+      "deadline": "2026-01-25",
+      "status": "preparation",
+      "start_date": "2026-01-12",
+      "relevance_score": 78,
+      "score_explanation": "Good match: Cybersecurity is a capability, follows from ICT tender",
+      "phases": [
+        {
+          "name": "preparation",
+          "start_date": "2026-01-12",
+          "end_date": "2026-01-20",
+          "status": "in_progress",
+          "completion": 45
+        },
+        {
+          "name": "review",
+          "start_date": "2026-01-21",
+          "end_date": "2026-01-23",
+          "status": "pending",
+          "completion": 0
+        },
+        {
+          "name": "submission",
+          "start_date": "2026-01-24",
+          "end_date": "2026-01-25",
+          "status": "pending",
+          "completion": 0
+        }
+      ],
+      "assigned_to": "Nokuthula Dlamini",
+      "notes": "Requires ISO 27001 certification - we have this"
+    },
+    {
+      "id": "pipeline-003",
+      "tender_id": "doh-gp-2026-015",
+      "title": "Server Room Upgrade - Gauteng DoH",
+      "reference": "DOH/GP/IT/2026/015",
+      "client": "Gauteng Department of Health",
+      "source": "etenders",
+      "estimated_value": 1800000.00,
+      "deadline": "2026-02-05",
+      "status": "qualified",
+      "start_date": "2026-01-15",
+      "relevance_score": 72,
+      "score_explanation": "Good match: Server infrastructure is core capability, previous experience with DoH",
+      "phases": [
+        {
+          "name": "preparation",
+          "start_date": "2026-01-20",
+          "end_date": "2026-01-30",
+          "status": "pending",
+          "completion": 0
+        },
+        {
+          "name": "review",
+          "start_date": "2026-01-31",
+          "end_date": "2026-02-03",
+          "status": "pending",
+          "completion": 0
+        },
+        {
+          "name": "submission",
+          "start_date": "2026-02-04",
+          "end_date": "2026-02-05",
+          "status": "pending",
+          "completion": 0
+        }
+      ],
+      "assigned_to": "Thabo Molefe",
+      "notes": "Briefing session on 2026-01-20"
+    },
+    {
+      "id": "pipeline-004",
+      "tender_id": "coj-2026-045",
+      "title": "VoIP System Implementation - CoJ Libraries",
+      "reference": "COJ/LIB/IT/2026/045",
+      "client": "City of Johannesburg",
+      "source": "coj-portal",
+      "estimated_value": 650000.00,
+      "deadline": "2026-02-12",
+      "status": "discovered",
+      "start_date": null,
+      "relevance_score": 68,
+      "score_explanation": "Moderate match: VoIP is a capability but limited library sector experience",
+      "phases": [],
+      "assigned_to": null,
+      "notes": "Need to assess capacity given other active bids"
+    }
+  ],
+  "summary": {
+    "total_in_pipeline": 4,
+    "by_status": {
+      "discovered": 1,
+      "qualified": 1,
+      "preparation": 2,
+      "review": 0,
+      "submission": 0
+    },
+    "due_this_week": 1,
+    "due_next_week": 1,
+    "total_potential_value": 5840000.00,
+    "conflicts": [
+      {
+        "tender_ids": ["pipeline-001", "pipeline-002"],
+        "conflict_type": "resource",
+        "description": "Both JHB Water tenders have overlapping review periods (Jan 19-23)",
+        "severity": "medium"
+      }
+    ]
+  }
+}

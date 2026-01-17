@@ -1,0 +1,185 @@
+{
+  "company_id": "techflow-solutions",
+  "fiscal_year": "2025-2026",
+  "currency": "ZAR",
+  "cost_categories": [
+    {
+      "category": "platform",
+      "name": "Platform Subscriptions",
+      "description": "Annual subscriptions to tender discovery platforms",
+      "items": [
+        {
+          "id": "platform-001",
+          "description": "Leads 2 Business Annual Subscription",
+          "amount": 17112.00,
+          "date": "2025-04-01",
+          "tender_id": null,
+          "recurring": true,
+          "frequency": "annual"
+        }
+      ],
+      "total": 17112.00
+    },
+    {
+      "category": "compliance",
+      "name": "Compliance Costs",
+      "description": "Costs for maintaining compliance registrations",
+      "items": [
+        {
+          "id": "compliance-001",
+          "description": "B-BBEE Verification (Empowerdex)",
+          "amount": 12000.00,
+          "date": "2025-01-15",
+          "tender_id": null,
+          "recurring": true,
+          "frequency": "annual"
+        },
+        {
+          "id": "compliance-002",
+          "description": "CIDB Registration Renewal",
+          "amount": 2400.00,
+          "date": "2025-03-01",
+          "tender_id": null,
+          "recurring": true,
+          "frequency": "annual"
+        },
+        {
+          "id": "compliance-003",
+          "description": "ISO 27001 Annual Audit",
+          "amount": 8500.00,
+          "date": "2025-06-15",
+          "tender_id": null,
+          "recurring": true,
+          "frequency": "annual"
+        },
+        {
+          "id": "compliance-004",
+          "description": "Company Secretary Annual Fees",
+          "amount": 3600.00,
+          "date": "2025-01-01",
+          "tender_id": null,
+          "recurring": true,
+          "frequency": "annual"
+        }
+      ],
+      "total": 26500.00
+    },
+    {
+      "category": "preparation",
+      "name": "Bid Preparation Costs",
+      "description": "Costs incurred in preparing tender submissions",
+      "items": [
+        {
+          "id": "prep-001",
+          "description": "Staff time - JHB Water ICT Tender (80 hrs @ R450/hr)",
+          "amount": 36000.00,
+          "date": "2025-11-15",
+          "tender_id": "jhb-water-ict-2025-001",
+          "hours": 80,
+          "rate": 450.00
+        },
+        {
+          "id": "prep-002",
+          "description": "Technical consultant - Network Design Review",
+          "amount": 15000.00,
+          "date": "2025-11-20",
+          "tender_id": "jhb-water-ict-2025-001"
+        },
+        {
+          "id": "prep-003",
+          "description": "Staff time - DOH Security Tender (60 hrs @ R450/hr)",
+          "amount": 27000.00,
+          "date": "2025-10-10",
+          "tender_id": "doh-security-2025-001",
+          "hours": 60,
+          "rate": 450.00
+        },
+        {
+          "id": "prep-004",
+          "description": "Site visit - Gauteng DoE Data Center",
+          "amount": 4500.00,
+          "date": "2025-09-25",
+          "tender_id": "doe-datacenter-2025-001"
+        }
+      ],
+      "total": 82500.00
+    },
+    {
+      "category": "submission",
+      "name": "Submission Costs",
+      "description": "Costs for printing, binding, and delivering tender documents",
+      "items": [
+        {
+          "id": "sub-001",
+          "description": "Printing and binding - JHB Water ICT Tender (4 copies)",
+          "amount": 2800.00,
+          "date": "2025-11-28",
+          "tender_id": "jhb-water-ict-2025-001"
+        },
+        {
+          "id": "sub-002",
+          "description": "Courier delivery - JHB Water",
+          "amount": 450.00,
+          "date": "2025-11-29",
+          "tender_id": "jhb-water-ict-2025-001"
+        },
+        {
+          "id": "sub-003",
+          "description": "Printing and binding - DOH Security Tender (3 copies)",
+          "amount": 2100.00,
+          "date": "2025-10-18",
+          "tender_id": "doh-security-2025-001"
+        },
+        {
+          "id": "sub-004",
+          "description": "Bid security guarantee (bank guarantee fee)",
+          "amount": 5000.00,
+          "date": "2025-11-25",
+          "tender_id": "jhb-water-ict-2025-001"
+        }
+      ],
+      "total": 10350.00
+    },
+    {
+      "category": "opportunity",
+      "name": "Opportunity Costs",
+      "description": "Revenue foregone due to time spent on tender preparation",
+      "items": [
+        {
+          "id": "opp-001",
+          "description": "Lost billable hours - Q4 2025 (estimated 40 hours @ R750/hr)",
+          "amount": 30000.00,
+          "date": "2025-12-31",
+          "tender_id": null,
+          "hours": 40,
+          "billable_rate": 750.00
+        }
+      ],
+      "total": 30000.00
+    }
+  ],
+  "summary": {
+    "total_cost": 166462.00,
+    "tenders_submitted": 8,
+    "tenders_won": 3,
+    "cost_per_submission": 20807.75,
+    "cost_per_win": 55487.33,
+    "win_rate": 0.375
+  },
+  "historical_costs": {
+    "2024-2025": {
+      "total_cost": 142000.00,
+      "tenders_submitted": 12,
+      "tenders_won": 4,
+      "cost_per_win": 35500.00,
+      "win_rate": 0.333
+    },
+    "2023-2024": {
+      "total_cost": 98000.00,
+      "tenders_submitted": 8,
+      "tenders_won": 2,
+      "cost_per_win": 49000.00,
+      "win_rate": 0.25
+    }
+  }
+}
