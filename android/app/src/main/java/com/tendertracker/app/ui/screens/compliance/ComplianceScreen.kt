@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.tendertracker.app.ui.components.EmptyStates
 import com.tendertracker.app.ui.components.charts.ComplianceGauge
 import com.tendertracker.app.ui.components.charts.ComplianceGaugeRow
 import com.tendertracker.app.ui.components.charts.ComplianceStatusSummary
@@ -107,73 +108,84 @@ fun ComplianceScreen(
                         )
                     }
 
-                    // Gauge Row
-                    item {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .glassCard()
-                                .padding(16.dp)
-                        ) {
+                    if (state.isEmpty) {
+                        // Empty state for new users
+                        item {
+                            EmptyStates.Compliance(
+                                onAddRegistration = {
+                                    // TODO: Navigate to add compliance screen
+                                }
+                            )
+                        }
+                    } else {
+                        // Gauge Row
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .glassCard()
+                                    .padding(16.dp)
+                            ) {
+                                Text(
+                                    text = "Registration Status",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = GlassTextPrimary
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                ComplianceGaugeRow(
+                                    items = state.complianceItems,
+                                    onRenewClick = { item ->
+                                        item.renewalUrl?.let { url ->
+                                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                                        }
+                                    }
+                                )
+                            }
+                        }
+
+                        // Expiration Timeline
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .glassCard()
+                                    .padding(16.dp)
+                            ) {
+                                Text(
+                                    text = "Expiration Timeline",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = GlassTextPrimary
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                ExpirationTimeline(
+                                    markers = state.timelineMarkers
+                                )
+                            }
+                        }
+
+                        // Individual compliance items
+                        item {
                             Text(
-                                text = "Registration Status",
+                                text = "All Registrations",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold,
-                                color = GlassTextPrimary
+                                color = GlassTextPrimary,
+                                modifier = Modifier.padding(top = 8.dp)
                             )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            ComplianceGaugeRow(
-                                items = state.complianceItems,
-                                onRenewClick = { item ->
+                        }
+
+                        items(state.complianceItems) { item ->
+                            ComplianceItemCard(
+                                item = item,
+                                onRenewClick = {
                                     item.renewalUrl?.let { url ->
                                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
                                     }
                                 }
                             )
                         }
-                    }
-
-                    // Expiration Timeline
-                    item {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .glassCard()
-                                .padding(16.dp)
-                        ) {
-                            Text(
-                                text = "Expiration Timeline",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = GlassTextPrimary
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            ExpirationTimeline(
-                                markers = state.timelineMarkers
-                            )
-                        }
-                    }
-
-                    // Individual compliance items
-                    item {
-                        Text(
-                            text = "All Registrations",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = GlassTextPrimary,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
-
-                    items(state.complianceItems) { item ->
-                        ComplianceItemCard(
-                            item = item,
-                            onRenewClick = {
-                                item.renewalUrl?.let { url ->
-                                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-                                }
-                            }
-                        )
                     }
 
                     // Bottom spacing

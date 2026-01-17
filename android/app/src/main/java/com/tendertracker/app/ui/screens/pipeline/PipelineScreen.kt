@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.tendertracker.app.ui.components.EmptyStates
 import com.tendertracker.app.ui.components.charts.Milestone
 import com.tendertracker.app.ui.components.charts.MilestoneTimeline
 import com.tendertracker.app.ui.components.charts.PipelineCalendar
@@ -130,16 +131,25 @@ fun PipelineScreen(
                         )
                     }
 
-                    // Calendar
-                    item {
-                        PipelineCalendar(
-                            tenders = state.tenders,
-                            onTenderClick = { tender ->
-                                viewModel.selectTender(tender)
-                                showTenderDetail = true
-                            },
-                            onAddClick = { /* Show add dialog */ }
-                        )
+                    if (state.isEmpty) {
+                        // Empty state for new users
+                        item {
+                            EmptyStates.Pipeline(
+                                onAddTender = { /* Show add tender dialog */ }
+                            )
+                        }
+                    } else {
+                        // Calendar
+                        item {
+                            PipelineCalendar(
+                                tenders = state.tenders,
+                                onTenderClick = { tender ->
+                                    viewModel.selectTender(tender)
+                                    showTenderDetail = true
+                                },
+                                onAddClick = { /* Show add dialog */ }
+                            )
+                        }
                     }
 
                     // Pipeline tips

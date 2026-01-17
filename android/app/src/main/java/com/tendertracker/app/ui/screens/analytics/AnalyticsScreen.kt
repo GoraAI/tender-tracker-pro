@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.tendertracker.app.ui.components.EmptyStates
 import com.tendertracker.app.ui.components.charts.CostPerBidCalculator
 import com.tendertracker.app.ui.components.charts.HeatMapViewMode
 import com.tendertracker.app.ui.components.charts.OpportunityFunnel
@@ -95,28 +96,38 @@ fun AnalyticsScreen(
                 ) {
                     // Opportunity Funnel
                     item {
-                        OpportunityFunnel(
-                            stages = state.funnelStages,
-                            winRate = state.winRate,
-                            costPerWin = state.costPerWin,
-                            avgDaysToAward = state.avgDaysToAward,
-                            onStageClick = { /* Navigate to filtered tender list */ }
-                        )
+                        if (state.funnelIsEmpty) {
+                            EmptyStates.Funnel()
+                        } else {
+                            OpportunityFunnel(
+                                stages = state.funnelStages,
+                                winRate = state.winRate,
+                                costPerWin = state.costPerWin,
+                                avgDaysToAward = state.avgDaysToAward,
+                                onStageClick = { /* Navigate to filtered tender list */ }
+                            )
+                        }
                     }
 
                     // Cost Per Bid Calculator
                     item {
-                        CostPerBidCalculator(
-                            categories = state.costCategories,
-                            totalSpent = state.totalSpent,
-                            tendersWon = state.tendersWon,
-                            periodLabel = state.selectedPeriod,
-                            onAddCost = { /* Show add cost dialog */ },
-                            onCategoryClick = { /* Show category details */ }
-                        )
+                        if (state.costIsEmpty) {
+                            EmptyStates.Costs(
+                                onAddCost = { /* Show add cost dialog */ }
+                            )
+                        } else {
+                            CostPerBidCalculator(
+                                categories = state.costCategories,
+                                totalSpent = state.totalSpent,
+                                tendersWon = state.tendersWon,
+                                periodLabel = state.selectedPeriod,
+                                onAddCost = { /* Show add cost dialog */ },
+                                onCategoryClick = { /* Show category details */ }
+                            )
+                        }
                     }
 
-                    // Payment Risk Heat Map
+                    // Payment Risk Heat Map (always show - uses reference data)
                     item {
                         PaymentRiskHeatMap(
                             data = state.paymentDelayData,
