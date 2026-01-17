@@ -68,16 +68,17 @@ class TenderRepositoryImpl @Inject constructor(
     }
 
     /**
-     * Run the pipeline to discover new tenders, wait for completion, then sync.
+     * Run the full pipeline (discover → download → extract → score), then sync.
+     * This ensures tenders have scores when synced to the app.
      */
     override suspend fun runPipelineAndSync(
         sourceId: String,
         onProgress: (Int) -> Unit
     ): Result<Int> {
         return try {
-            // Step 1: Trigger the discover pipeline
+            // Step 1: Trigger the FULL pipeline (includes scoring)
             onProgress(5)
-            val pipelineResponse = tenderApi.runDiscoverPipeline(PipelineRequest(sourceId))
+            val pipelineResponse = tenderApi.runFullPipeline(PipelineRequest(sourceId))
 
             if (!pipelineResponse.isSuccessful) {
                 val error = pipelineResponse.errorBody()?.string() ?: "Failed to start pipeline"

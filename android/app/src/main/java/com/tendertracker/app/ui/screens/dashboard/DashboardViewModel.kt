@@ -242,7 +242,10 @@ class DashboardViewModel @Inject constructor(
                 onProgress = { progress ->
                     val message = when {
                         progress < 10 -> "Starting pipeline..."
-                        progress < 80 -> "Discovering tenders... $progress%"
+                        progress < 30 -> "Discovering tenders..."
+                        progress < 50 -> "Downloading PDFs..."
+                        progress < 70 -> "Extracting content..."
+                        progress < 85 -> "Scoring relevance..."
                         progress < 100 -> "Syncing tenders..."
                         else -> "Complete!"
                     }

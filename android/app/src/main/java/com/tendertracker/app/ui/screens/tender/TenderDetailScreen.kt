@@ -1,5 +1,11 @@
 package com.tendertracker.app.ui.screens.tender
 
+import android.app.DownloadManager
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Environment
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,12 +17,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,7 +36,10 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -34,11 +47,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -60,12 +75,34 @@ fun TenderDetailScreen(
     viewModel: TenderDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(tenderId) {
         viewModel.loadTender(tenderId)
     }
 
+    // Handle events from ViewModel
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is TenderDetailEvent.OpenUrl -> {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(event.url))
+                    context.startActivity(intent)
+                }
+                is TenderDetailEvent.DownloadPdf -> {
+                    downloadPdf(context, event.url, event.filename)
+                    Toast.makeText(context, "Downloading ${event.filename}...", Toast.LENGTH_SHORT).show()
+                }
+                is TenderDetailEvent.ShowError -> {
+                    snackbarHostState.showSnackbar(event.message)
+                }
+            }
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = Color.Transparent,  // Transparent for glass effect
         topBar = {
             // Glassmorphism TopAppBar
@@ -207,6 +244,44 @@ fun TenderDetailScreen(
                     }
                     Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
 
+                    // PDF Buttons
+                    if (!tender.pdfUrl.isNullOrBlank()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = { viewModel.openPdf() },
+                                modifier = Modifier.weight(1f),
+                                border = BorderStroke(1.dp, GlassPrimary)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.PictureAsPdf,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = GlassPrimary
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("View PDF", color = GlassPrimary)
+                            }
+                            OutlinedButton(
+                                onClick = { viewModel.downloadPdf() },
+                                modifier = Modifier.weight(1f),
+                                border = BorderStroke(1.dp, GlassSecondary)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Download,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = GlassSecondary
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Download", color = GlassSecondary)
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
+                    }
+
                     // Requirements Summary
                     tender.requirementsSummary?.let { summary ->
                         Text(
@@ -300,4 +375,16 @@ private fun DetailRow(label: String, value: String) {
             style = MaterialTheme.typography.bodyMedium
         )
     }
+}
+
+private fun downloadPdf(context: Context, url: String, filename: String) {
+    val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+    val request = DownloadManager.Request(Uri.parse(url))
+        .setTitle(filename)
+        .setDescription("Downloading tender PDF")
+        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename)
+        .setAllowedOverMetered(true)
+        .setAllowedOverRoaming(true)
+    downloadManager.enqueue(request)
 }

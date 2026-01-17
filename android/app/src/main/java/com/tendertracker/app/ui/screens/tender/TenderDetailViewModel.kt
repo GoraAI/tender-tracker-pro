@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.tendertracker.domain.model.Tender
 import com.tendertracker.domain.repository.TenderRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,6 +21,12 @@ data class TenderDetailState(
     val error: String? = null
 )
 
+sealed class TenderDetailEvent {
+    data class OpenUrl(val url: String) : TenderDetailEvent()
+    data class DownloadPdf(val url: String, val filename: String) : TenderDetailEvent()
+    data class ShowError(val message: String) : TenderDetailEvent()
+}
+
 @HiltViewModel
 class TenderDetailViewModel @Inject constructor(
     private val tenderRepository: TenderRepository
@@ -26,6 +34,9 @@ class TenderDetailViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(TenderDetailState())
     val state: StateFlow<TenderDetailState> = _state.asStateFlow()
+
+    private val _events = Channel<TenderDetailEvent>()
+    val events = _events.receiveAsFlow()
 
     fun loadTender(tenderId: String) {
         viewModelScope.launch {
@@ -42,5 +53,33 @@ class TenderDetailViewModel @Inject constructor(
 
     fun onAskAI() {
         // Navigate to chat with tender context - implemented in FR-MOBILE-003
+    }
+
+    fun openPdf() {
+        val pdfUrl = _state.value.tender?.pdfUrl
+        if (pdfUrl.isNullOrBlank()) {
+            viewModelScope.launch {
+                _events.send(TenderDetailEvent.ShowError("PDF not available for this tender"))
+            }
+            return
+        }
+        viewModelScope.launch {
+            _events.send(TenderDetailEvent.OpenUrl(pdfUrl))
+        }
+    }
+
+    fun downloadPdf() {
+        val tender = _state.value.tender
+        val pdfUrl = tender?.pdfUrl
+        if (pdfUrl.isNullOrBlank()) {
+            viewModelScope.launch {
+                _events.send(TenderDetailEvent.ShowError("PDF not available for this tender"))
+            }
+            return
+        }
+        val filename = "${tender.reference.replace("/", "_")}.pdf"
+        viewModelScope.launch {
+            _events.send(TenderDetailEvent.DownloadPdf(pdfUrl, filename))
+        }
     }
 }
