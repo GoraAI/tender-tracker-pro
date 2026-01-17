@@ -6,6 +6,7 @@ import com.tendertracker.app.gemma.engine.GemmaInferenceEngine
 import com.tendertracker.app.ui.components.AttentionItem
 import com.tendertracker.app.ui.components.AttentionPriority
 import com.tendertracker.domain.model.Tender
+import com.tendertracker.domain.repository.AnalyticsRepository
 import com.tendertracker.domain.repository.TenderRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,9 +33,10 @@ data class DashboardState(
     val attentionItems: List<AttentionItem> = emptyList(),
 
     // Compliance summary
-    val complianceValidCount: Int = 5,
-    val complianceTotalCount: Int = 6,
-    val complianceDaysToExpiry: Int = 12,
+    val complianceValidCount: Int = 0,
+    val complianceTotalCount: Int = 0,
+    val complianceDaysToExpiry: Int = 0,
+    val complianceNextExpiryItem: String = "",
 
     // Pipeline summary
     val pipelineActiveCount: Int = 0,
@@ -45,7 +47,12 @@ data class DashboardState(
     val funnelDiscovered: Int = 0,
     val funnelQualified: Int = 0,
     val funnelSubmitted: Int = 0,
-    val funnelAwarded: Int = 0
+    val funnelAwarded: Int = 0,
+
+    // Empty states
+    val complianceIsEmpty: Boolean = true,
+    val pipelineIsEmpty: Boolean = true,
+    val funnelIsEmpty: Boolean = true
 )
 
 enum class ModelStatus(val displayName: String) {
@@ -58,6 +65,7 @@ enum class ModelStatus(val displayName: String) {
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val tenderRepository: TenderRepository,
+    private val analyticsRepository: AnalyticsRepository,
     private val inferenceEngine: GemmaInferenceEngine
 ) : ViewModel() {
 
@@ -71,6 +79,9 @@ class DashboardViewModel @Inject constructor(
     fun loadDashboardData() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
+
+            // Load analytics data from API
+            loadAnalyticsSummaries()
 
             // Load all tenders from local database
             tenderRepository.getAllTenders()
@@ -98,43 +109,8 @@ class DashboardViewModel @Inject constructor(
                         else -> ModelStatus.NOT_LOADED
                     }
 
-                    // Generate attention items based on data
-                    val attentionItems = mutableListOf<AttentionItem>()
-
-                    // Check for urgent compliance (mock data - in production from compliance service)
-                    if (12 < 30) {
-                        attentionItems.add(
-                            AttentionItem(
-                                id = "bbbee-expiry",
-                                title = "B-BBEE Expires in 12 days",
-                                description = "Affects: 4 active tenders",
-                                priority = AttentionPriority.CRITICAL,
-                                actionLabel = "Start Renewal"
-                            )
-                        )
-                    }
-
-                    // Check for tenders with upcoming deadlines
-                    highPriority.take(1).forEach { tender ->
-                        tender.deadline?.let {
-                            attentionItems.add(
-                                AttentionItem(
-                                    id = "tender-${tender.id}",
-                                    title = tender.title.take(40),
-                                    description = "Due: ${tender.deadline} | Score: ${tender.score}",
-                                    priority = AttentionPriority.WARNING,
-                                    actionLabel = "View Details",
-                                    secondaryActionLabel = "Complete Checklist"
-                                )
-                            )
-                        }
-                    }
-
-                    // Calculate funnel metrics (mock - in production from analytics service)
-                    val discovered = totalCount
-                    val qualified = (discovered * 0.62).toInt()
-                    val submitted = (qualified * 0.64).toInt()
-                    val awarded = (submitted * 0.33).toInt()
+                    // Generate attention items based on real data
+                    val attentionItems = generateAttentionItems(highPriority)
 
                     _state.update {
                         it.copy(
@@ -144,20 +120,105 @@ class DashboardViewModel @Inject constructor(
                             modelStatus = modelStatus,
                             recentTenders = recentHighPriority,
                             isLoading = false,
-                            attentionItems = attentionItems,
-                            // Pipeline data (mock)
-                            pipelineActiveCount = highPriority.size.coerceAtMost(5),
-                            pipelineDueThisWeek = (highPriority.size * 0.4).toInt(),
-                            pipelineHasConflicts = highPriority.size > 3,
-                            // Funnel data
-                            funnelDiscovered = discovered,
-                            funnelQualified = qualified,
-                            funnelSubmitted = submitted,
-                            funnelAwarded = awarded
+                            attentionItems = attentionItems
                         )
                     }
                 }
         }
+    }
+
+    private suspend fun loadAnalyticsSummaries() {
+        // Load compliance status
+        analyticsRepository.getComplianceStatus().onSuccess { status ->
+            _state.update {
+                it.copy(
+                    complianceValidCount = status.validCount,
+                    complianceTotalCount = status.totalCount,
+                    complianceDaysToExpiry = status.daysToNextExpiry ?: 0,
+                    complianceNextExpiryItem = status.nextExpiryItem ?: "",
+                    complianceIsEmpty = status.isEmpty
+                )
+            }
+        }
+
+        // Load pipeline status
+        analyticsRepository.getPipelineStatus().onSuccess { status ->
+            _state.update {
+                it.copy(
+                    pipelineActiveCount = status.activeCount,
+                    pipelineDueThisWeek = status.dueThisWeek,
+                    pipelineHasConflicts = status.hasConflicts,
+                    pipelineIsEmpty = status.isEmpty
+                )
+            }
+        }
+
+        // Load funnel analytics
+        analyticsRepository.getFunnelAnalytics(12).onSuccess { funnel ->
+            val discovered = funnel.stages.find { it.name == "Discovered" }?.count ?: 0
+            val qualified = funnel.stages.find { it.name == "Qualified" }?.count ?: 0
+            val submitted = funnel.stages.find { it.name == "Submitted" }?.count ?: 0
+            val awarded = funnel.stages.find { it.name == "Awarded" }?.count ?: 0
+
+            _state.update {
+                it.copy(
+                    funnelDiscovered = discovered,
+                    funnelQualified = qualified,
+                    funnelSubmitted = submitted,
+                    funnelAwarded = awarded,
+                    funnelIsEmpty = funnel.isEmpty
+                )
+            }
+        }
+    }
+
+    private fun generateAttentionItems(highPriorityTenders: List<Tender>): List<AttentionItem> {
+        val attentionItems = mutableListOf<AttentionItem>()
+        val currentState = _state.value
+
+        // Check for urgent compliance from real data
+        if (!currentState.complianceIsEmpty && currentState.complianceDaysToExpiry > 0 && currentState.complianceDaysToExpiry < 30) {
+            attentionItems.add(
+                AttentionItem(
+                    id = "compliance-expiry",
+                    title = "${currentState.complianceNextExpiryItem} expires in ${currentState.complianceDaysToExpiry} days",
+                    description = "Affects: ${currentState.pipelineActiveCount} active tenders",
+                    priority = if (currentState.complianceDaysToExpiry < 14) AttentionPriority.CRITICAL else AttentionPriority.WARNING,
+                    actionLabel = "Start Renewal"
+                )
+            )
+        }
+
+        // Check for tenders with upcoming deadlines
+        highPriorityTenders.take(1).forEach { tender ->
+            tender.deadline?.let {
+                attentionItems.add(
+                    AttentionItem(
+                        id = "tender-${tender.id}",
+                        title = tender.title.take(40),
+                        description = "Due: ${tender.deadline} | Score: ${tender.score}",
+                        priority = AttentionPriority.WARNING,
+                        actionLabel = "View Details",
+                        secondaryActionLabel = "Complete Checklist"
+                    )
+                )
+            }
+        }
+
+        // Check for pipeline conflicts
+        if (currentState.pipelineHasConflicts) {
+            attentionItems.add(
+                AttentionItem(
+                    id = "pipeline-conflicts",
+                    title = "Schedule conflicts detected",
+                    description = "${currentState.pipelineDueThisWeek} tenders due this week",
+                    priority = AttentionPriority.WARNING,
+                    actionLabel = "Review Pipeline"
+                )
+            )
+        }
+
+        return attentionItems
     }
 
     /**
