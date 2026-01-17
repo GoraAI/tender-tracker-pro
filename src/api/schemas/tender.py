@@ -50,6 +50,7 @@ class TenderListItem(BaseModel):
     deadline: Optional[datetime] = None
     estimated_value: Optional[Decimal] = None
     discovered_at: datetime
+    pdf_url: Optional[str] = None
     score: Optional[int] = None
     relevance_category: Optional[str] = None
 

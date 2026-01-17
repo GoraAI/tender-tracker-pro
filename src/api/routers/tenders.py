@@ -58,6 +58,7 @@ async def get_tenders(
                 deadline=tender.deadline,
                 estimated_value=tender.estimated_value,
                 discovered_at=tender.discovered_at,
+                pdf_url=tender.pdf_url,
                 score=user_score.score if user_score else None,
                 relevance_category=user_score.category if user_score else None,
             )
