@@ -24,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.tendertracker.app.ui.theme.GlassCard
 import com.tendertracker.app.ui.theme.GlassEffect
 import com.tendertracker.app.ui.theme.GlassPrimary
 import com.tendertracker.app.ui.theme.GlassTextPrimary
