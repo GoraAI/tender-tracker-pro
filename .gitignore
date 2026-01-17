@@ -71,3 +71,13 @@ evals/outputs/
 *.tmp
 *.bak
 .cache/
+
+# Android builds and cache
+*.apk
+android/.gradle/
+android/app/build/
+android/build/
+*.aab
+
+# Database
+*.db

@@ -29,4 +29,14 @@ sealed class Screen {
 
     @Serializable
     data object ModelManager : Screen()
+
+    // Visualization screens
+    @Serializable
+    data object Analytics : Screen()
+
+    @Serializable
+    data object Compliance : Screen()
+
+    @Serializable
+    data object Pipeline : Screen()
 }

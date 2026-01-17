@@ -3,6 +3,8 @@ package com.tendertracker.app.ui.screens.dashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tendertracker.app.gemma.engine.GemmaInferenceEngine
+import com.tendertracker.app.ui.components.AttentionItem
+import com.tendertracker.app.ui.components.AttentionPriority
 import com.tendertracker.domain.model.Tender
 import com.tendertracker.domain.repository.TenderRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +26,26 @@ data class DashboardState(
     val isSyncing: Boolean = false,
     val syncProgress: Int = 0,
     val error: String? = null,
-    val syncMessage: String? = null
+    val syncMessage: String? = null,
+
+    // Attention-prioritized data
+    val attentionItems: List<AttentionItem> = emptyList(),
+
+    // Compliance summary
+    val complianceValidCount: Int = 5,
+    val complianceTotalCount: Int = 6,
+    val complianceDaysToExpiry: Int = 12,
+
+    // Pipeline summary
+    val pipelineActiveCount: Int = 0,
+    val pipelineDueThisWeek: Int = 0,
+    val pipelineHasConflicts: Boolean = false,
+
+    // Funnel summary
+    val funnelDiscovered: Int = 0,
+    val funnelQualified: Int = 0,
+    val funnelSubmitted: Int = 0,
+    val funnelAwarded: Int = 0
 )
 
 enum class ModelStatus(val displayName: String) {
@@ -77,6 +98,44 @@ class DashboardViewModel @Inject constructor(
                         else -> ModelStatus.NOT_LOADED
                     }
 
+                    // Generate attention items based on data
+                    val attentionItems = mutableListOf<AttentionItem>()
+
+                    // Check for urgent compliance (mock data - in production from compliance service)
+                    if (12 < 30) {
+                        attentionItems.add(
+                            AttentionItem(
+                                id = "bbbee-expiry",
+                                title = "B-BBEE Expires in 12 days",
+                                description = "Affects: 4 active tenders",
+                                priority = AttentionPriority.CRITICAL,
+                                actionLabel = "Start Renewal"
+                            )
+                        )
+                    }
+
+                    // Check for tenders with upcoming deadlines
+                    highPriority.take(1).forEach { tender ->
+                        tender.deadline?.let {
+                            attentionItems.add(
+                                AttentionItem(
+                                    id = "tender-${tender.id}",
+                                    title = tender.title.take(40),
+                                    description = "Due: ${tender.deadline} | Score: ${tender.score}",
+                                    priority = AttentionPriority.WARNING,
+                                    actionLabel = "View Details",
+                                    secondaryActionLabel = "Complete Checklist"
+                                )
+                            )
+                        }
+                    }
+
+                    // Calculate funnel metrics (mock - in production from analytics service)
+                    val discovered = totalCount
+                    val qualified = (discovered * 0.62).toInt()
+                    val submitted = (qualified * 0.64).toInt()
+                    val awarded = (submitted * 0.33).toInt()
+
                     _state.update {
                         it.copy(
                             totalTenders = totalCount,
@@ -84,7 +143,17 @@ class DashboardViewModel @Inject constructor(
                             avgScore = avgScore,
                             modelStatus = modelStatus,
                             recentTenders = recentHighPriority,
-                            isLoading = false
+                            isLoading = false,
+                            attentionItems = attentionItems,
+                            // Pipeline data (mock)
+                            pipelineActiveCount = highPriority.size.coerceAtMost(5),
+                            pipelineDueThisWeek = (highPriority.size * 0.4).toInt(),
+                            pipelineHasConflicts = highPriority.size > 3,
+                            // Funnel data
+                            funnelDiscovered = discovered,
+                            funnelQualified = qualified,
+                            funnelSubmitted = submitted,
+                            funnelAwarded = awarded
                         )
                     }
                 }

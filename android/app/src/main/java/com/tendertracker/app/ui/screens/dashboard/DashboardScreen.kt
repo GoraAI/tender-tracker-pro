@@ -14,11 +14,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Memory
@@ -26,6 +28,8 @@ import androidx.compose.material.icons.filled.PriorityHigh
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -48,7 +52,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.tendertracker.app.ui.components.AttentionSection
+import com.tendertracker.app.ui.components.NewOpportunitiesCard
 import com.tendertracker.app.ui.components.ScoreBadge
+import com.tendertracker.app.ui.components.charts.ComplianceStatusSummary
+import com.tendertracker.app.ui.components.charts.FunnelSummary
+import com.tendertracker.app.ui.components.charts.PipelineSummary
 import com.tendertracker.app.ui.theme.GlassEffect
 import com.tendertracker.app.ui.theme.GlassPrimary
 import com.tendertracker.app.ui.theme.GlassSecondary
@@ -66,6 +75,9 @@ fun DashboardScreen(
     onViewAllTenders: () -> Unit,
     onChatClick: () -> Unit,
     onModelManagerClick: () -> Unit,
+    onAnalyticsClick: () -> Unit = {},
+    onComplianceClick: () -> Unit = {},
+    onPipelineClick: () -> Unit = {},
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -109,6 +121,50 @@ fun DashboardScreen(
                     }
                 }
 
+                // Attention-Prioritized: Compliance + Pipeline Summary Row
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        ComplianceStatusSummary(
+                            validCount = state.complianceValidCount,
+                            totalCount = state.complianceTotalCount,
+                            daysToNextExpiry = state.complianceDaysToExpiry,
+                            modifier = Modifier.weight(1f),
+                            onClick = onComplianceClick
+                        )
+                    }
+                }
+
+                // Pipeline Summary
+                item {
+                    PipelineSummary(
+                        activeCount = state.pipelineActiveCount,
+                        dueThisWeek = state.pipelineDueThisWeek,
+                        hasConflicts = state.pipelineHasConflicts,
+                        onClick = onPipelineClick
+                    )
+                }
+
+                // Attention Items (urgent actions)
+                if (state.attentionItems.isNotEmpty()) {
+                    item {
+                        AttentionSection(
+                            items = state.attentionItems,
+                            onItemAction = { item ->
+                                when {
+                                    item.id.startsWith("tender-") -> {
+                                        val tenderId = item.id.removePrefix("tender-")
+                                        onTenderClick(tenderId)
+                                    }
+                                    item.id.contains("expiry") -> onComplianceClick()
+                                }
+                            }
+                        )
+                    }
+                }
+
                 // Stats Grid
                 item {
                     StatsGrid(
@@ -120,13 +176,50 @@ fun DashboardScreen(
                     )
                 }
 
-                // Quick Actions
+                // Quick Actions with Analytics
                 item {
                     QuickActionsCard(
                         onViewAllTenders = onViewAllTenders,
                         onChatClick = onChatClick,
-                        onModelManagerClick = onModelManagerClick
+                        onModelManagerClick = onModelManagerClick,
+                        onAnalyticsClick = onAnalyticsClick
                     )
+                }
+
+                // Funnel Summary
+                if (state.funnelDiscovered > 0) {
+                    item {
+                        FunnelSummary(
+                            discovered = state.funnelDiscovered,
+                            qualified = state.funnelQualified,
+                            submitted = state.funnelSubmitted,
+                            awarded = state.funnelAwarded,
+                            onClick = onAnalyticsClick
+                        )
+                    }
+                }
+
+                // New Opportunities
+                if (state.recentTenders.isNotEmpty()) {
+                    item {
+                        SectionHeader(title = "New Opportunities")
+                    }
+
+                    item {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(state.recentTenders.take(3)) { tender ->
+                                NewOpportunitiesCard(
+                                    title = tender.title.take(30),
+                                    value = tender.estimatedValue?.let { "R${formatValue(it)}" } ?: "TBD",
+                                    score = tender.score ?: 0,
+                                    modifier = Modifier.width(160.dp),
+                                    onClick = { onTenderClick(tender.id) }
+                                )
+                            }
+                        }
+                    }
                 }
 
                 // Recent High-Priority Tenders
@@ -374,7 +467,8 @@ private fun StatCard(
 private fun QuickActionsCard(
     onViewAllTenders: () -> Unit,
     onChatClick: () -> Unit,
-    onModelManagerClick: () -> Unit
+    onModelManagerClick: () -> Unit,
+    onAnalyticsClick: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -396,8 +490,14 @@ private fun QuickActionsCard(
             QuickActionButton(
                 modifier = Modifier.weight(1f),
                 icon = Icons.Default.Description,
-                label = "View Tenders",
+                label = "Tenders",
                 onClick = onViewAllTenders
+            )
+            QuickActionButton(
+                modifier = Modifier.weight(1f),
+                icon = Icons.Default.Analytics,
+                label = "Analytics",
+                onClick = onAnalyticsClick
             )
             QuickActionButton(
                 modifier = Modifier.weight(1f),
@@ -544,5 +644,13 @@ private fun EmptyTendersCard() {
                 color = GlassTextSecondary.copy(alpha = 0.7f)
             )
         }
+    }
+}
+
+private fun formatValue(amount: Double): String {
+    return when {
+        amount >= 1_000_000 -> String.format("%.1fM", amount / 1_000_000)
+        amount >= 1_000 -> String.format("%.0fK", amount / 1_000)
+        else -> String.format("%.0f", amount)
     }
 }

@@ -43,6 +43,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tendertracker.app.ui.components.ScoreBadge
+import com.tendertracker.app.ui.components.charts.BidStrengthInsight
+import com.tendertracker.app.ui.components.charts.BidStrengthRadar
+import com.tendertracker.app.ui.components.charts.RadarAxis
 import com.tendertracker.app.ui.theme.GlassBorder
 import com.tendertracker.app.ui.theme.GlassCardBackground
 import com.tendertracker.app.ui.theme.GlassEffect
@@ -225,6 +228,54 @@ fun TenderDetailScreen(
                             )
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
+
+                    // Bid Strength Radar
+                    tender.score?.let { score ->
+                        val radarAxes = listOf(
+                            RadarAxis(
+                                name = "Price",
+                                value = (score * 0.9f).coerceIn(0f, 100f),
+                                weight = 0.2f
+                            ),
+                            RadarAxis(
+                                name = "Functionality",
+                                value = score.toFloat(),
+                                weight = 0.6f
+                            ),
+                            RadarAxis(
+                                name = "B-BBEE",
+                                value = 85f,  // Mock - would come from user profile
+                                weight = 0.2f
+                            ),
+                            RadarAxis(
+                                name = "Track Record",
+                                value = (score * 0.7f).coerceIn(0f, 100f),
+                                weight = 0f  // Informational
+                            )
+                        )
+
+                        val insights = mutableListOf<BidStrengthInsight>()
+                        if (radarAxes[2].value >= 80) {
+                            insights.add(BidStrengthInsight(true, "Strong: B-BBEE Level 1"))
+                        }
+                        if (radarAxes[0].value >= 70) {
+                            insights.add(BidStrengthInsight(true, "Competitive pricing"))
+                        }
+                        if (radarAxes[3].value < 60) {
+                            insights.add(BidStrengthInsight(false, "Weak: Track record (limited prior contracts)"))
+                        }
+
+                        BidStrengthRadar(
+                            axes = radarAxes,
+                            overallScore = score,
+                            tenderTitle = "Bid Assessment",
+                            insights = insights
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(80.dp))
                 }
             }
         }

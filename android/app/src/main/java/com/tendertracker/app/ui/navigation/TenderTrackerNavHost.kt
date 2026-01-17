@@ -33,12 +33,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.tendertracker.app.ui.screens.analytics.AnalyticsScreen
 import com.tendertracker.app.ui.screens.auth.AuthViewModel
 import com.tendertracker.app.ui.screens.auth.LoginScreen
 import com.tendertracker.app.ui.screens.auth.RegisterScreen
 import com.tendertracker.app.ui.screens.chat.ChatScreen
+import com.tendertracker.app.ui.screens.compliance.ComplianceScreen
 import com.tendertracker.app.ui.screens.dashboard.DashboardScreen
 import com.tendertracker.app.ui.screens.model.ModelManagerScreen
+import com.tendertracker.app.ui.screens.pipeline.PipelineScreen
 import com.tendertracker.app.ui.screens.settings.SettingsScreen
 import com.tendertracker.app.ui.screens.tender.TenderDetailScreen
 import com.tendertracker.app.ui.screens.tender.TenderListScreen
@@ -131,6 +134,15 @@ fun TenderTrackerNavHost(
                         },
                         onModelManagerClick = {
                             navController.navigate(Screen.ModelManager)
+                        },
+                        onAnalyticsClick = {
+                            navController.navigate(Screen.Analytics)
+                        },
+                        onComplianceClick = {
+                            navController.navigate(Screen.Compliance)
+                        },
+                        onPipelineClick = {
+                            navController.navigate(Screen.Pipeline)
                         }
                     )
                 }
@@ -192,6 +204,28 @@ fun TenderTrackerNavHost(
             composable<Screen.ModelManager> {
                 ModelManagerScreen(
                     onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            // Visualization screens
+            composable<Screen.Analytics> {
+                AnalyticsScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable<Screen.Compliance> {
+                ComplianceScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable<Screen.Pipeline> {
+                PipelineScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onTenderClick = { tenderId ->
+                        navController.navigate(Screen.TenderDetail(tenderId))
+                    }
                 )
             }
         }
