@@ -3,7 +3,6 @@ package com.tendertracker.app.ui.screens.tender
 import android.app.DownloadManager
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.time.ZoneId
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -259,8 +258,7 @@ fun TenderDetailScreen(
                         // Deadline urgency chip
                         tender.deadline?.let { deadline ->
                             val now = LocalDateTime.now()
-                            val deadlineLocal = LocalDateTime.ofInstant(deadline.toInstant(), ZoneId.systemDefault())
-                            val daysRemaining = ChronoUnit.DAYS.between(now, deadlineLocal)
+                            val daysRemaining = ChronoUnit.DAYS.between(now, deadline)
 
                             val (chipColor, urgencyText) = when {
                                 daysRemaining < 0 -> Color(0xFFB00020) to "Closed"
