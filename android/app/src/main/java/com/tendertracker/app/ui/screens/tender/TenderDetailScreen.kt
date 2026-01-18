@@ -251,37 +251,38 @@ fun TenderDetailScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Quick-glance chips
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // Deadline urgency chip
-                        tender.deadline?.let { deadlineStr ->
-                            try {
-                                val deadline = LocalDateTime.parse(deadlineStr, DateTimeFormatter.ISO_DATE_TIME)
-                                val now = LocalDateTime.now()
-                                val daysRemaining = ChronoUnit.DAYS.between(now, deadline)
-
-                            val (chipColor, urgencyText) = when {
+                    // Quick-glance chips - calculate values first (outside composables)
+                    val deadlineChip: Pair<Color, String>? = tender.deadline?.let { deadlineStr ->
+                        try {
+                            val deadline = LocalDateTime.parse(deadlineStr, DateTimeFormatter.ISO_DATE_TIME)
+                            val now = LocalDateTime.now()
+                            val daysRemaining = ChronoUnit.DAYS.between(now, deadline)
+                            when {
                                 daysRemaining < 0 -> Color(0xFFB00020) to "Closed"
                                 daysRemaining <= 3 -> Color(0xFFB00020) to "$daysRemaining days left"
                                 daysRemaining <= 7 -> Color(0xFFFF9800) to "$daysRemaining days left"
                                 daysRemaining <= 14 -> Color(0xFFFFC107) to "$daysRemaining days left"
                                 else -> Color(0xFF4CAF50) to "$daysRemaining days left"
                             }
+                        } catch (e: Exception) {
+                            null // Skip chip if parsing fails
+                        }
+                    }
 
-                                AssistChip(
-                                    onClick = { },
-                                    label = { Text(urgencyText) },
-                                    colors = AssistChipDefaults.assistChipColors(
-                                        containerColor = chipColor.copy(alpha = 0.2f),
-                                        labelColor = chipColor
-                                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Deadline urgency chip
+                        deadlineChip?.let { (chipColor, urgencyText) ->
+                            AssistChip(
+                                onClick = { },
+                                label = { Text(urgencyText) },
+                                colors = AssistChipDefaults.assistChipColors(
+                                    containerColor = chipColor.copy(alpha = 0.2f),
+                                    labelColor = chipColor
                                 )
-                            } catch (e: Exception) {
-                                // If deadline parsing fails, skip the chip
-                            }
+                            )
                         }
 
                         // Value range chip
