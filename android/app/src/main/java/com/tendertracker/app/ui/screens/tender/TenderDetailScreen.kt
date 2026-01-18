@@ -1,6 +1,9 @@
 package com.tendertracker.app.ui.screens.tender
 
 import android.app.DownloadManager
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import java.time.ZoneId
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -8,6 +11,7 @@ import android.os.Environment
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +31,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,13 +50,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -180,29 +192,43 @@ fun TenderDetailScreen(
                             colors = CardDefaults.cardColors(containerColor = GlassCardBackground),
                             border = BorderStroke(GlassEffect.borderWidth, GlassBorder)
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(GlassEffect.cardPadding),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column {
-                                    Text(
-                                        text = "Relevance Score",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                    tender.scoreExplanation?.let { explanation ->
-                                        Spacer(modifier = Modifier.height(4.dp))
+                            Column(modifier = Modifier.padding(GlassEffect.cardPadding)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column {
                                         Text(
-                                            text = explanation,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            text = "Relevance Score",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.SemiBold
                                         )
+                                        tender.scoreExplanation?.let { explanation ->
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Text(
+                                                text = explanation,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
                                     }
+                                    ScoreBadge(score = score, large = true)
                                 }
-                                ScoreBadge(score = score, large = true)
+                                // Re-score button
+                                TextButton(
+                                    onClick = { viewModel.rescore() },
+                                    modifier = Modifier.align(Alignment.End)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Refresh,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = GlassSecondary
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Re-score", color = GlassSecondary)
+                                }
                             }
                         }
                         Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
@@ -223,7 +249,101 @@ fun TenderDetailScreen(
                         fontWeight = FontWeight.SemiBold,
                         color = GlassPrimary
                     )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Quick-glance chips
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Deadline urgency chip
+                        tender.deadline?.let { deadline ->
+                            val now = LocalDateTime.now()
+                            val deadlineLocal = LocalDateTime.ofInstant(deadline.toInstant(), ZoneId.systemDefault())
+                            val daysRemaining = ChronoUnit.DAYS.between(now, deadlineLocal)
+
+                            val (chipColor, urgencyText) = when {
+                                daysRemaining < 0 -> Color(0xFFB00020) to "Closed"
+                                daysRemaining <= 3 -> Color(0xFFB00020) to "$daysRemaining days left"
+                                daysRemaining <= 7 -> Color(0xFFFF9800) to "$daysRemaining days left"
+                                daysRemaining <= 14 -> Color(0xFFFFC107) to "$daysRemaining days left"
+                                else -> Color(0xFF4CAF50) to "$daysRemaining days left"
+                            }
+
+                            AssistChip(
+                                onClick = { },
+                                label = { Text(urgencyText) },
+                                colors = AssistChipDefaults.assistChipColors(
+                                    containerColor = chipColor.copy(alpha = 0.2f),
+                                    labelColor = chipColor
+                                )
+                            )
+                        }
+
+                        // Value range chip
+                        tender.estimatedValue?.let { value ->
+                            val valueText = when {
+                                value >= 1_000_000 -> "R${String.format("%.1fM", value / 1_000_000)}"
+                                value >= 1_000 -> "R${String.format("%.0fK", value / 1_000)}"
+                                else -> "R${String.format("%.0f", value)}"
+                            }
+                            val chipColor = if (value >= 500_000) Color(0xFF4CAF50) else Color(0xFF2196F3)
+
+                            AssistChip(
+                                onClick = { },
+                                label = { Text(valueText) },
+                                colors = AssistChipDefaults.assistChipColors(
+                                    containerColor = chipColor.copy(alpha = 0.2f),
+                                    labelColor = chipColor
+                                )
+                            )
+                        }
+                    }
                     Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
+
+                    // Requirements Summary (Prominent position, collapsible)
+                    tender.requirementsSummary?.let { summary ->
+                        var isExpanded by remember { mutableStateOf(false) }
+                        val shouldTruncate = summary.length > 300
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { if (shouldTruncate) isExpanded = !isExpanded },
+                            shape = RoundedCornerShape(GlassEffect.cornerRadius),
+                            colors = CardDefaults.cardColors(containerColor = GlassCardBackground),
+                            border = BorderStroke(GlassEffect.borderWidth, GlassBorder)
+                        ) {
+                            Column(modifier = Modifier.padding(GlassEffect.cardPadding)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Requirements Summary",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = GlassPrimary
+                                    )
+                                    if (shouldTruncate) {
+                                        Icon(
+                                            imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                            contentDescription = if (isExpanded) "Collapse" else "Expand",
+                                            tint = GlassPrimary
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = if (isExpanded || !shouldTruncate) summary else summary.take(300) + "...",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
+                    }
 
                     // Details Card - Glassmorphism
                     Card(
@@ -281,30 +401,6 @@ fun TenderDetailScreen(
                         }
                         Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
                     }
-
-                    // Requirements Summary
-                    tender.requirementsSummary?.let { summary ->
-                        Text(
-                            text = "Requirements Summary",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(GlassEffect.cornerRadius),
-                            colors = CardDefaults.cardColors(containerColor = GlassCardBackground),
-                            border = BorderStroke(GlassEffect.borderWidth, GlassBorder)
-                        ) {
-                            Text(
-                                text = summary,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(GlassEffect.cardPadding)
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
 
                     // Bid Strength Radar
                     tender.score?.let { score ->

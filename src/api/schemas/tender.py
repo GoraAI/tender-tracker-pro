@@ -53,6 +53,7 @@ class TenderListItem(BaseModel):
     pdf_url: Optional[str] = None
     score: Optional[int] = None
     relevance_category: Optional[str] = None
+    score_explanation: Optional[str] = None
 
     class Config:
         from_attributes = True

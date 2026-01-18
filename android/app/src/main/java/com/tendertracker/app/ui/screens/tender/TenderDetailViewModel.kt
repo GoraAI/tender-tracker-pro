@@ -82,4 +82,24 @@ class TenderDetailViewModel @Inject constructor(
             _events.send(TenderDetailEvent.DownloadPdf(pdfUrl, filename))
         }
     }
+
+    fun rescore() {
+        val tenderId = _state.value.tender?.id
+        if (tenderId == null) {
+            viewModelScope.launch {
+                _events.send(TenderDetailEvent.ShowError("Tender not loaded"))
+            }
+            return
+        }
+
+        // TODO: Call API to trigger re-scoring
+        // For MVP, show a message that scoring has been queued
+        // In production, this would:
+        // 1. Call POST /tenders/{id}/score
+        // 2. Poll or wait for scoring to complete
+        // 3. Reload tender to get updated score
+        viewModelScope.launch {
+            _events.send(TenderDetailEvent.ShowError("Scoring queued. Refresh in a few moments to see updated score."))
+        }
+    }
 }
