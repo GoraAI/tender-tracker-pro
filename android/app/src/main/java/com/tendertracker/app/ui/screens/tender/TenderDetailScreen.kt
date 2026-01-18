@@ -2,6 +2,7 @@ package com.tendertracker.app.ui.screens.tender
 
 import android.app.DownloadManager
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import android.content.Context
 import android.content.Intent
@@ -256,9 +257,11 @@ fun TenderDetailScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         // Deadline urgency chip
-                        tender.deadline?.let { deadline ->
-                            val now = LocalDateTime.now()
-                            val daysRemaining = ChronoUnit.DAYS.between(now, deadline)
+                        tender.deadline?.let { deadlineStr ->
+                            try {
+                                val deadline = LocalDateTime.parse(deadlineStr, DateTimeFormatter.ISO_DATE_TIME)
+                                val now = LocalDateTime.now()
+                                val daysRemaining = ChronoUnit.DAYS.between(now, deadline)
 
                             val (chipColor, urgencyText) = when {
                                 daysRemaining < 0 -> Color(0xFFB00020) to "Closed"
@@ -268,14 +271,17 @@ fun TenderDetailScreen(
                                 else -> Color(0xFF4CAF50) to "$daysRemaining days left"
                             }
 
-                            AssistChip(
-                                onClick = { },
-                                label = { Text(urgencyText) },
-                                colors = AssistChipDefaults.assistChipColors(
-                                    containerColor = chipColor.copy(alpha = 0.2f),
-                                    labelColor = chipColor
+                                AssistChip(
+                                    onClick = { },
+                                    label = { Text(urgencyText) },
+                                    colors = AssistChipDefaults.assistChipColors(
+                                        containerColor = chipColor.copy(alpha = 0.2f),
+                                        labelColor = chipColor
+                                    )
                                 )
-                            )
+                            } catch (e: Exception) {
+                                // If deadline parsing fails, skip the chip
+                            }
                         }
 
                         // Value range chip
