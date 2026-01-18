@@ -1,8 +1,9 @@
 # FR-MOBILE-001: Android App Foundation
 
-**Status**: PROPOSED
+**Status**: IMPLEMENTED & ARCHIVED
 **Priority**: P0
 **Created**: 2026-01-13
+**Archived**: 2026-01-18
 **Dependencies**: None
 
 ---
@@ -387,3 +388,14 @@ dependencies {
 - Widget for home screen
 - iOS version with KMM
 - Accessibility improvements
+
+---
+
+## Completion Record
+
+- **Archived**: 2026-01-18
+- **Tasks Completed**: 36/36 (100%)
+- **Specs Created**: `openspec/specs/android/foundation.md`
+- **Implementation**: Full Android foundation with Kotlin, Compose, Hilt, Room, Navigation
+- **Testing**: Unit tests + instrumented tests passing
+- **Build**: Debug + Release builds configured
