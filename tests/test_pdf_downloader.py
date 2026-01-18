@@ -114,6 +114,154 @@ def test_download_result_to_dict(sample_pdf_link):
     assert result_dict["method"] == "direct"
 
 
+def test_download_result_success_rate(sample_pdf_link):
+    """Test success rate calculation from download results."""
+    results = [
+        DownloadResult(
+            pdf_link=sample_pdf_link,
+            success=True,
+            file_path=Path("documents/test1.pdf"),
+            file_size=1000,
+            download_time_ms=100,
+            method="direct",
+            error=None,
+            attempts=1,
+        ),
+        DownloadResult(
+            pdf_link=sample_pdf_link,
+            success=False,
+            file_path=None,
+            file_size=0,
+            download_time_ms=500,
+            method="direct",
+            error="404",
+            attempts=3,
+        ),
+        DownloadResult(
+            pdf_link=sample_pdf_link,
+            success=True,
+            file_path=Path("documents/test2.pdf"),
+            file_size=2000,
+            download_time_ms=200,
+            method="direct",
+            error=None,
+            attempts=1,
+        ),
+    ]
+
+    success_rate = DownloadResult.success_rate(results)
+
+    # 2 out of 3 succeeded = 66.67%
+    assert success_rate == pytest.approx(66.67, rel=0.01)
+
+
+def test_download_result_success_rate_empty():
+    """Test success rate with empty results."""
+    success_rate = DownloadResult.success_rate([])
+    assert success_rate == 0.0
+
+
+def test_download_result_total_size(sample_pdf_link):
+    """Test total size calculation from download results."""
+    results = [
+        DownloadResult(
+            pdf_link=sample_pdf_link,
+            success=True,
+            file_path=Path("documents/test1.pdf"),
+            file_size=1000,
+            download_time_ms=100,
+            method="direct",
+            error=None,
+            attempts=1,
+        ),
+        DownloadResult(
+            pdf_link=sample_pdf_link,
+            success=False,
+            file_path=None,
+            file_size=0,
+            download_time_ms=500,
+            method="direct",
+            error="404",
+            attempts=3,
+        ),
+        DownloadResult(
+            pdf_link=sample_pdf_link,
+            success=True,
+            file_path=Path("documents/test2.pdf"),
+            file_size=2500,
+            download_time_ms=200,
+            method="direct",
+            error=None,
+            attempts=1,
+        ),
+    ]
+
+    total_size = DownloadResult.total_size(results)
+
+    # Only successful downloads count: 1000 + 2500 = 3500
+    assert total_size == 3500
+
+
+def test_download_result_average_time(sample_pdf_link):
+    """Test average download time calculation."""
+    results = [
+        DownloadResult(
+            pdf_link=sample_pdf_link,
+            success=True,
+            file_path=Path("documents/test1.pdf"),
+            file_size=1000,
+            download_time_ms=100,
+            method="direct",
+            error=None,
+            attempts=1,
+        ),
+        DownloadResult(
+            pdf_link=sample_pdf_link,
+            success=False,
+            file_path=None,
+            file_size=0,
+            download_time_ms=500,
+            method="direct",
+            error="404",
+            attempts=3,
+        ),
+        DownloadResult(
+            pdf_link=sample_pdf_link,
+            success=True,
+            file_path=Path("documents/test2.pdf"),
+            file_size=2000,
+            download_time_ms=200,
+            method="direct",
+            error=None,
+            attempts=1,
+        ),
+    ]
+
+    avg_time = DownloadResult.average_time(results)
+
+    # Only successful downloads: (100 + 200) / 2 = 150
+    assert avg_time == 150.0
+
+
+def test_download_result_average_time_no_successes(sample_pdf_link):
+    """Test average time with no successful downloads."""
+    results = [
+        DownloadResult(
+            pdf_link=sample_pdf_link,
+            success=False,
+            file_path=None,
+            file_size=0,
+            download_time_ms=500,
+            method="direct",
+            error="404",
+            attempts=3,
+        ),
+    ]
+
+    avg_time = DownloadResult.average_time(results)
+    assert avg_time == 0.0
+
+
 # ============================================================================
 # Path Building Tests
 # ============================================================================
@@ -651,3 +799,221 @@ async def test_download_batch_with_failures(download_config):
             assert results[0].success is True
             assert results[1].success is False
             assert results[2].success is True
+
+
+# ============================================================================
+# Tracking File Update Tests
+# ============================================================================
+
+
+def test_update_tracking_successful_downloads(download_config, sample_pdf_link, tmp_path):
+    """Test tracking file update with successful downloads."""
+    downloader = PDFDownloader(download_config)
+
+    # Create tracking file
+    tracking_file = tmp_path / "tracking.json"
+    tracking_file.write_text("""
+    {
+        "version": "1.0",
+        "last_updated": "2026-01-15T10:00:00",
+        "discovered_pdfs": {
+            "https://example.com/documents/RFQ123.pdf": {
+                "url": "https://example.com/documents/RFQ123.pdf",
+                "link_text": "RFQ123 - Water Supply",
+                "downloaded": false,
+                "file_path": null
+            }
+        }
+    }
+    """)
+
+    # Create download results
+    download_results = [
+        DownloadResult(
+            pdf_link=sample_pdf_link,
+            success=True,
+            file_path=Path("documents/downloads/jhb-water/2026-01/RFQ123.pdf"),
+            file_size=12345,
+            download_time_ms=1500,
+            method="direct",
+            error=None,
+            attempts=1,
+        )
+    ]
+
+    # Update tracking
+    downloader.update_tracking(tracking_file, download_results)
+
+    # Verify tracking file was updated
+    import json
+    with open(tracking_file) as f:
+        tracking = json.load(f)
+
+    assert tracking["discovered_pdfs"][sample_pdf_link.url]["downloaded"] is True
+    assert tracking["discovered_pdfs"][sample_pdf_link.url]["file_path"] == "documents/downloads/jhb-water/2026-01/RFQ123.pdf"
+    assert "downloaded_at" in tracking["discovered_pdfs"][sample_pdf_link.url]
+    assert "last_updated" in tracking
+
+
+def test_update_tracking_failed_downloads(download_config, sample_pdf_link, tmp_path):
+    """Test tracking file update with failed downloads."""
+    downloader = PDFDownloader(download_config)
+
+    # Create tracking file
+    tracking_file = tmp_path / "tracking.json"
+    tracking_file.write_text("""
+    {
+        "version": "1.0",
+        "last_updated": "2026-01-15T10:00:00",
+        "discovered_pdfs": {
+            "https://example.com/documents/RFQ123.pdf": {
+                "url": "https://example.com/documents/RFQ123.pdf",
+                "link_text": "RFQ123 - Water Supply",
+                "downloaded": false,
+                "file_path": null
+            }
+        }
+    }
+    """)
+
+    # Create failed download result
+    download_results = [
+        DownloadResult(
+            pdf_link=sample_pdf_link,
+            success=False,
+            file_path=None,
+            file_size=0,
+            download_time_ms=500,
+            method="direct",
+            error="404 Not Found",
+            attempts=3,
+        )
+    ]
+
+    # Update tracking
+    downloader.update_tracking(tracking_file, download_results)
+
+    # Verify tracking file marks download as failed
+    import json
+    with open(tracking_file) as f:
+        tracking = json.load(f)
+
+    assert tracking["discovered_pdfs"][sample_pdf_link.url]["downloaded"] is False
+    assert tracking["discovered_pdfs"][sample_pdf_link.url].get("file_path") is None
+
+
+def test_update_tracking_creates_new_file(download_config, sample_pdf_link, tmp_path):
+    """Test tracking file update creates new file if it doesn't exist."""
+    downloader = PDFDownloader(download_config)
+
+    # Use non-existent tracking file
+    tracking_file = tmp_path / "new_tracking.json"
+
+    # Create download results
+    download_results = [
+        DownloadResult(
+            pdf_link=sample_pdf_link,
+            success=True,
+            file_path=Path("documents/downloads/jhb-water/2026-01/RFQ123.pdf"),
+            file_size=12345,
+            download_time_ms=1500,
+            method="direct",
+            error=None,
+            attempts=1,
+        )
+    ]
+
+    # Update tracking (should create new file)
+    downloader.update_tracking(tracking_file, download_results)
+
+    # Verify tracking file was created
+    assert tracking_file.exists()
+
+    import json
+    with open(tracking_file) as f:
+        tracking = json.load(f)
+
+    assert "version" in tracking
+    assert "last_updated" in tracking
+    assert "discovered_pdfs" in tracking
+
+
+def test_update_tracking_handles_corrupt_json(download_config, sample_pdf_link, tmp_path):
+    """Test tracking file update handles corrupt JSON gracefully."""
+    downloader = PDFDownloader(download_config)
+
+    # Create corrupt tracking file
+    tracking_file = tmp_path / "corrupt_tracking.json"
+    tracking_file.write_text("{ invalid json content }")
+
+    # Create download results
+    download_results = [
+        DownloadResult(
+            pdf_link=sample_pdf_link,
+            success=True,
+            file_path=Path("documents/downloads/jhb-water/2026-01/RFQ123.pdf"),
+            file_size=12345,
+            download_time_ms=1500,
+            method="direct",
+            error=None,
+            attempts=1,
+        )
+    ]
+
+    # Update tracking (should handle corrupt file)
+    downloader.update_tracking(tracking_file, download_results)
+
+    # Verify tracking file was recreated with valid JSON
+    assert tracking_file.exists()
+
+    import json
+    with open(tracking_file) as f:
+        tracking = json.load(f)
+
+    assert "version" in tracking
+    assert "last_updated" in tracking
+
+
+def test_update_tracking_atomic_write_failure(download_config, sample_pdf_link, tmp_path, monkeypatch):
+    """Test tracking file update handles atomic write failure."""
+    downloader = PDFDownloader(download_config)
+
+    # Create tracking file
+    tracking_file = tmp_path / "tracking.json"
+    tracking_file.write_text("""
+    {
+        "version": "1.0",
+        "last_updated": "2026-01-15T10:00:00",
+        "discovered_pdfs": {}
+    }
+    """)
+
+    # Create download results
+    download_results = [
+        DownloadResult(
+            pdf_link=sample_pdf_link,
+            success=True,
+            file_path=Path("documents/downloads/jhb-water/2026-01/RFQ123.pdf"),
+            file_size=12345,
+            download_time_ms=1500,
+            method="direct",
+            error=None,
+            attempts=1,
+        )
+    ]
+
+    # Mock Path.rename to raise OSError (simulating disk space issue)
+    original_rename = Path.rename
+
+    def mock_rename(self, target):
+        raise OSError("No space left on device")
+
+    monkeypatch.setattr(Path, "rename", mock_rename)
+
+    # Update tracking should raise exception
+    with pytest.raises(OSError):
+        downloader.update_tracking(tracking_file, download_results)
+
+    # Verify temp file was cleaned up
+    temp_file = tracking_file.with_suffix(".tmp")
+    assert not temp_file.exists()

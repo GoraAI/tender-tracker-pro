@@ -11,10 +11,12 @@ This module provides functionality to download PDFs from discovered links with:
 """
 
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 import asyncio
 from urllib.parse import urlparse, unquote
 import time
+import json
+from datetime import datetime
 
 import aiohttp
 import structlog
@@ -488,3 +490,110 @@ class PDFDownloader:
             filename += ".pdf"
 
         return filename
+
+    def update_tracking(
+        self, tracking_file: Path, download_results: List[DownloadResult]
+    ) -> None:
+        """
+        Update tracking file with download results.
+
+        Args:
+            tracking_file: Path to tracking JSON file
+            download_results: List of DownloadResult objects
+
+        Updates the "downloaded" and "file_path" fields for each URL.
+        Uses atomic write (write to temp, then rename).
+        """
+        logger.info(
+            "updating_tracking_file",
+            tracking_file=str(tracking_file),
+            results_count=len(download_results),
+        )
+
+        # Load existing tracking
+        tracking = self._load_tracking_file(tracking_file)
+
+        # Update download status
+        updates = 0
+        for result in download_results:
+            url = result.pdf_link.url
+            if url in tracking.get("discovered_pdfs", {}):
+                tracking["discovered_pdfs"][url]["downloaded"] = result.success
+                if result.success and result.file_path:
+                    tracking["discovered_pdfs"][url]["file_path"] = str(result.file_path)
+                    tracking["discovered_pdfs"][url]["downloaded_at"] = datetime.now().isoformat()
+                updates += 1
+
+        # Update metadata
+        tracking["last_updated"] = datetime.now().isoformat()
+
+        # Save atomically
+        self._save_tracking_file(tracking_file, tracking)
+
+        logger.info("tracking_file_updated", updates=updates)
+
+    def _load_tracking_file(self, tracking_file: Path) -> Dict[str, Any]:
+        """
+        Load tracking file from disk.
+
+        Args:
+            tracking_file: Path to tracking JSON file
+
+        Returns:
+            Tracking dictionary
+        """
+        if not tracking_file.exists():
+            logger.warning(
+                "tracking_file_not_found", path=str(tracking_file), creating_new=True
+            )
+            return {
+                "version": "1.0",
+                "last_updated": datetime.now().isoformat(),
+                "discovered_pdfs": {},
+            }
+
+        try:
+            with open(tracking_file, "r") as f:
+                tracking = json.load(f)
+                return tracking
+        except json.JSONDecodeError as e:
+            logger.error(
+                "tracking_file_corrupt",
+                path=str(tracking_file),
+                error=str(e),
+                creating_new=True,
+            )
+            return {
+                "version": "1.0",
+                "last_updated": datetime.now().isoformat(),
+                "discovered_pdfs": {},
+            }
+
+    def _save_tracking_file(self, tracking_file: Path, tracking: Dict[str, Any]) -> None:
+        """
+        Save tracking file to disk atomically.
+
+        Args:
+            tracking_file: Path to tracking JSON file
+            tracking: Tracking dictionary to save
+
+        Uses atomic write pattern (write to temp, then rename).
+        """
+        # Ensure directory exists
+        tracking_file.parent.mkdir(parents=True, exist_ok=True)
+
+        # Atomic write
+        temp_file = tracking_file.with_suffix(".tmp")
+        try:
+            with open(temp_file, "w") as f:
+                json.dump(tracking, f, indent=2)
+
+            # Atomic rename
+            temp_file.rename(tracking_file)
+
+            logger.debug("tracking_file_saved", path=str(tracking_file))
+        except Exception as e:
+            logger.error("tracking_file_save_failed", error=str(e))
+            if temp_file.exists():
+                temp_file.unlink()
+            raise

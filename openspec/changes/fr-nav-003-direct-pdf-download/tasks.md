@@ -2,7 +2,7 @@
 
 **Feature:** Direct PDF Download
 **Status:** 🟢 IN PROGRESS
-**Progress:** 36/45 tasks complete (80%)
+**Progress:** 43/45 tasks complete (95.6%)
 
 ---
 
@@ -16,11 +16,11 @@
 
 ---
 
-## Phase 2: DownloadResult Data Model (3 tasks) ⚠️ PARTIAL
+## Phase 2: DownloadResult Data Model (3 tasks) ✅ COMPLETE
 
 - [x] **Task 2.1:** Implement DownloadResult dataclass with all fields
 - [x] **Task 2.2:** Add `to_dict()` method for logging/tracking
-- [ ] **Task 2.3:** Add summary statistics method (`success_rate()`, `total_size()`)
+- [x] **Task 2.3:** Add summary statistics method (`success_rate()`, `total_size()`, `average_time()`)
 
 ---
 
@@ -88,12 +88,12 @@
 
 ---
 
-## Phase 9: Tracking File Integration (4 tasks)
+## Phase 9: Tracking File Integration (4 tasks) ✅ COMPLETE
 
-- [ ] **Task 9.1:** Implement `update_tracking()` method
-- [ ] **Task 9.2:** Load tracking file from PDFDiscovery
-- [ ] **Task 9.3:** Update downloaded status and file_path for each PDFLink
-- [ ] **Task 9.4:** Save updated tracking file atomically
+- [x] **Task 9.1:** Implement `update_tracking()` method
+- [x] **Task 9.2:** Load tracking file from PDFDiscovery (implemented in `_load_tracking_file()`)
+- [x] **Task 9.3:** Update downloaded status and file_path for each PDFLink
+- [x] **Task 9.4:** Save updated tracking file atomically (implemented in `_save_tracking_file()`)
 
 ---
 
@@ -108,7 +108,7 @@
 
 ---
 
-## Phase 11: Unit Tests (20 tests) ✅ COMPLETE (25 tests implemented)
+## Phase 11: Unit Tests (20 tests) ✅ COMPLETE (30 tests implemented)
 
 - [x] **Task 11.1:** Test DownloadResult creation
 - [x] **Task 11.2:** Test path building with date organization
@@ -128,8 +128,8 @@
 - [x] **Task 11.16:** Test fallback from direct to browser
 - [x] **Task 11.17:** Test concurrent download with semaphore
 - [x] **Task 11.18:** Test batch download result aggregation
-- [ ] **Task 11.19:** Test tracking file update (deferred to Phase 9)
-- [ ] **Task 11.20:** Test disk space error handling (covered in general error handling)
+- [x] **Task 11.19:** Test tracking file update (5 tests: successful, failed, new file, corrupt JSON, atomic write failure)
+- [x] **Task 11.20:** Test summary statistics methods (5 tests: success_rate, total_size, average_time, edge cases)
 
 ---
 

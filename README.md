@@ -95,6 +95,141 @@ cd frontend && npm run dev
 
 Open http://localhost:5173 in your browser.
 
+### API Setup (Detailed)
+
+#### 1. Database Setup
+
+```bash
+# Start PostgreSQL container
+docker-compose up -d db
+
+# Verify database is running
+docker-compose ps
+
+# Expected output:
+# NAME                 SERVICE   STATUS    PORTS
+# tender-tracker-db    db        running   0.0.0.0:5432->5432/tcp
+```
+
+#### 2. Configure Environment
+
+```bash
+# Copy environment template
+cp .env.example .env
+
+# Edit .env and set these variables:
+# - DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/tender_tracker
+# - JWT_SECRET_KEY=<generate-a-secure-random-key>
+# - CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+```
+
+Generate a secure JWT secret:
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+```
+
+#### 3. Run Database Migrations
+
+```bash
+# Install dependencies if not done already
+pip install -r requirements.txt
+
+# Run Alembic migrations to create tables
+alembic upgrade head
+
+# Verify migrations
+alembic current
+
+# Expected output: head (current revision)
+```
+
+#### 4. Seed Initial Data
+
+```bash
+# Populate sources table with configured tender sources
+python scripts/seed_sources.py
+
+# Expected output: Created/Updated 3 sources
+```
+
+#### 5. Start the API
+
+```bash
+# Development mode with auto-reload
+uvicorn src.api.main:app --reload --port 8000
+
+# Production mode
+uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --workers 4
+```
+
+The API will be available at:
+- **API Root**: http://localhost:8000/api/v1/
+- **Interactive Docs**: http://localhost:8000/docs
+- **OpenAPI JSON**: http://localhost:8000/openapi.json
+- **Health Check**: http://localhost:8000/health
+
+#### 6. Test the API
+
+```bash
+# Create a test user
+curl -X POST http://localhost:8000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "SecurePass123",
+    "full_name": "Test User",
+    "company_name": "Test Company"
+  }'
+
+# Login and get token
+curl -X POST http://localhost:8000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "SecurePass123"
+  }'
+
+# Use the token from login response
+export TOKEN="your-jwt-token-here"
+
+# Test authenticated endpoint
+curl http://localhost:8000/api/v1/auth/me \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+#### 7. Run API Tests
+
+```bash
+# Run all API tests
+pytest tests/api/ -v
+
+# Run with coverage
+pytest tests/api/ --cov=src.api --cov-report=html
+
+# View coverage report
+open htmlcov/index.html
+```
+
+#### Database Management
+
+```bash
+# Create a new migration
+alembic revision --autogenerate -m "description of changes"
+
+# Apply migrations
+alembic upgrade head
+
+# Rollback one migration
+alembic downgrade -1
+
+# View migration history
+alembic history
+
+# Reset database (development only)
+alembic downgrade base
+alembic upgrade head
+```
+
 ### Docker Deployment
 
 ```bash

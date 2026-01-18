@@ -75,3 +75,48 @@ class DownloadResult:
             "error": self.error,
             "attempts": self.attempts,
         }
+
+    @staticmethod
+    def success_rate(results: list["DownloadResult"]) -> float:
+        """
+        Calculate success rate from a list of download results.
+
+        Args:
+            results: List of DownloadResult objects
+
+        Returns:
+            Success rate as a percentage (0.0-100.0)
+        """
+        if not results:
+            return 0.0
+        successful = sum(1 for r in results if r.success)
+        return (successful / len(results)) * 100.0
+
+    @staticmethod
+    def total_size(results: list["DownloadResult"]) -> int:
+        """
+        Calculate total size of all successfully downloaded files.
+
+        Args:
+            results: List of DownloadResult objects
+
+        Returns:
+            Total size in bytes
+        """
+        return sum(r.file_size for r in results if r.success)
+
+    @staticmethod
+    def average_time(results: list["DownloadResult"]) -> float:
+        """
+        Calculate average download time for successful downloads.
+
+        Args:
+            results: List of DownloadResult objects
+
+        Returns:
+            Average time in milliseconds (0.0 if no successful downloads)
+        """
+        successful_results = [r for r in results if r.success]
+        if not successful_results:
+            return 0.0
+        return sum(r.download_time_ms for r in successful_results) / len(successful_results)
