@@ -15,7 +15,7 @@ source:
 # URLs
 urls:
   main_site: "https://www.sars.gov.za/"
-  tenders_page: "https://www.sars.gov.za/procurement/published-tenders/"
+  rfq_listing: "https://www.sars.gov.za/procurement/published-tenders/"
 
 # Navigation configuration
 navigation:
@@ -34,7 +34,7 @@ navigation:
   # Navigation steps
   steps:
     - action: "goto"
-      url: "${urls.tenders_page}"
+      url: "${urls.rfq_listing}"
       wait_for: "networkidle"
       timeout_ms: 30000
 
