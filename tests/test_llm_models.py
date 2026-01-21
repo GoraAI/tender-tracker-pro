@@ -6,7 +6,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-from llm.models import DownloadProgress, ModelInfo, ModelStatus
+from src.llm.models import DownloadProgress, ModelInfo, ModelStatus
 
 
 def test_model_status_enum():

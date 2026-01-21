@@ -1,0 +1,1059 @@
+=== Page 1 ===
+SARS CONFIDENTIAL
+SOUTH AFRICAN REVENUE SERVICE
+REQUEST FOR PROPOSAL
+RFP24-2025 APPOINTMENT OF A SERVICE
+PROVIDER TO PROVIDE A TURN-KEY SOLUTION
+INCLUDING FIT-OUT FOR SARS CENTRAL
+WAREHOUSE IN CAPE TOWN
+MAIN RFP DOCUMENT
+INSTRUCTIONS, GUIDELINES, AND CONDITIONS OF TENDER
+© SARS Procurement Confidential v2025.01
+Page 1 of 31
+
+=== Page 2 ===
+SARS CONFIDENTIAL
+TABLE OF CONTENTS
+1 PURPOSE OF THIS REQUEST FOR PROPOSAL ........................................ 3
+2 OVERVIEW OF SARS’ REQUIREMENTS ..................................................... 3
+3 STRUCTURE OF THE RFP PACK ................................................................. 5
+4 KEY ACTIVITIES AND DATES ...................................................................... 6
+5 COMMUNICATION ......................................................................................... 7
+6 TENDER PREPARATION AND SUBMISSION .............................................. 7
+7 EVALUATION OF PROPOSALS.................................................................. 10
+8 TRUSTS, JOINT VENTURES, SUBCONTRACTING AND OTHER
+ARRANGEMENTS ....................................................................................... 20
+9 COMPLAINTS AND ALLEGATIONS ........................................................... 21
+10 GENERAL CONDITIONS OF BIDDING ....................................................... 22
+11 CHECKLIST OF RETURNABLES ................................................................ 31
+© SARS Procurement Confidential v2025.01
+Page 2 of 31
+
+=== Page 3 ===
+SARS CONFIDENTIAL
+REQUEST FOR PROPOSAL
+Summary, Guidelines, Conditions and Instructions
+1 PURPOSE OF THIS REQUEST FOR PROPOSAL
+1.1 The purpose of this Request for Proposal (RFP) is for the South African Revenue Service (SARS) to
+invite suitably qualified service providers (bidders) to submit proposals (tenders) in accordance with
+the rules set out in this RFP for an appointment as a service provider(s) on a non-exclusive basis.
+2 OVERVIEW OF SARS’ REQUIREMENTS
+2.1 Summary of the scope
+2.1.1 Details of the scope of work and the required goods and services are defined in more detail in the
+business requirements attached as Annexure A and other documents forming an integral part of this
+RFP.
+2.2 Background
+SARS mandate in terms of Sections 17 & 43 of the Customs and Excise Act (No. 91 of 1964) to
+regulate the Storage, Release and Disposal of Goods. This is in alignment with the Customs Control
+Act (No.31 of 2014) particularly Chapter 27. The Act provides regulatory framework that outlines the
+enforcement, detention, storage, payments, seizure and disposal of goods process as part of
+managing the trade value chain.
+These requirements are further entrenched in the South African Revenue Service (SARS) Act, No. 34
+of 1997, which recommends that SARS is mandated to ensure maximum compliance with Tax and
+Customs and Excise Legislation pursuant to facilitating legitimate trade. SARS, therefore, invites
+competitive proposals from prospective service providers to provide turn-key solution for warehousing
+and fit-out for SARS Cape Town central state warehouse.
+2.3 The objective of this bid is to appoint a single, turnkey solution provider to deliver a fully
+functional customs warehouse facility. The scope of this project includes a comprehensive
+fit-out an existing building and its entire exterior yard, which the provider is responsible for
+sourcing and presenting to SARS for approval. The facility must meet the specific operational
+and logistical criteria outlined in the specification document.
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 3 of 31
+
+=== Page 4 ===
+SARS CONFIDENTIAL
+2.4 Two (2) Stage Bidding Process
+The tender will be evaluated in line with principles contained in paragraph 4.7.9 of the National
+Treasury Supply Chain Management Guidelines for Accounting Officers/Authorities published in 2004.
+The breakdown of the two (2) stage bidding process:
+2.4.1 Stage 1: Prequalification and Mandatory Evaluation
+• SARS Tender Documents
+SARS has developed a detailed specification for provision of a turnkey solution including fit-
+out for SARS Central warehouse in Cape Town. The SARS tender pack covers key aspects
+of Business Requirements Specifications (Annexure A), Prequalification (Paragraph 7.2) and
+Mandatory (Paragraph 7.3) Evaluation Criteria. Bidders are required to assess the SARS BRS
+and comply with the evaluation criteria outlined in this main RFP document.
+• Bidder Submission
+Stage 1 of the tender process will involve a thorough evaluation of bidder’s compliance to
+SARS evaluation criteria and mandatory proposals on financial models that SARS can utilize
+for Stage 2 of the process. Below is the breakdown of information to be submitted:
+o Pre-qualification documents,
+o Mandatory compliance documents,
+o Full mandatory proposals,
+o Conceptual designs, and
+o Proposed financial model(s).
+Bidders will be evaluated on mandatory compliance and the viability of proposed financial
+models. Only bidders who meet mandatory requirements will be shortlisted and be invited to
+submit proposals for Stage 2 of the tender process.
+2.4.2 Stage 2: Financial Model Confirmation and Comparative Evaluation.
+SARS will assess the bidder’s mandatory proposals and their proposed financial model(s),
+with a preferred financial model based on Stage 1 analysis. Shortlisted bidders will be invited
+to submit detailed financial offers on the selected model using the same specifications
+published in stage 1 of the process (reference footprint or gross building area [GBA] of
+approximately 5 500 m²).
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 4 of 31
+
+=== Page 5 ===
+SARS CONFIDENTIAL
+Bidders are required to submit complete financial proposals illustrating the total cost of the
+various proposal of tenure for immovable property and return to SARS under the following
+financial models as a minimum:
+• Straight Lease;
+• Lease to own;
+• Purchase (including installment sale).
+Bidders may also include and propose alternative transparent financing structures, provided
+they are fully described and compliant with procurement regulations. All financial proposals
+must include (but not limited to) indicative schedules, escalation assumptions, and lifecycle
+cost analysis projections.
+3 STRUCTURE OF THE RFP PACK
+3.1 Structure
+3.1.1 This RFP pack is organised in 5 (five) sections consisting of one or more documents in each section.
+Table 1: RFP pack outline and contents
+Section Index Description of section contents
+Main RFP Documents outlining the main RFP guidelines, instructions, conditions and
+1
+Document documents necessary for a bidder to submit a proposal.
+Business Document(s) outlining the business requirements specifications,
+2 Requirements mandatory requirements and other information required by a bidder to
+Specification submit a proposal.
+SBD Documents Standard Bid Documents (SBDs) and other administrative documents that
+3 are required by National Treasury and SARS Procurement to be read,
+completed, and returned as part of a bidder’s proposal.
+Contract The General Conditions of Contract (GCC) and/or proposed agreement
+4
+management under which SARS wishes to contract the services.
+Response Where applicable, response templates that are required to be completed
+5
+templates and returned as part of a bidder’s proposal.
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 5 of 31
+
+=== Page 6 ===
+SARS CONFIDENTIAL
+4 KEY ACTIVITIES AND DATES
+4.1 The table below lists certain key dates and activities relevant from the time of issue of the RFP up to
+and until the closing date:
+Table 2: Key activities and dates
+No. Activity Date / Time / Details
+1. Bid Number: RFP24-2025
+Description: RFP24-2025 Appointment of a service provider to
+2. provide a Turn-Key Solution Including Fit-Out for
+SARS Central Warehouse in Cape Town
+Duration of contract: The contract duration will be dependent on the
+3. preferred financial model, including but not limited to
+straight lease, lease to own, or outright purchase.
+Validity period of proposals: Bids submitted will be valid for a period of 180
+calendar days from closing date. SARS may however,
+4.
+subject to the bidders’ consent, extend the validity
+period prior to expiry thereof.
+a) National Treasury e-Tender Portal: 11
+5. Advertisement of the RFP: November 2025
+b) SARS website: 11 November 2025
+RFP pack (complete set of bid
+documents) available for
+6. download from National 11 November 2025
+Treasury e-Tender Portal and
+SARS website:
+Physical briefing session / site Non-compulsory Virtual briefing session
+7.1 inspection date, location, and 20 November 2025
+address: 10 am
+Virtual briefing session date non-compulsory briefing session will be held virtually
+and registration: Microsoft Teams meeting and can be accessed at the
+20 November 2025 following link
+7.2 10am
+Microsoft Teams
+. Need help?
+Join the meeting now
+Meeting ID: 352 623 788 674 0
+Passcode: jm6ih2Gu
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 6 of 31
+
+=== Page 7 ===
+SARS CONFIDENTIAL
+Bidders to submit written From 20 November 2025 to 27 November 2025
+8.
+questions on or before:
+SARS to respond to bidders’ From 28 November 2025 to 5 December 2025
+9.
+written questions on or before:
+CLOSING DATE AND TIME 12 December 2025
+10.
+(proposals due): 11 am
+4.2 All dates and times in this RFP are South African Standard Time. The establishment of a time or date
+in this RFP does not create an obligation on the part of SARS to take any action or create any right or
+expectation in any way for any bidder to demand that any action be taken on the date established, or
+on any other date. A bidder accepts that if SARS extends the deadline (closing date) for proposal
+submissions for any reason whatsoever, the requirements of this RFP will apply equally to the
+extended deadline.
+5 COMMUNICATION
+5.1 All communications to SARS must be addressed to the SARS Tender Office, emailed to
+tenderoffice@sars.gov.za, and must contain a clear reference to this RFP. Communication sent by
+SARS must only be regarded as official communication if sent from tenderoffice@sars.gov.za, or a
+communication accompanied by a letter of authorisation signed by the SARS Procurement Executive.
+5.2 A bidder may not make any communication to SARS regarding this RFP other than through the official
+contact provided in this document. SARS may, at its sole discretion, disqualify a bidder if the bidder
+communicates or attempts to communicate any information regarding this RFP to any of SARS’
+employees; officials; or any third parties involved in the preparation, evaluation, or award of the RFP
+other than through the official contact provided.
+6 TENDER PREPARATION AND SUBMISSION
+6.1 Introduction
+6.1.1 SARS has a detailed evaluation methodology premised on Treasury Regulation 16A3 promulgated
+under section 76 of the Public Finance Management Act, 1999 (Act No. 1 of 1999), which prescribes
+that SARS’ procurement processes be:
+6.1.1.1 economical, efficient, fair, equitable, transparent, competitive and cost effective; and
+6.1.1.2 consistent with the Preferential Procurement Policy Framework Act, 2000 (Act No. 5 of
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 7 of 31
+
+=== Page 8 ===
+SARS CONFIDENTIAL
+2000), its Regulations, and the Broad-Based Black Economic Empowerment Act, 2003 (Act
+No. 53 of 2003).
+6.2 Question and answer process
+6.2.1 A bidder may submit questions to SARS as part of the question-and-answer process to gain a full
+understanding of any aspect of the RFP that is not clear to the bidder.
+6.2.2 Between the dates given in paragraph 4, SARS will receive written questions sent by bidders by
+email through the official contact provided in this document. SARS will respond to these questions,
+but however is not be obliged to respond to a question which in SARS’ opinion is inappropriate and
+does not reasonably warrant an answer. The questions and answers will be published on the National
+Treasury e-Tender Portal and the SARS website. The identity of a bidder who has directed a question
+to SARS will not be disclosed by SARS in such responses.
+6.2.3 SARS may issue updated versions of documents issued in the RFP pack and/or may issue additional
+documentation to form part of the RFP pack. Such reissued or additional documentation will be
+published on the National Treasury e-Tender Portal and SARS website. It is a bidder’s responsibility
+to visit the National Treasury e-Tender Portal and SARS website at regular intervals to ensure that
+a bidder uses the latest versions of documents in the RFP pack.
+6.2.4 The National Treasury e-Tender Portal must be treated as the primary means of
+communication. In the event of any other communication that conflicts with communications
+posted on the National Treasury e-Tender Portal, the National Treasury e-Tender Portal
+communication will prevail.
+6.3 Central Supplier Database
+6.3.1 All bidders wishing to do business with SARS must register on the Government’s Central Supplier
+Database (CSD) at www.CSD.gov.za, and to include in their submission their CSD Master
+Registration Number. The recommended bidder(s) must be registered on the CSD prior to an award
+letter / purchase order / signed contract being issued.
+6.3.2 Foreign suppliers with neither South African tax obligations nor history of doing business in South
+Africa must complete the questionnaire on the Standard Bidding Document (SBD) 1.
+6.4 Proposal submission
+6.4.1 For this RFP, SARS will accept proposal submissions in the form of physical proposal submissions,
+either deposited in the SARS tender box or posted to the SARS Tender Office.
+6.4.2 The physical proposal submissions must be deposited in the SARS tender box on or before the
+closing date and time at the SARS Tender Office, situated at the main entrance at:
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 8 of 31
+
+=== Page 9 ===
+SARS CONFIDENTIAL
+SARS Procurement Tender Office,
+Lehae La SARS,
+299 Bronkhorst Street, Nieuw Muckleneuk, Brooklyn,
+Pretoria, 0181.
+6.4.3 The proposals may also be couriered to the address provided in the afore mentioned paragraph.
+6.4.4 Proposals will only be considered if received by the SARS Tender Office before the closing date and
+time, regardless of the method used.
+6.4.5 Late proposals will not be accepted.
+6.4.6 The onus is on the bidder to ensure that its proposal submission and documentation received by
+SARS in this bid are submitted timeously and are accurate and complete. Failure by any bidder to
+discharge this onus will result in proposal submissions being disqualified for consideration.
+6.5 Instruction for submitting a proposal
+6.5.1 This section details the instructions to bidders for preparing a proposal in response to this RFP, which
+must be followed in detail to enable the information contained in a bidder’s proposal to be read,
+understood and evaluated in a common and consistent layout, and to ensure that the information
+submitted is correct, complete and well structured. Should a proposal be received that is not in the
+correct format, SARS reserves the right to disqualify the entire proposal or portions of the proposal
+depending on the extent of the deviation from the format described in this document.
+6.5.2 All proposals and supporting documentation must be submitted in English.
+6.5.3 A bidder’s proposal is required to be submitted in two forms:
+1 x Hardcopy One (1) hardcopy submission clearly marked.
+submission
+A “hardcopy submission” means an A4 ring bound lever arch file.
+1 x Electronic One (1) electronic submission of a complete copy of the hardcopy submission.
+submission
+An “electronic submission” means a memory stick (USB stick) containing a
+complete copy of the hardcopy submission. The onus is on the bidder to ensure
+that the electronic submission submitted is a complete copy of the hardcopy
+submission.
+6.5.4 The hardcopy and electronic submission must be marked and labelled correctly, and must be outer
+sealed, wrapped and packaged, for ease of reference during the evaluation process.
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 9 of 31
+
+=== Page 10 ===
+SARS CONFIDENTIAL
+6.5.5 Mandatory and financial model information must be included in separate folders. The
+Mandatory information must be included in “Folder 1”, and the Financial models information
+must be included in “Folder 2”.
+6.5.6 A bidder is required to submit the contents of its submission (hardcopy and electronic) in the following
+format:
+Table 3: Format and organisation of proposal
+Files Section Responses
+• Prequalification documents (SBD and other
+1 documents), excluding SBD 6.1 Preference point
+claim form
+• Response to mandatory requirements (if
+applicable)
+• RFP 2
+Folder 1: • Supporting documents for mandatory
+reference
+requirements (if applicable)
+MANDATORY
+• Description
+• Response to mandatory requirements
+proposal
+• Bidder name
+3 • Supporting documents for mandatory
+requirements
+• Company profile
+4
+• Supplementary information
+5 • Draft agreement
+Folder 2: • RFP 1 • B-BBEE certificate or sworn affidavit
+• SBD 6.1 Preference point claim form
+reference
+PRICE and B-
+BBEE/ specific • Description 2 • complete proposed financial models
+goals proposal • Bidder name • A complete set of three (3) most recent years
+3
+annual financial statements as detailed in this RFP
+7 EVALUATION OF PROPOSALS
+7.1 Process after the closing date
+7.1.1 After the closing date and time SARS, will evaluate the proposals with reference to SARS’ evaluation
+criteria. SARS reserves the right to employ subject matter experts to assist in performing such
+evaluations.
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 10 of 31
+
+=== Page 11 ===
+SARS CONFIDENTIAL
+7.2 Prequalification evaluation process (Gate 0)
+7.2.1 SARS has defined minimum administrative prequalification criteria that must be met by a bidder. The
+table below contains the administrative prequalification documents that are required as part of a
+bidder’s proposal, which must be completed and signed by the duly authorised representative of the
+prospective bidder(s).
+7.2.2 Where a bidder’s proposal fails to comply fully with any of the prequalification criteria, SARS may at
+its discretion allow the bidder an opportunity to submit and/or supplement the information and/or
+documentation provided within a grace period of seven (7) working days or such alternative period
+as SARS may determine to achieve full compliance with these criteria before disqualifying the bidder.
+7.2.3 SARS will disqualify a bidder who does not achieve full compliance of the prequalification
+Standard Bidding Documents (SBD) after the grace period provided by SARS.
+Table 4: Prequalification criteria
+Prequalification Instructions Non-submission will result
+documents to be in disqualification?
+submitted
+1. SBD 1: Invitation to bid form Bidder to complete and sign the YES
+supplied pro forma document.
+2. SBD 4: Bidder’s Disclosure Bidder to complete and sign the YES
+supplied pro forma document.
+4. SBD 6.1: Preference points Bidder to complete and sign the NO
+claim form supplied pro forma document, to Non-submission will lead to a
+claim the points for B-BBEE / zero score on B-BBEE /
+specific goals. specific goals.
+6. Proof of registration on the Bidder to submit the proof of NO
+Central Supplier Database registration on CSD. However, a bidder must be
+(CSD) registered on CSD in order to
+be considered for award.
+7. Draft Agreement and/or Bidder to sign the supplied pro NO
+General Conditions of forma document. The recommended bidder(s)
+Contract (GCC) will be required to sign the
+applicable Agreement / GCC
+on award.
+8. A complete set of three (3) Submit complete sets of three (3) NO
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 11 of 31
+
+=== Page 12 ===
+SARS CONFIDENTIAL
+Prequalification Instructions Non-submission will result
+documents to be in disqualification?
+submitted
+most recent years annual most recent years annual
+financial statements financial statements in
+accordance with the
+requirements of the Financial
+Risk Analysis paragraph as
+detailed in this RFP.
+7.3 Mandatory evaluation process (Gate 1)
+7.3.1 Only Bidders that have met the prequalification criteria in Gate 0 will be evaluated in Gate 1 for
+mandatory evaluation. The table below contains the mandatory evaluation criteria.
+7.3.2 If a bidder does not meet any of the mandatory evaluation criteria, the bidder will be
+disqualified, and the bidder’s proposal will not be evaluated further.
+Table 5: Mandatory evaluation criteria
+No Mandatory evaluation criteria Bidder to submit as proof
+1. Proof of Ownership: Submission of a Valid copy of Title Deed of
+the Warehouse Property or a Valid Mandate
+Title Deed of proposed Warehouse Property or a
+Agreement incorporating the Title Deed.
+Valid Mandate Agreement incorporating the title
+deed.
+2 2.1 The existence and location of Warehouse 2.1 Source document Title deed/ or a Valid
+must be within the 50km radius from Cape Town Mandate Agreement incorporating the title
+CBD deed (SARS verification google maps).
+Confirmation of existence and location of
+Warehouse within the 50km radius from
+Cape Town CBD.
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 12 of 31
+
+=== Page 13 ===
+SARS CONFIDENTIAL
+No Mandatory evaluation criteria Bidder to submit as proof
+2.2 Size of the Warehouse at 5500m2 with 2.2 The Building Plans for confirmation of
+scalability options of a 10% variance. warehouse size (Size of the Warehouse at
+5500m2 with scalability options of a 10%
+variance).
+3 Warehouse Building Occupation Certificate from Submission of a Valid Warehouse Building
+Municipality. Occupation Certificate from Municipality.
+4 Valid Zoning Certificate (premises zoned for Submission Valid Zoning Certificate
+warehousing/logistics use). (premises zoned for warehousing/logistics
+use).
+5 Fire Safety Preliminary Approval (fire engineer’s Submission Fire Safety Preliminary Approval
+compliance letter). (fire engineer’s compliance letter).
+1.2 Mandatory Evaluation Site Visit verification Yes/ No
+1 Dedicated secure zones within the Warehouse
+2 Accommodation Space within the warehouse
+3 Auction and Viewing Area within the warehouse
+4 Loading Docks within the warehouse
+5 Sufficient Warehouse Flooring & Structure
+6 Access & Truck Circulation
+Walking of the yard. Can a super-link truck enter,
+turn, dock, and exit without reversing long
+distances or crossing lanes?
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 13 of 31
+
+=== Page 14 ===
+SARS CONFIDENTIAL
+7.4 Price and B-BBEE/specific goals evaluation (Gate 3)
+7.4.1 In line with the requirements of the Preferential Procurement Policy Framework Act, 2000, and its
+Regulations and SARS Preferential Procurement Policy, only bidders that have met all the mandatory
+requirements both required submission of documents and site visit verification of items will be
+evaluated further.
+7.4.2 SARS will apply the applicable preference point system in accordance with published preference
+point system. Should actual financial model proposals submitted by the bidders differ from the
+estimated costs prescribing the system to be used, the lowest acceptable tender will be used to
+determine the applicable preference point system.
+Table 7: Price and B-BBEE/specific goals evaluation
+Criteria Points
+1. Price 80/90
+2. Specific goals 20/10
+TOTAL 100
+7.4.3 Price evaluation (Gate 3, Stage 1)
+7.4.3.1 Points for the price evaluation will be calculated in accordance with the formula stated
+below.
+7.4.3.2 Bidders are required to complete all line items in the financial model response template
+provided by SARS, which will be used for the price evaluation. The price should be all-
+inclusive for all the goods and services required in the scope of work, and bidders must
+ensure the completeness and accuracy of the financial model figures provided in the
+financial model response template. Failure to complete the financial model response
+template/bill of quantities may lead to a bidder scoring zero for the financial model
+evaluation or disqualification of the bidder.
+Table 8: Financial model evaluation formula
+Price evaluation formula Points
+80/90
+[OR]
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 14 of 31
+
+=== Page 15 ===
+SARS CONFIDENTIAL
+Where
+Ps = Points scored for price of proposal under consideration
+Pt = Rand value of proposal under consideration
+Pmin = Rand value of lowest acceptable proposal
+7.4.4 B-BBEE/specific goals evaluation (Gate 3, Stage 2)
+7.4.4.1 Points for the B-BBEE/specific goals evaluation will be allocated in accordance with the
+applicable preference points systems depending on the lowest and highest value of price
+submission received. The BBBEE Specific goals will be allocated in accordance to a
+bidder’s size as per table 1 of the SBD 6.1 Preference points claim form claimed. Points for
+specific goals can only be awarded to a bidder who B-BBEE certificate or sworn affidavit
+or Share Certificate of the company or CIPC registration documents together with the SBD
+6.1 Preference points claim form.
+7.4.4.2 Bidders are required to refer to the SBD 6.1 Preference Points Claim Form in terms
+of the Preferential Procurement Regulations 2022, for the specific goals and points
+to be claimed for this RFP.
+7.4.4.3 Bidders who do not claim preference points will be scored zero for B-BBEE/specific goals.
+7.4.4.4 Failure of a bidder to submit the required supporting documentation in support of claiming
+the preference points for B-BBEE/specific goals together with the proposal, will be
+interpreted to mean that preference points for B-BBEE/specific goals are not claimed.
+7.4.4.5 The B-BBEE certificate or sworn affidavit should be submitted in the name of the bidding
+entity. If the proposal is submitted by an incorporated joint venture, the incorporated joint
+venture must submit their B-BBEE status level verification certificate or sworn affidavit. If
+the proposal is submitted by an unincorporated joint venture / consortium arrangement, the
+unincorporated joint venture / consortium must submit a consolidated B-BBEE certificate
+or sworn affidavit as if they were a group structure, and that such consolidated B-BBEE
+certificate or sworn affidavit is prepared for every separate proposal.
+7.4.4.6 SARS reserves the right to request bidders to submit proof of any information, to
+substantiate claims made about their B-BBEE status.
+Table 9: B-BBEE/specific goals evaluation points allocation
+B-BBEE/specific goals evaluation criteria Points
+Bidders to submit:
+a) A duly completed SBD 6.1 Preference point claim form, and
+20/10
+b) A valid B-BBEE certificate or sworn affidavit.
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 15 of 31
+
+=== Page 16 ===
+SARS CONFIDENTIAL
+7.4.4.7 The following table indicates the specific B-BBEE/specific goals documents that must be
+submitted for this RFP.
+Table 10: B-BBEE/specific goals documents checklist
+Classification Turnover Submission requirement
+1. An entity that is a Between R10 million • B-BBEE Certificate / Sworn-Affidavit B-
+Qualifying Small and R50 million p.a. BBEE Certificate In case of JV, a
+Enterprise (QSE) consolidated scorecard will be
+accepted)
+2. An entity with at least Above R50 million p.a. • B-BBEE Certificate / Sworn-Affidavit B-
+51% Black BBEE Certificate In case of JV, a
+Ownership consolidated scorecard will be
+accepted)
+3. An entity with at least Above R50 million p.a. • B-BBEE Certificate / Sworn-Affidavit B-
+30% Black Women BBEE Certificate In case of JV, a
+Ownership consolidated scorecard will be
+accepted)
+4 An entity with at least Above R50 million p.a. • B-BBEE Certificate / Sworn-Affidavit B-
+51% Black Youth BBEE Certificate In case of JV, a
+Ownership consolidated scorecard will be
+accepted)
+7.4.5 Consolidation of price and B-BBEE/specific goals evaluation (Gate 4)
+7.4.5.1 The points scored by a bidder for the price evaluation and the B-BBEE/specific goals
+evaluation will be added together to determine the overall points a bidder’s proposal will
+score out of 100 points for the consolidated price and B-BBEE/specific goals evaluation
+and ranking of the bidders.
+7.5 Financial risk analysis
+7.5.1 SARS may conduct a financial risk analysis on the bidders and SARS has the right not to make an
+award to a bidder(s) if its risk analysis indicates a high risk.
+7.5.2 The bidders are required to submit complete sets of annual financial statements, for the three (3)
+most recent financial periods in the name of the bidding entity. The annual financial statements must
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 16 of 31
+
+=== Page 17 ===
+SARS CONFIDENTIAL
+either be audited or independently reviewed in accordance with the public interest score (PIS) in
+compliance with the Companies Act, Act 71 of 2008, and the bidders are required to submit the public
+interest score (PIS) in compliance with the Companies Act, Act 71 of 2008. The annual financial
+statements must contain:
+7.5.2.1 A statement of profit and loss and other comprehensive income;
+7.5.2.2 A statement of financial position;
+7.5.2.3 A statement of cash flows;
+7.5.2.4 A statement of changes in equity / net assets; and
+7.5.2.5 Accompanying notes.
+7.5.3 If the bidder cannot provide the preceding year’s audited / independently reviewed financial
+statements as part of its bid submission, the bidder should submit draft annual financial statements
+or its latest management accounts, together with the three (3) most recent years audited /
+independently reviewed annual financial statements.
+7.5.4 Bidders who have been trading for less than three (3) financial periods must provide:
+7.5.4.1 A letter detailing the fact, signed by a duly authorised representative of the entity;
+7.5.4.2 The annual financial statements that the entity can provide, considering the period that it
+has been trading; and
+7.5.4.3 Any other information or documentation which would provide more clarity on the financial
+history of a bidder.
+7.5.5 SARS reserves the right to request further information regarding the annual financial statements of
+a bidder at a later stage to demonstrate the potential bidder’s financial capability. These will include,
+but are not limited to:
+7.5.5.1 Holding company’s / Parent company’s accounts;
+7.5.5.2 Management accounts;
+7.5.5.3 Signed letter from a recognised financial institution confirming capital availability and bank
+statements; and/or
+7.5.5.4 Credit rating reports (confirming capital availability or access to capital).
+7.5.6 In the event of a subsidiary being the bidding entity and it submits the holding company’s financial
+statements for financial analysis purposes, the holding company must furnish a Performance
+Guarantee that is signed by a Financial Service Provider (Guarantor) of the holding company, stating
+that the Guarantor will undertake to cover any or all risks associated with a bidder, in the event the
+bidder is awarded the RFP.
+7.5.7 If the proposal is submitted by an incorporated joint venture, the incorporated joint venture is required
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 17 of 31
+
+=== Page 18 ===
+SARS CONFIDENTIAL
+to submit annual financial statements of the joint venture. If the proposal is submitted by an
+unincorporated joint venture / consortium arrangement, the unincorporated joint venture / consortium
+is required to submit annual financial statements of each of the parties to the arrangement.
+7.5.8 SARS reserves the right to request a financial guarantee from the recommended bidder(s) prior to
+award, based on the financial risk evaluation outcome.
+7.6 Recommended bidders’ due diligence and risk assessment prior to award
+7.6.1 SARS has a legal and moral obligation to ensure that a supplier’s financial position does not place
+public money or services at unacceptable risks and will therefore perform due diligence and risk
+assessment of recommended bidder(s)’ prior to award.
+7.6.2 As part of due diligence and risk assessment, the bidder must ensure that the bidder is complying to
+all regulatory prescripts, including industry regulations specific to the commodity/services procuring,
+that are applicable to this tender, as well as ethical business practices. SARS has the right to request
+evidence of this compliance from the bidder, and third parties, for purposes of the due diligence
+exercise and for audit or contracting arrangements.
+7.6.3 In the event that a due diligence exercise reveals that a recommended bidder does not comply with
+SARS’ risk appetite or compliance requirements then SARS has the right not to make an award to
+the recommended bidder.
+7.6.4 The recommended bidder(s) will be required to consent in the agreement to continuous and in-depth
+due diligence to ensure ethical business practices throughout the term of the tender.
+7.7 Proposed legal agreement
+7.7.1 Any award made to a bidder under this RFP is conditional, amongst other provisions, upon SARS
+and such bidder concluding a written agreement within twenty-one (21) working days of the bidder
+receiving the written agreement. The timeous finalisation of such an agreement will be an absolute
+pre-condition to the recommended bidder(s) being awarded the tender and providing the goods or
+services to SARS.
+7.7.2 If the recommended bidder(s) fails to sign the proposed agreement within the time frame stipulated,
+SARS reserves the right to:
+7.7.2.1 cancel the award to the recommended bidder;
+7.7.2.2 enter into negotiations with the second ranked bidder(s) and conclude the proposed
+agreement with such second ranked bidder(s); or
+7.7.2.3 take any other action SARS deems reasonable and appropriate.
+7.7.3 Bidders are requested to-
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 18 of 31
+
+=== Page 19 ===
+SARS CONFIDENTIAL
+7.7.3.1 Comment on the terms and conditions set out in the draft agreement and where necessary,
+propose required changes to such terms and conditions.
+7.7.3.2 Each comment and/or amendment must be explained.
+7.7.3.3 All changes and/or amendments to the agreement must be in an easily identifiable colour
+font and tracked for ease of reference.
+7.7.4 Upon award, SARS and the successful bidder will conclude the agreement which regulates the
+specific terms and conditions applicable to the goods and services being procured by SARS. In this
+regard:
+7.7.4.1 SARS will enter into negotiations with the bidder with a view to concluding the agreement.
+7.7.4.2 SARS will be entitled to cease negotiating with a bidder if SARS, in its sole discretion, is of
+the opinion that: (i) the bidder has made misrepresentations in its proposal; (ii) the bidder
+is attempting to withdraw from positions or commitments made in its proposal; (iii) the
+bidder is not negotiating in good faith; or (iv) an agreement may not be expeditiously
+concluded with the bidder for any other reason.
+7.7.4.3 SARS reserves the right to vary the terms and conditions of the proposed agreement during
+the course of negotiations with a bidder at SARS’ sole discretion.
+7.7.4.4 SARS reserves the right to accept or reject any or all amendments or additions proposed
+by the successful bidder if such amendments or additions are unacceptable to SARS or
+pose a risk to the organisation.
+7.7.5 A bidder should note that the terms of its proposal will be incorporated in the proposed agreement
+by reference and that SARS relies upon the bidder’s proposal as a material representation in making
+an award to a successful bidder and in concluding an agreement with the bidder. It follows therefore
+that any misrepresentations in a proposal may result in legal action or other processes by SARS
+against the bidder, notwithstanding the conclusion of an agreement between SARS and the bidder
+for the provision of the goods and services in question. In the event of a conflict between the bidder’s
+proposal and the agreement concluded between the parties, the agreement will prevail.
+7.8 Performance Standards
+7.8.1 SARS may prescribe certain performance standards (Service Levels) that a successful bidder must
+comply with in the performance of the services.
+7.8.2 Failure to adhere to the Service Levels will result in SARS levying a financial penalty for the Service
+Level Failure.
+7.8.3 Multiple Service Level Failures with the SARS’ prescribed Service Levels will constitute a material
+breach of the Service Level Agreement.
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 19 of 31
+
+=== Page 20 ===
+SARS CONFIDENTIAL
+7.8.4 Notwithstanding the implementation of the Service Levels and Financial Penalties, SARS reserves
+the right and without derogation to any other remedies it may have in law, to terminate the Service
+Level Agreement for breach (persistent non-compliance) by the successful bidder.
+8 TRUSTS, JOINT VENTURES, SUBCONTRACTING AND OTHER ARRANGEMENTS
+8.1 Proof of existence of a trust, joint venture, consortium and subcontracting arrangements
+8.1.1 Where, for the purposes of this RFP, a bidder submits its proposal as a trust, such bidder must submit
+concrete proof of the existence of a trust. SARS will accept a registered trust deed as acceptable
+proof of the existence of a trust. The trust deed must include amongst others:
+8.1.1.1 Details of the trustees of the trust; and
+8.1.1.2 Details of the beneficiaries of the trust. In instances where the beneficiary is a trust, the
+trust deed of that specific trust is required.
+8.1.2 Where, for the purposes of this RFP, a bidder submits its proposal as a joint venture or consortium
+(incorporated or unincorporated), the bidder must submit the joint venture / consortium agreement,
+which sets forth the following details:
+8.1.2.1 identification of each party to the agreement in full;
+8.1.2.2 the percentage ownership of the joint venture / consortium of each party to the agreement
+(if applicable);
+8.1.2.3 the precise functions and responsibilities which each party will fulfil in terms of the
+agreement. This should include details of the delimitations of scope within the goods and
+services to be assigned to such a party(ies);
+8.1.2.4 the anticipated percentage of the revenue that the party(ies) would receive (anticipated
+revenue that the party(ies) would receive as a percentage of the total revenue the bidder
+would anticipate receiving over the term of the agreement with SARS), if the bidder is
+successful; and
+8.1.2.5 clearly set out the roles and responsibilities of the Lead Partner and the remainder joint
+venture / consortium party(ies). The agreement must also clearly identify the Lead Partner,
+who shall be given the power of attorney to bind the other party(ies) in respect of matters
+pertaining to the joint venture.
+8.1.2.6 If a bidder is submitting a proposal in the form of an unincorporated joint venture / consortium, the
+SBD 4 Bidder’s disclosure form should be completed by each party participating in the joint venture
+/ consortium agreement, and proof of CSD registration should be submitted for all parties participating
+in the joint venture / consortium for this RFP.
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 20 of 31
+
+=== Page 21 ===
+SARS CONFIDENTIAL
+8.1.2.7 Joint venture members should be advised that each member will be held jointly and severally liable
+for the performance of the joint venture.
+8.1.3 Where, for the purposes of this RFP, a bidder has or intends to subcontract areas of scope of the
+goods and services, the bidder must submit the subcontracting agreement, and must note the
+following:
+8.1.3.1 the bidder must indicate the name of the subcontractor(s), the percentage of the contract
+that will be subcontracted, the B-BBEE status level of the subcontractor(s) and whether the
+subcontractor(s) is an EME or QSE;
+8.1.3.2 a bidder awarded a contract, may only enter into a subcontracting arrangement with the
+approval of SARS;
+8.1.3.3 the agreement will be concluded between the main contractor(s) and SARS, therefore, the
+main contractor(s) and not its/their subcontractor(s) will be held liable for performance in
+terms of its contractual obligations;
+8.1.3.4 the successful bidder must, at all times, be solely and entirely accountable to SARS for the
+performance of its contractual obligations in terms of the agreement; and
+8.1.3.5 Without diminishing the bidder’s accountability in any way for the delivery of the services,
+including the performance standards, SARS may require: access to and transparency in
+the subcontracting agreements; the full details of the functions which the subcontractor will
+fulfil in terms of the agreement including details of the delimitations of scope within the
+services to be assigned to such a subcontractor; monitoring and reporting of
+subcontractor’s participation and performance to SARS; direct participation of
+subcontractor(s) in the account and project planning activities; and subcontractors’
+representation in governance structures and committees. SARS will, at all times, demand
+fair dealing in the relationship between a bidder and its subcontractor(s).
+9 COMPLAINTS AND ALLEGATIONS
+9.1.1 Should a Bidder have rational reasons to believe that the tender process is unfair or irregular,
+including the fact that the mandatory specifications are not open and/or are written for a particular
+bidder, brand or product; the bidder is urged to notify the Procurement Department within ten (10)
+days after publication of the bid and provide details of its complaint for SARS’ consideration.
+9.1.2 Any suspicious activity, including requests, approaches or calls asking for upfront payment to secure
+an award of a bid or in lieu of claims that the outcome of a tender can be influenced towards a
+particular bidder, bidders are requested to immediately inform the SARS Fraud / Anti-Corruption
+Hotline at 0800-002870 or email at anti-corruption@sars.gov.za for further investigation.
+9.1.3 The “SARS hotline” further provides an anonymous reporting channel for any unethical behaviour
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 21 of 31
+
+=== Page 22 ===
+SARS CONFIDENTIAL
+that a bidder wants to report.
+10 GENERAL CONDITIONS OF BIDDING
+10.1 By bidding, a bidder, is deemed to have accepted all terms and conditions of this RFP; and is
+further deemed to have accepted that if successful, any award made will be made subject to
+the terms and conditions of this RFP.
+10.2 Reservation of rights
+10.2.1 In addition to any rights which SARS has reserved to itself in this document or any other document
+in the RFP pack, SARS reserves the right in its sole discretion to:
+10.2.1.1 make no award, or to accept part of a proposal rather than the whole;
+10.2.1.2 withdraw, or cancel this RFP;
+10.2.1.3 amend, vary, or supplement any of the information, terms or requirements contained in
+this RFP, any information or requirements delivered pursuant to this RFP, or the structure
+of the RFP process;
+10.2.1.4 schedule additional briefing sessions / site inspections, and to conduct site visits, site
+inspections, product evaluations, local content evaluations, and/or perform audits
+including due diligence exercises on any bidder whenever SARS deems it prudent to do
+so;
+10.2.1.5 no longer consider a bidder’s proposal where adverse information about the bidder or its
+proposal submission has come to the attention of SARS, provided that such bidder is
+informed accordingly and afforded an opportunity to object;
+10.2.1.6 subject to applicable legislation and conditions of tender, award a proposal based on
+which bidder is offering the best value for money, even if such proposal has not scored
+the highest points during the evaluation;
+10.2.1.7 conduct a risk assessment of a bidder’s capability to deliver the goods and perform the
+services in accordance with the specified service levels and/or achieve SARS’ objectives;
+10.2.1.8 request clarification or verification in respect of any information contained in or omitted
+from a bidder’s proposal, which SARS may do either in writing or at a meeting convened
+with the bidder for that purpose;
+10.2.1.9 conduct a due diligence on any bidder or its subcontractor, which may include
+interviewing customer references or performing other activities to verify information and
+capabilities submitted, claimed, or otherwise, (including visiting a bidder’s,
+subcontractors, or customer reference premises, sites and/or facilities to verify certain
+stated facts or assumptions). The bidder will be obliged to grant SARS with all such
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 22 of 31
+
+=== Page 23 ===
+SARS CONFIDENTIAL
+access, assistance and/or information as SARS may reasonably request. The bidder
+must respond within the timeframes set by SARS, failing which SARS reserves the right
+not to consider the bidder’s proposal any further; and/or
+10.2.1.10 request presentations from such short-listed bidders. All costs relating to the preparation
+of such presentations will be borne by the bidders.
+10.2.2 SARS will disqualify any bidder, report to the National Treasury and take the necessary steps to
+restrict a bidder form doing business with the State, who:
+10.2.2.1 engages in any collusive tendering, anti-competitive conduct, or any other similar conduct,
+including but not limited to any collusion with any other bidder in respect of the subject
+matter of this RFP;
+10.2.2.2 seeks any assistance, other than assistance officially provided by a government entity, from
+any employee, advisor or other representative of a government entity in order to obtain any
+unlawful advantage in relation to procurement or services provided or to be provided to a
+government entity;
+10.2.2.3 makes or offers any gift, gratuity, anything of value or other inducement, whether lawful or
+unlawful, to any of SARS’ officers, directors, employees, advisors or other representatives;
+10.2.2.4 makes or offers any gift, gratuity, anything of any value or other inducement, to any
+government entity's officers, directors, employees, advisors or other representatives in
+order to obtain any unlawful advantage in relation to procurement or services provided or
+to be provided to a government entity;
+10.2.2.5 accepts anything of value or an inducement that would or may provide financial gain,
+advantage or benefit in relation to procurement or services provided or to be provided to a
+government entity;
+10.2.2.6 pays or agrees to pay to any person any fee, commission, percentage, brokerage fee, gift
+or any other consideration, which is contingent upon or results from, the award of any
+tender, contract, right or entitlement which is in any way related to procurement or the
+rendering of any services to a government entity;
+10.2.2.7 has been found guilty in a court of law or administrative or regulatory authority having
+appropriate jurisdiction on charges of unethical or improper conduct, regardless of whether
+or not a prison term or penalty was imposed;
+10.2.2.8 is listed on the National Treasury’s Register for Tender Defaulters or the National
+Treasury’s Database of Restricted Suppliers; or
+10.2.2.9 whose tender contains a misrepresentation which is materially incorrect or misleading.
+10.2.3 Bidders’ own conditions
+10.2.3.1 Bidders may not come up with their own terms and conditions, counter conditions, modify
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 23 of 31
+
+=== Page 24 ===
+SARS CONFIDENTIAL
+or vary any of the terms, conditions or requirements herein. SARS may disqualify any
+bidder who fails to comply with this clause.
+10.3 Conflict of interest
+10.3.1 If at any time a bidder identifies an actual or potential conflict of interest, the bidder must immediately
+notify SARS in writing. SARS reserves the right to exclude the proposal submitted by such bidder
+from further consideration, unless the bidder is able to resolve the conflict to SARS’ satisfaction. If it
+comes to SARS’ knowledge that there was indeed a conflict of interest or a potential conflict of
+interest, same will be grounds for the immediate disqualification of the bidder.
+10.4 Confidentiality
+10.4.1 Except as may be required by operation of law, by a court or by a regulatory authority having
+appropriate jurisdiction, information contained in a bidder’s proposal(s) may not be disclosed by any
+bidder, other than to a person officially involved with SARS’ examination and evaluation of a proposal.
+10.4.2 Throughout this RFP process and thereafter, the bidders must secure SARS’ written approval prior
+to the release of any information that pertains to (i) the potential work or activities to which this RFP
+relates; or (ii) the process which follows this RFP. Failure to adhere to this requirement may result in
+disqualification from the RFP process and such legal action as SARS may deem suitable.
+10.5 Fronting
+10.5.1 SARS supports the spirit of broad-based black economic empowerment and recognises that real
+empowerment can only be achieved through individuals and businesses conducting themselves in
+accordance with the Constitution and in an honest, fair, equitable, transparent and legally compliant
+manner. Against this background SARS condemns any form of fronting.
+10.5.2 SARS, in ensuring that bidders conduct themselves in an honest manner will, as part of the bid
+evaluation processes, conduct or initiate the necessary enquiries / investigations to determine the
+accuracy of the representations made in the bid documents. Should any of the fronting indicators as
+contained in the Guidelines on Complex Structures and Transactions and Fronting, issued by the
+Department of Trade and Industry be established during such enquiry / investigation, the onus will
+be on the bidder / contractor to prove that fronting does not exist. Failure to do so within a period of
+14 days from date of notification may invalidate the bid / contract and may also result in the restriction
+of the bidder / contractor to conduct business with the public sector for a period not exceeding ten
+years, in addition to any other remedies SARS may have against the bidder / contractor concerned.
+10.6 Insurance
+10.6.1 The successful bidder will be required, on or before the effective date of the agreement and for the
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 24 of 31
+
+=== Page 25 ===
+SARS CONFIDENTIAL
+duration of the agreement, to have and maintain in force adequate insurance cover consistent with
+acceptable and prudent business practices and acceptable to SARS, which shall include, without
+limitation, professional indemnity and public liability insurance cover as appropriate.
+10.7 Indemnity
+10.7.1 If a bidder breaches any condition of this RFP and, as a result of that breach, SARS incurs costs or
+damages (including, without limitation, the cost of any investigations, procedural impairment,
+repetition of all or part of the RFP process and/or enforcement or defence of intellectual property
+rights or confidentiality obligations), then the bidder indemnifies and holds SARS harmless from any
+and all such costs which SARS may incur and for any damages or losses SARS may suffer.
+10.7.2 A successful bidder shall indemnify, hold harmless and agree to defend SARS and its officers,
+employees, agents, successors-in-title, and assigns, from any and all Losses arising from, or in
+connection with, any of the following-
+10.7.2.1 Third party claims attributable to any breach of the provisions of the Services Agreement
+by the successful bidder;
+10.7.2.2 Third party claims attributable to theft, fraud or other unlawful activity or any negligent, wilful
+or fraudulent conduct by the successful bidder or its employees and claims attributable to
+errors and/or omissions;
+10.7.2.3 Third party claims arising from or related to the death or bodily injury of any SARS agent,
+employee, business invitee, or business visitor or other person on SARS’s premises
+caused by the negligent acts or omissions of the successful bidder or its employees; and
+10.7.2.4 Third party claims arising from damage to property owned or leased by SARS or a third
+party caused by the successful bidder’s or its employees’ negligence or misconduct.
+10.8 Intellectual property
+10.8.1 SARS retains ownership of all intellectual property rights in the documents that form part of this RFP.
+10.8.2 Bidders will retain the intellectual property rights in their proposals but grant SARS the right to
+reproduce any copyrighted works for the purposes of the tender process.
+10.8.3 Subject to any specific provisions in any service level agreement, master services agreement, work
+orders or change orders or any other agreement concluded between SARS and a bidder in terms of
+this RFP, all intellectual property rights created, generated, coded or designed in terms of this bid to
+meet SARS’ business requirements and needs will be, and remain the perpetual exclusive property
+of SARS. Successful bidders who so create, generate, code or design any intellectual property for
+SARS in terms of this RFP, undertake to provide SARS with full access to such intellectual property
+including the provision of security keys and access codes both during and after the bidders
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 25 of 31
+
+=== Page 26 ===
+SARS CONFIDENTIAL
+appointment as a service provider or vendor.
+10.8.4 In the event that any bidder utilises any third party intellectual property, in terms of a license, to
+submit a bid, or that such third party intellectual property will be utilised to fulfil SARS’ business
+requirements for the bid, bidders firstly warrant that they have the rights to do so, and secondly,
+agree to fully indemnify SARS against in any claims whatsoever arising from the application of third
+party intellectual property in the SARS environment and on the basis of SARS’ indemnity rights in
+the Indemnity clause above.
+10.9 Limitation of liability
+10.9.1 A bidder participates in this RFP process entirely at its own risk and cost. SARS will not be liable to
+compensate a bidder on any grounds whatsoever for any costs incurred or any damages suffered
+as a result of the bidder’s participation in this RFP process.
+10.10 Preparation costs
+10.10.1 A bidder will bear all its costs in preparing, submitting, delivering, and presenting any response or
+proposal to this RFP and all other costs incurred by it throughout the RFP process. No statement in
+this RFP will be construed as placing SARS, its employees or agents under any obligation
+whatsoever, including in respect of costs, expenses or losses incurred by the bidders in the
+preparation of their response to this RFP.
+10.11 Precedence
+10.11.1 The terms and conditions of this document will prevail over any information provided during any
+briefing session or communication, whether oral or written, unless such information is official written
+communication, as set out per the Communication paragraph in this document, and that such
+information expressly states that it amends this document.
+10.12 Responsibility for bidder’s personnel and subcontractors
+10.12.1 A bidder is responsible for ensuring that its personnel (including agents, officers, directors,
+employees, advisors and other representatives of a bidder), its subcontractors (if any), and personnel
+of its subcontractors comply with all the terms and conditions of this RFP.
+10.12.2 If SARS allows a bidder to make use of subcontractors, such subcontractors will at all times remain
+the responsibility of the bidder and SARS will not under any circumstances be liable for any losses
+or damages incurred by such subcontractors.
+10.12.3 The proposal shall however be awarded to the bidder as a primary contractor who shall be
+responsible for the management of the awarded proposal. No separate contract shall be entered into
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 26 of 31
+
+=== Page 27 ===
+SARS CONFIDENTIAL
+between SARS and/or its client and any such subcontractors.
+10.12.4 If a bidder includes evidence of experience of individuals that are not currently employed by the said
+bidder, then the bidder is required include in their submission a letter or agreement from the
+respective individual whose evidence of experience is included in the proposal, that the individual is
+aware and is in agreement that their evidence of experience may be included for tendering purposes,
+and that the said individual confirms to commit and will make him/herself available for the contract
+period should the contract be awarded.
+10.12.5 If a bidder includes experience of an entity other than the bidder itself, then the bidder must include
+in their submission a letter or agreement from the respective entity that the entity is aware and agrees
+that their experience may be included for tendering purposes. Copies of the signed agreements
+between the relevant parties must be attached to the proposal responses.
+10.13 Prohibition of participation in resultant tender
+10.13.1 Any bidder, whether participating in a trust, joint venture, consortium and/or subcontracting
+arrangement, who participates in preparatory work on the basis of which another tender will flow,
+may not participate in the resultant tender because of the advantage of having been privy to the
+underlying preparatory work.
+10.14 RFP not an offer
+10.14.1 This RFP does not constitute an offer to do business with SARS, but merely serves as an invitation
+to bidders to facilitate a requirements-based decision process. Nothing in this RFP or any other
+communication made between SARS (including its officers, directors, employees, advisers and
+representatives) is a representation that SARS will offer, award or enter into an agreement with the
+bidder.
+10.15 SARS’ oath / affirmation of secrecy
+10.15.1 SARS has a Policy in terms of which the successful bidder; key personnel or any other personnel as
+may be determined by SARS will be required, upon award, to individually take a mandatory oath/
+declaration/ affirmation of secrecy. The award will therefore be made subject to the condition that the
+successful bidder along with the personnel referred to above comply with the afore mentioned Policy.
+10.16 Screening and vetting of a bidder
+10.16.1 Acceptance of a bidder’s proposal is subject to the condition that both the successful bidder and its
+personnel providing the goods and services, must be screened and cleared by the appropriate
+authorities to the grade of clearance in line with SARS’ applicable policies.
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 27 of 31
+
+=== Page 28 ===
+SARS CONFIDENTIAL
+10.16.2 Obtaining the necessary clearance is the responsibility of the successful bidder concerned. If the
+successful bidder appoints a subcontractor, the same provisions and measures will apply to the
+subcontractor.
+10.16.3 The bidders shall supply and maintain a list of personnel involved on the project indicating their
+clearance status.
+10.17 Tax compliance
+10.17.1 It is a requirement that any supplier conducting business with SARS is tax compliant at the date of
+award of a contract / bid and remains tax compliant throughout the duration of their contracts with
+SARS.
+10.17.2 Verification of tax compliance status prior to award
+10.17.2.1 SARS must verify supplier/ bidder’s tax compliance status prior to the awarding
+of a contract.
+10.17.2.2 No contract / bid may be awarded to a supplier who is not tax compliant.
+10.17.2.3 Where the recommended supplier / bidder is not tax compliant, it must be notified
+in writing of their non-compliant status and be granted a minimum of seven (7)
+working days to submit written proof regarding their tax compliance status with
+SARS or proof that arrangement has been made with SARS to meet their
+outstanding tax obligations.
+10.17.2.4 Should the recommended bidder/ supplier fail to provide written roof of their tax
+compliance status as contemplated in paragraph 10.17.2.3 above, SARS as the
+procuring entity must reject the bid submitted.
+10.17.2.5 Accordingly, the supplier / bidder is responsible to provide SARS with proof of its
+tax compliance status which must be verified through the Central Supplier
+Database or eFiling.
+10.17.3 Verification and/or confirmation of tax compliance status during the course and scope of
+executing awarded contract
+10.17.3.1 SARS reserves the right to request the supplier or successful bidder to provide
+written proof of tax compliance status at any time during the execution of the awarded contract.
+10.17.3.2 Further, SARS reserves the right to withdraw an award made, or cancel a contract
+concluded with a supplier / successful bidder in the event that it is established that such supplier /
+bidder was in fact not tax compliant at the time of the award.
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 28 of 31
+
+=== Page 29 ===
+SARS CONFIDENTIAL
+10.17.3.3 Furthermore, SARS reserves the right to cancel a contract with a supplier
+/ successful bidder in the event that such supplier/bidder does not remain tax compliant for the full
+term of its contract.
+10.17.4 In line with SARS’s strategic objectives, the directors / owners of the bidding entity who are not tax
+compliant may be referred to the SARS tax compliance unit for further investigation in order to
+achieve full tax compliance.
+10.17.5 In terms of section 3 of the Tax Administration Act, Act No. 28 of 2011, SARS is responsible for the
+administration of a tax Act under the control or direction of the Commissioner for SARS. Accordingly,
+SARS may as part of the administration of a tax Act exercise its powers, inter alia, to collect revenue
+due to the fiscus and enforce compliance with legislation administered by the Commissioner for
+SARS.
+10.18 Tender defaulters and restricted suppliers
+10.18.1 No bid will be awarded to a bidder whose name (or any of its members, directors, partners or trustees)
+appears on the National Treasury’s Register for Tender Defaulters or the National Treasury’s
+Database of Restricted Suppliers.
+10.19 Local production and content
+10.19.1 SARS supports and promotes local production and local content, environmentally friendly products,
+and sustainable sourcing.
+10.19.2 To enable this objective to be adequately assessed and as part of contract management, bidders
+shall advise SARS of its local and regional strategy and its initiatives to involve, support and use
+local/regional entities and workforce.
+10.19.3 The appointed supplier shall provide and use, for the performance of this contract, local
+subcontractors or locally acquired materials, equipment and facilities, to the extent available and
+within reasonable costs, to produce the quality and quantity of work and materials required by this
+contract.
+10.20 Validity of information
+10.20.1 SARS has made reasonable efforts to ensure the accuracy of the information contained in this RFP.
+However, neither SARS, nor its employees, officers, advisers or agents will be liable (directly or
+otherwise) to a bidder or any third party for any inaccuracy or omission of any information in the RFP
+or in respect of any additional information SARS may provide to a bidder as part of the RFP process.
+10.20.2 A bidder is deemed to have examined this RFP and any other information supplied by SARS to the
+bidder and to have satisfied itself as to the correctness and sufficiency of such information before
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 29 of 31
+
+=== Page 30 ===
+SARS CONFIDENTIAL
+submitting any of its responses.
+10.21 Governing law
+10.21.1 This RFP and any resultant agreement shall be governed by the laws of the Republic of South Africa.
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 30 of 31
+
+=== Page 31 ===
+SARS CONFIDENTIAL
+11 CHECKLIST OF RETURNABLES
+Table 11: Checklist of returnable documents
+Comply Do not
+Checklist of returnable documents
+comply
+1. A hardcopy and an electronic copy RFP proposal submission
+has been submitted for this RFP.
+2. Complete set of Financial models (File 2) and is not included in
+the mandatory file (File 1).
+3. The tender proposal has been organised as per the format
+required for this tender (paragraph 6).
+4. SBD 1: Invitation to bid form has been completed and signed.
+5. SBD 4: Bidder’s Disclosure has been completed and signed.
+6. SBD 6.1: Preference points claim form has been completed,
+points for B-BBEE / specific goals claimed, and signed.
+7. Proof of registration on the Central Supplier Database (CSD) has
+been submitted.
+8. Draft Agreement / General Conditions of Contract (GCC) has
+been completed and signed.
+9. A complete set of three (3) most recent annual financial
+statements has been included.
+10. All the mandatory evaluation requirements have been submitted
+with this bid.
+11. Stage 1 requirements
+12. All the B-BBEE/specific goals evaluation and specific goal
+requirements have been submitted with this bid.
+© South African Revenue Service Guidelines, Conditions and Instructions
+Page 31 of 31

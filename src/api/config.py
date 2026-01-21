@@ -4,7 +4,7 @@ import os
 from functools import lru_cache
 from typing import List
 
-from pydantic import Field, field_validator
+from pydantic import ConfigDict, Field, field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -50,17 +50,18 @@ class Settings(BaseSettings):
 
     # Application
     app_name: str = Field(default="Tender Tracker Pro", description="Application name")
-    app_version: str = Field(default="1.0.0", description="Application version")
+    app_version: str = Field(default="1.0.3", description="Application version")
 
     @property
     def cors_origins_list(self) -> List[str]:
         """Parse CORS origins string into list."""
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
+    model_config = ConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+    )
 
 
 @lru_cache()

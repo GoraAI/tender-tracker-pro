@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 
 class ScoreBase(BaseModel):
@@ -45,5 +45,4 @@ class ScoreResponse(ScoreBase):
         else:
             return "Poor"
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

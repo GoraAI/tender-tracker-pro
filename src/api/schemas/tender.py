@@ -5,7 +5,7 @@ from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class TenderBase(BaseModel):
@@ -36,8 +36,7 @@ class TenderResponse(TenderBase):
     relevance_category: Optional[str] = None
     score_explanation: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TenderListItem(BaseModel):
@@ -55,8 +54,7 @@ class TenderListItem(BaseModel):
     relevance_category: Optional[str] = None
     score_explanation: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TenderList(BaseModel):

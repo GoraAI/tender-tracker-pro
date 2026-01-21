@@ -9,8 +9,8 @@ from pathlib import Path
 
 import pytest
 
-from llm.models import ModelInfo, ModelStatus
-from llm.storage import ModelStorage
+from src.llm.models import ModelInfo, ModelStatus
+from src.llm.storage import ModelStorage
 
 
 @pytest.fixture

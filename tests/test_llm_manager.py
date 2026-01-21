@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from llm.manager import ModelManager
-from llm.models import ModelStatus
+from src.llm.manager import ModelManager
+from src.llm.models import ModelStatus
 
 
 @pytest.fixture

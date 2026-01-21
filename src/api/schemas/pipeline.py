@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional, Any
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class PipelineRunRequest(BaseModel):
@@ -33,8 +33,7 @@ class JobResponse(BaseModel):
     completed_at: Optional[datetime]
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class JobLogResponse(BaseModel):
@@ -46,8 +45,7 @@ class JobLogResponse(BaseModel):
     extra_data: Optional[dict[str, Any]]
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class JobDetailResponse(JobResponse):

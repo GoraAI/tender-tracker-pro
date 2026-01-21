@@ -1,8 +1,8 @@
 # Tender Tracker Pro
 
-**Version:** 1.0.0
-**Architecture:** Full-Stack Web Application
-**AI Engine:** Gemma 3n (Local Inference) with Keyword Fallback
+**Version:** 1.0.3
+**Architecture:** Backend API + Native Android App
+**AI Engine:** On-Device Gemma 3n (MediaPipe)
 
 ---
 
@@ -14,53 +14,81 @@ Tender Tracker Pro is an intelligent, privacy-first tender discovery and analysi
 
 - **Navigation-First Architecture**: Playwright-based browser automation mimics human behavior
 - **PDF as Source of Truth**: All data extracted from PDF documents
-- **Local AI Processing**: Gemma 3n models for zero-cloud dependency (with keyword fallback)
+- **On-Device AI Processing**: Gemma 3n models for zero-cloud dependency
 - **Smart Scoring**: Relevance scoring 0-100 based on user criteria
-- **Modern Web UI**: React + Material UI with Glassmorphism design
-- **Real-time Updates**: WebSocket-based job progress streaming
+- **Native Android App**: Material Design 3 UI with Jetpack Compose
+- **Real-time Sync**: Background tender synchronization with push notifications
 - **User Management**: JWT authentication with personalized scoring
+- **Offline-First**: Local database with full-text search
 
 ---
 
 ## Architecture
 
+### Dual-Platform System
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                         FRONTEND (React + MUI)                       │
+│              ANDROID APP (Kotlin + Jetpack Compose)                 │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐  │
-│  │Dashboard │ │ Tenders  │ │ Pipeline │ │ Settings │ │   Auth   │  │
+│  │  Login   │ │Dashboard │ │ Tenders  │ │   Chat   │ │ Profile  │  │
 │  └──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘  │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │         Gemma 3n On-Device LLM (MediaPipe)                    │  │
+│  │         Room Database + FTS5 Search (Offline-First)           │  │
+│  └───────────────────────────────────────────────────────────────┘  │
 └──────────────────────────────┬──────────────────────────────────────┘
-                               │ REST + WebSocket
+                               │ REST API + WorkManager Sync
 ┌──────────────────────────────┼──────────────────────────────────────┐
-│                         API (FastAPI)                                │
+│                    BACKEND API (FastAPI)                            │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐  │
-│  │  /auth   │ │/tenders  │ │/pipeline │ │ /config  │ │/dashboard│  │
+│  │  /auth   │ │/tenders  │ │/pipeline │ │/analytics│ │/dashboard│  │
 │  └──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘  │
 │         └────────────────────┴────────────────────┘                 │
-│                    SQLAlchemy ORM (PostgreSQL/SQLite)               │
+│                    SQLAlchemy ORM (PostgreSQL)                      │
 └──────────────────────────────┬──────────────────────────────────────┘
                                │
 ┌──────────────────────────────┼──────────────────────────────────────┐
 │                    BACKEND PROCESSING                                │
 │  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐       │
-│  │ Navigator  │ │ Downloader │ │ Extractor  │ │  Scorer    │       │
-│  │(Playwright)│ │   (PDF)    │ │(pdfplumber)│ │(LLM/kw)    │       │
+│  │ Navigator  │ │ Downloader │ │ Extractor  │ │  Analyzer  │       │
+│  │(Playwright)│ │   (PDF)    │ │(pdfplumber)│ │  (Gemma)   │       │
 │  └────────────┘ └────────────┘ └────────────┘ └────────────┘       │
 └─────────────────────────────────────────────────────────────────────┘
 ```
+
+### Component Breakdown
+
+**Backend (Python + FastAPI)**
+- REST API with JWT authentication
+- PostgreSQL database with SQLAlchemy
+- Playwright browser automation
+- PDF extraction with pdfplumber
+- Scheduled scraping with APScheduler
+- Deployed on Railway
+
+**Android App (Kotlin + Compose)**
+- Native Android (minSdk 31, targetSdk 35)
+- Jetpack Compose Material Design 3 UI
+- Clean Architecture (Presentation/Domain/Data)
+- MVI state management
+- Room database with FTS5 search
+- Hilt dependency injection
+- MediaPipe for on-device Gemma inference
+- WorkManager for background sync
 
 ---
 
 ## Quick Start
 
-### Prerequisites
+### Backend API Setup
 
-- Python 3.10+
-- Node.js 18+
-- Docker & Docker Compose (for production)
+#### Prerequisites
+- Python 3.12+
+- PostgreSQL 15+
+- Docker (optional)
 
-### Development Setup
+#### Development
 
 ```bash
 # Clone and enter directory
@@ -76,206 +104,110 @@ pip install -r requirements.txt
 # Install Playwright browsers
 playwright install chromium
 
-# Install frontend dependencies
-cd frontend && npm install && cd ..
-
 # Copy and configure environment
 cp .env.example .env
-# Edit .env with your settings
+# Edit .env with your DATABASE_URL and JWT_SECRET_KEY
+
+# Run database migrations
+alembic upgrade head
 
 # Seed the database with sources
 python scripts/seed_sources.py
 
-# Start backend (terminal 1)
+# Start backend
 uvicorn src.api.main:app --reload --port 8000
-
-# Start frontend (terminal 2)
-cd frontend && npm run dev
 ```
 
-Open http://localhost:5173 in your browser.
-
-### API Setup (Detailed)
-
-#### 1. Database Setup
-
-```bash
-# Start PostgreSQL container
-docker-compose up -d db
-
-# Verify database is running
-docker-compose ps
-
-# Expected output:
-# NAME                 SERVICE   STATUS    PORTS
-# tender-tracker-db    db        running   0.0.0.0:5432->5432/tcp
-```
-
-#### 2. Configure Environment
-
-```bash
-# Copy environment template
-cp .env.example .env
-
-# Edit .env and set these variables:
-# - DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/tender_tracker
-# - JWT_SECRET_KEY=<generate-a-secure-random-key>
-# - CORS_ORIGINS=http://localhost:5173,http://localhost:3000
-```
-
-Generate a secure JWT secret:
-```bash
-python -c "import secrets; print(secrets.token_urlsafe(32))"
-```
-
-#### 3. Run Database Migrations
-
-```bash
-# Install dependencies if not done already
-pip install -r requirements.txt
-
-# Run Alembic migrations to create tables
-alembic upgrade head
-
-# Verify migrations
-alembic current
-
-# Expected output: head (current revision)
-```
-
-#### 4. Seed Initial Data
-
-```bash
-# Populate sources table with configured tender sources
-python scripts/seed_sources.py
-
-# Expected output: Created/Updated 3 sources
-```
-
-#### 5. Start the API
-
-```bash
-# Development mode with auto-reload
-uvicorn src.api.main:app --reload --port 8000
-
-# Production mode
-uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --workers 4
-```
-
-The API will be available at:
+API available at:
 - **API Root**: http://localhost:8000/api/v1/
 - **Interactive Docs**: http://localhost:8000/docs
-- **OpenAPI JSON**: http://localhost:8000/openapi.json
 - **Health Check**: http://localhost:8000/health
 
-#### 6. Test the API
+#### Production (Railway)
 
-```bash
-# Create a test user
-curl -X POST http://localhost:8000/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "test@example.com",
-    "password": "SecurePass123",
-    "full_name": "Test User",
-    "company_name": "Test Company"
-  }'
+The backend is deployed on Railway at:
+- **Production URL**: https://tender-tracker-pro-production.up.railway.app/api/v1/
 
-# Login and get token
-curl -X POST http://localhost:8000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "test@example.com",
-    "password": "SecurePass123"
-  }'
+Configuration:
+- Uses Dockerfile builder
+- PostgreSQL linked service
+- Playwright with `--with-deps` flag
+- Uvicorn with `--loop asyncio` (DNS fix)
+- Healthcheck timeout: 300s
 
-# Use the token from login response
-export TOKEN="your-jwt-token-here"
-
-# Test authenticated endpoint
-curl http://localhost:8000/api/v1/auth/me \
-  -H "Authorization: Bearer $TOKEN"
-```
-
-#### 7. Run API Tests
-
-```bash
-# Run all API tests
-pytest tests/api/ -v
-
-# Run with coverage
-pytest tests/api/ --cov=src.api --cov-report=html
-
-# View coverage report
-open htmlcov/index.html
-```
-
-#### Database Management
-
-```bash
-# Create a new migration
-alembic revision --autogenerate -m "description of changes"
-
-# Apply migrations
-alembic upgrade head
-
-# Rollback one migration
-alembic downgrade -1
-
-# View migration history
-alembic history
-
-# Reset database (development only)
-alembic downgrade base
-alembic upgrade head
-```
-
-### Docker Deployment
-
-```bash
-# Copy environment configuration
-cp .env.example .env
-# Edit .env with production values (especially JWT_SECRET_KEY, POSTGRES_PASSWORD)
-
-# Build and start all services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
-```
-
-Services:
-- Frontend: http://localhost:3000
-- API: http://localhost:8000
-- API Docs: http://localhost:8000/docs
-- Database: localhost:5432
+See `Dockerfile` and `railway.json` for full configuration.
 
 ---
 
-## Feature Status
+### Android App Setup
 
-### Backend (100% Complete)
+#### Prerequisites
+- Android Studio Ladybug or later
+- JDK 21
+- Android SDK 35
+- Physical device or emulator (Android 12+)
 
-| Feature | Status | Description |
-|---------|--------|-------------|
-| FR-NAV-001 | ✅ Complete | Browser Navigation Engine |
-| FR-NAV-002 | ✅ Complete | PDF Link Discovery |
-| FR-NAV-003 | ✅ Complete | Direct PDF Download |
-| FR-EXTRACT-001 | ✅ Complete | PDF Text Extraction |
-| FR-LLM-001 | ✅ Complete | Gemma 3n Model Management |
-| FR-LLM-002 | ✅ Complete | Tender Information Extraction |
-| FR-LLM-003 | ✅ Complete | Relevance Scoring |
+#### Development
 
-### Frontend (100% Complete)
+```bash
+# Open Android Studio
+# File -> Open -> /path/to/tender_tracker_pro/android
 
-| Feature | Status | Description |
-|---------|--------|-------------|
-| FR-WEB-001 | ✅ Complete | Database & API Foundation |
-| FR-WEB-002 | ✅ Complete | React Frontend Core |
-| FR-WEB-003 | ✅ Complete | Pipeline Control & Settings |
+# Configure backend URL
+# Edit: android/app/src/main/java/com/tendertracker/app/di/NetworkModule.kt
+# For local testing:
+# - Emulator: http://10.0.2.2:8000/api/v1/
+# - Physical: http://127.0.0.1:8000/api/v1/ (with adb reverse)
+
+# Build and run
+# Click "Run" button in Android Studio
+```
+
+#### Production Build (GitHub Actions)
+
+Push to repository triggers CI/CD:
+
+```bash
+git add -A
+git commit -m "feat: your changes"
+git push
+
+# Monitor build
+gh run list --limit 3
+gh run watch
+
+# Download APK
+gh run download <run-id> -n app-debug
+adb install -r app-debug.apk
+```
+
+**Important**: Never build Android locally on ARM64/aarch64 machines. Always use GitHub Actions CI.
+
+---
+
+## Tech Stack
+
+### Backend
+- **Language**: Python 3.12
+- **Framework**: FastAPI + Uvicorn
+- **Database**: PostgreSQL 15 with SQLAlchemy 2.0 (async)
+- **ORM**: Alembic for migrations
+- **Browser Automation**: Playwright
+- **PDF Processing**: pdfplumber, PyPDF2
+- **Authentication**: JWT with python-jose, bcrypt
+- **Scheduling**: APScheduler
+- **Deployment**: Railway (Docker)
+
+### Android
+- **Language**: Kotlin 1.9+
+- **UI**: Jetpack Compose + Material Design 3
+- **Architecture**: Clean Architecture (MVI pattern)
+- **Database**: Room + SQLite FTS5
+- **DI**: Hilt (Dagger)
+- **Networking**: Retrofit + OkHttp
+- **AI**: MediaPipe Tasks GenAI (Gemma 3n)
+- **Background Work**: WorkManager
+- **Build**: Gradle 8+ with Kotlin DSL
 
 ---
 
@@ -283,35 +215,52 @@ Services:
 
 ```
 tender_tracker_pro/
-├── config/
-│   └── sources/           # Source configuration YAML files
-├── documents/             # Downloaded PDFs
-├── frontend/              # React frontend
-│   ├── src/
-│   │   ├── api/           # API clients
-│   │   ├── components/    # UI components
-│   │   ├── hooks/         # Custom React hooks
-│   │   ├── pages/         # Page components
-│   │   └── theme/         # MUI theme (Glassmorphism)
-│   ├── Dockerfile
-│   └── package.json
-├── src/
-│   ├── api/               # FastAPI application
-│   │   ├── models/        # SQLAlchemy models
-│   │   ├── routers/       # API routes
-│   │   ├── schemas/       # Pydantic schemas
-│   │   ├── services/      # Business logic
-│   │   └── websocket/     # WebSocket handlers
-│   ├── navigator/         # Browser automation
-│   ├── extraction/        # Text extraction
-│   ├── scoring/           # Relevance scoring
-│   └── llm/               # LLM management
-├── tests/                 # Test suite
-├── scripts/               # Utility scripts
-├── docker-compose.yml     # Docker orchestration
-├── Dockerfile.api         # Backend container
-├── requirements.txt       # Python dependencies
-└── .env.example           # Environment template
+├── src/                      # Python backend
+│   ├── api/                  # FastAPI endpoints
+│   │   ├── main.py          # App entry
+│   │   ├── config.py        # Settings with DATABASE_URL fix
+│   │   ├── routers/         # API routes (auth, tenders, pipeline, etc.)
+│   │   ├── models/          # SQLAlchemy models
+│   │   ├── schemas/         # Pydantic schemas
+│   │   └── services/        # Business logic
+│   ├── navigator/           # Playwright browser automation
+│   ├── extraction/          # PDF extraction (pdfplumber)
+│   ├── llm/                 # LLM model management
+│   ├── scoring/             # Tender relevance scoring
+│   └── scrapers/            # Tender scraping logic
+│
+├── android/                 # Android app
+│   └── app/src/main/java/com/tendertracker/app/
+│       ├── di/              # Hilt DI (NetworkModule.kt has BASE_URL)
+│       ├── ui/              # Compose screens
+│       │   ├── auth/        # Login/Register
+│       │   ├── dashboard/   # Dashboard
+│       │   ├── tenders/     # Tender list/detail
+│       │   └── chat/        # AI chat interface
+│       ├── data/            # Repository layer
+│       ├── domain/          # Business logic
+│       └── gemma/           # On-device Gemma LLM
+│
+├── config/                  # YAML scraper configs
+│   └── sources/             # Tender source configurations
+│
+├── tests/                   # Python tests (190 tests)
+│   ├── api/                 # API endpoint tests
+│   ├── integration/         # Integration tests
+│   └── *.py                 # Unit tests
+│
+├── openspec/                # OpenSpec change management
+│   ├── changes/            # Active changes
+│   ├── specs/              # Merged specs
+│   └── archive/            # Completed changes
+│
+├── Dockerfile               # Railway deployment
+├── railway.json             # Railway config
+├── requirements-prod.txt    # Production deps
+├── requirements.txt         # Dev deps
+├── .env.example             # Environment template
+├── CLAUDE.md               # Claude Code knowledge base
+└── LESSONS_LEARNED.md      # Development patterns
 ```
 
 ---
@@ -324,7 +273,7 @@ tender_tracker_pro/
 - `GET /api/v1/auth/me` - Current user info
 
 ### Tenders
-- `GET /api/v1/tenders` - List tenders (paginated)
+- `GET /api/v1/tenders` - List tenders (paginated, filtered)
 - `GET /api/v1/tenders/:id` - Tender detail
 
 ### Pipeline
@@ -334,16 +283,15 @@ tender_tracker_pro/
 - `POST /api/v1/pipeline/score` - Score tenders
 - `POST /api/v1/pipeline/full` - Run full pipeline
 - `GET /api/v1/pipeline/jobs` - List jobs
-- `WS /ws/pipeline/jobs/:id/stream` - Real-time job updates
-
-### Configuration
-- `GET /api/v1/config/criteria` - List scoring criteria
-- `POST /api/v1/config/criteria` - Create criteria
-- `GET /api/v1/config/sources` - List tender sources
 
 ### Dashboard
 - `GET /api/v1/dashboard/stats` - Overview statistics
 - `GET /api/v1/dashboard/recent` - Recent high-priority tenders
+
+### Analytics
+- `GET /api/v1/analytics/funnel` - Opportunity funnel
+- `GET /api/v1/analytics/costs` - Cost tracking
+- `GET /api/v1/analytics/compliance` - Compliance status
 
 Full API documentation: http://localhost:8000/docs
 
@@ -351,48 +299,170 @@ Full API documentation: http://localhost:8000/docs
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DATABASE_URL` | Database connection string | SQLite (dev) |
-| `JWT_SECRET_KEY` | JWT signing key | Change in production! |
-| `CORS_ORIGINS` | Allowed CORS origins | localhost |
-| `DEBUG` | Enable debug mode | true |
+Create a `.env` file in the project root:
 
-See `.env.example` for full list.
+```bash
+# Database
+DATABASE_URL=postgresql+asyncpg://user:pass@localhost:5432/tender_tracker
+
+# JWT Authentication
+JWT_SECRET_KEY=<generate-secure-random-key>
+JWT_ALGORITHM=HS256
+JWT_EXPIRE_MINUTES=1440
+
+# CORS
+CORS_ORIGINS=http://localhost:3000,http://localhost:5173
+
+# API Server
+API_HOST=0.0.0.0
+API_PORT=8000
+DEBUG=false
+
+# Application
+APP_NAME=Tender Tracker Pro
+APP_VERSION=1.0.3
+```
+
+Generate JWT secret:
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+```
 
 ---
 
 ## Testing
 
+### Backend Tests
+
 ```bash
-# Run all tests
-pytest tests/
+# Run all tests (190 tests)
+cd tender_tracker_pro
+source venv/bin/activate
+pytest tests/ -v
 
 # Run with coverage
 pytest --cov=src tests/
 
-# Run integration tests (requires network)
-pytest tests/integration/ -v
+# Run specific test suite
+pytest tests/api/ -v
+```
+
+### Android Tests
+
+```bash
+# Unit tests
+cd android
+./gradlew test
+
+# Instrumentation tests (requires device/emulator)
+./gradlew connectedAndroidTest
+```
+
+**Note**: Android builds must run via GitHub Actions on ARM64 machines.
+
+---
+
+## Deployment
+
+### Backend (Railway)
+
+1. **Connect Repository**: Link GitHub repo to Railway
+2. **Configure Service**:
+   - Builder: `DOCKERFILE`
+   - Root Directory: `/`
+   - Dockerfile Path: `./Dockerfile`
+3. **Link PostgreSQL**: Add PostgreSQL service
+4. **Set Environment Variables**: Add `DATABASE_URL`, `JWT_SECRET_KEY`, etc.
+5. **Deploy**: Push to GitHub triggers deployment
+
+Health check: `https://your-app.up.railway.app/health`
+
+### Android (GitHub Actions)
+
+APK builds automatically on push:
+
+```bash
+# Trigger build
+git push origin master
+
+# Download APK
+gh run download <run-id> -n app-debug
+
+# Install on device
+adb install -r app-debug.apk
 ```
 
 ---
 
-## Tech Stack
+## Configured Tender Sources
 
-### Backend
-- Python 3.10+
-- FastAPI + Uvicorn
-- SQLAlchemy 2.0 (async)
-- PostgreSQL / SQLite
-- Playwright (browser automation)
-- pdfplumber (PDF extraction)
+| Source | URL | Status |
+|--------|-----|--------|
+| JHB Water | https://www.johannesburgwater.co.za/tenders | ✅ Active |
+| SARS | https://www.sars.gov.za/documents/procurement | ✅ Active |
 
-### Frontend
-- React 18 + TypeScript
-- Material UI v7
-- React Query (server state)
-- Zustand (client state)
-- Vite (build tool)
+Add more sources in `config/sources/`
+
+---
+
+## Development Workflow
+
+### Adding a New Feature
+
+1. **Create OpenSpec Proposal**:
+   ```bash
+   /openspec-proposal <feature-name>
+   ```
+
+2. **Wait for Approval**
+
+3. **Implement with TDD**:
+   - Write failing tests (RED)
+   - Implement feature (GREEN)
+   - Refactor (REFACTOR)
+
+4. **Run Verification**:
+   ```bash
+   /verify  # Lint + tests
+   ```
+
+5. **Ship Changes**:
+   ```bash
+   /ship "feat: add <feature>"
+   ```
+
+6. **Archive Spec**:
+   ```bash
+   /openspec-archive <feature-name>
+   ```
+
+---
+
+## Production Readiness
+
+**Current Status: 75% Production Ready**
+
+✅ **Complete**:
+- Backend API deployed and healthy
+- Android app building via CI/CD
+- Database schema complete
+- Authentication working
+- PDF scraping and extraction functional
+
+⚠️ **In Progress**:
+- On-device Gemma LLM integration (code complete, deployment pending)
+- Test suite health (190 tests, all collecting successfully)
+
+See `PROJECT_STATUS.md` for detailed roadmap.
+
+---
+
+## Key Documentation
+
+- **CLAUDE.md**: Claude Code knowledge base with mandatory protocols
+- **LESSONS_LEARNED.md**: Development patterns and best practices
+- **PROJECT_STATUS.md**: Feature status and next steps
+- **ARCHITECTURE_ACTUAL.md**: (To be created) Detailed architecture guide
 
 ---
 
@@ -402,4 +472,12 @@ Proprietary - Internal Use Only
 
 ---
 
-**Built with:** Python | FastAPI | React | Material UI | Playwright | pdfplumber
+## Support
+
+For issues or questions:
+- GitHub Issues: https://github.com/anthropics/claude-code/issues
+- API Docs: http://localhost:8000/docs
+
+---
+
+**Built with:** Python | FastAPI | Kotlin | Jetpack Compose | PostgreSQL | Playwright | MediaPipe

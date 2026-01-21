@@ -6,7 +6,7 @@ NO MOCK DATA - real database queries only.
 from datetime import date as date_type, datetime
 from typing import Optional
 from uuid import UUID
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 # =============================================================================
@@ -60,8 +60,7 @@ class CostItemResponse(BaseModel):
     frequency: Optional[str] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CostCategory(BaseModel):
@@ -119,8 +118,7 @@ class ComplianceItemResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ComplianceStatus(BaseModel):
@@ -205,8 +203,7 @@ class PipelineTenderResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PipelineStatus(BaseModel):
@@ -247,8 +244,7 @@ class TenderOutcomeResponse(BaseModel):
     days_to_payment: Optional[int] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class OutcomeAnalytics(BaseModel):
@@ -300,5 +296,4 @@ class CompanyProfileResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
