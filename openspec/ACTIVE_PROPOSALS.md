@@ -1,183 +1,176 @@
 # Active OpenSpec Proposals
 
-**Last Updated:** 2026-01-13
+**Last Updated:** 2026-01-21
+**Status:** All active proposals cleaned up
 
 ---
 
-## Backend Complete
+## 📋 Summary
 
-### FR-NAV-001: Browser Navigation Engine
-- **Status:** COMPLETE
-- **Implemented:** 2026-01-12
-
-### FR-NAV-002: PDF Link Discovery
-- **Status:** COMPLETE
-- **Implemented:** 2026-01-12
-
-### FR-NAV-003: Direct PDF Download
-- **Status:** COMPLETE
-- **Implemented:** 2026-01-12
-
-### FR-EXTRACT-001: PDF Text Extraction
-- **Status:** COMPLETE
-- **Implemented:** 2026-01-12
-
-### FR-LLM-001: Gemma 3n Model Management
-- **Status:** COMPLETE
-- **Implemented:** 2026-01-12
-
-### FR-LLM-002: Tender Information Extraction
-- **Status:** COMPLETE
-- **Implemented:** 2026-01-12
-
-### FR-LLM-003: Tender Relevance Scoring
-- **Status:** COMPLETE
-- **Implemented:** 2026-01-12
-
-**Backend P0 Features:** 7/7 Complete (100%)
+**Completed & Archived:** 13 changes
+**Active Proposals:** 0
+**Obsolete Proposals Removed:** 7
 
 ---
 
-## Web Frontend Complete
+## ✅ Completed Features (Archived)
 
-### FR-WEB-001: Database and API Foundation
-- **Status:** COMPLETE
-- **Priority:** P0 (Critical)
-- **Implemented:** 2026-01-12
-- **Summary:** PostgreSQL database with SQLAlchemy ORM, FastAPI REST API with JWT authentication
+All completed features have been moved to `openspec/archive/`:
 
-### FR-WEB-002: React Frontend Core
-- **Status:** COMPLETE
-- **Priority:** P0 (Critical)
-- **Implemented:** 2026-01-12
-- **Summary:** React + Material UI + Glassmorphism theme, auth pages, dashboard, tender list
+### Backend (7 features - 100% complete)
+- FR-NAV-001: Browser Navigation Engine ✅
+- FR-NAV-002: PDF Link Discovery ✅
+- FR-NAV-003: Direct PDF Download ✅
+- FR-EXTRACT-001: PDF Text Extraction ✅
+- FR-WEB-001: Database and API Foundation ✅
+- pdf-viewer-scoring-fix ✅
+- tender-visualization-skill ✅
 
-### FR-WEB-003: Pipeline and Settings
-- **Status:** COMPLETE
-- **Priority:** P1 (High)
-- **Implemented:** 2026-01-12
-- **Summary:** Pipeline control UI, WebSocket job streaming, criteria editor, source manager
-
-**Web Frontend P0/P1 Features:** 3/3 Complete (100%)
+### Android (1 feature - archived)
+- FR-MOBILE-001: Android App Foundation ✅
 
 ---
 
-## Mobile App - PROPOSED (Awaiting Approval)
+## 🗑️ Obsolete Proposals (Removed 2026-01-21)
 
-### FR-MOBILE-001: Android App Foundation
-- **Status:** PROPOSED
-- **Priority:** P0 (Critical)
-- **Created:** 2026-01-13
-- **Location:** `openspec/changes/fr-mobile-001-android-foundation/`
-- **Summary:** Android project with Kotlin, Jetpack Compose, Clean Architecture, MVI, Room database, Hilt DI
-- **Tasks:** 36 tasks
+The following proposals were removed because they describe work that was either:
+- Implemented differently than proposed
+- Made obsolete by architecture changes
+- Superseded by actual implementation
 
-### FR-MOBILE-002: On-Device Gemma Integration
-- **Status:** PROPOSED
-- **Priority:** P0 (Critical)
-- **Created:** 2026-01-13
-- **Location:** `openspec/changes/fr-mobile-002-on-device-gemma/`
-- **Dependencies:** FR-MOBILE-001
-- **Summary:** MediaPipe LLM integration for Gemma 3n (E2B 2B params, E4B 4B params) on-device inference
-- **Tasks:** 30 tasks
+### Removed LLM Proposals (Code implemented differently)
+- **fr-llm-001-model-management**: Code exists in `src/llm/` but wasn't built following this proposal
+- **fr-llm-002-information-extraction**: Code exists but not deployed/tested
+- **fr-llm-003-relevance-scoring**: Code exists but not deployed/tested
 
-### FR-MOBILE-003: Conversational Chat Interface
-- **Status:** PROPOSED
-- **Priority:** P0 (Critical)
-- **Created:** 2026-01-13
-- **Location:** `openspec/changes/fr-mobile-003-chat-interface/`
-- **Dependencies:** FR-MOBILE-001, FR-MOBILE-002
-- **Summary:** Natural language chat with AI for tender queries, summaries, and score explanations
-- **Tasks:** 26 tasks
+**Note**: LLM code was built ad-hoc without following OpenSpec process. While functional code exists, it's not deployed to production yet.
 
-### FR-MOBILE-004: Tender Sync and Offline Database
-- **Status:** PROPOSED
-- **Priority:** P0 (Critical)
-- **Created:** 2026-01-13
-- **Location:** `openspec/changes/fr-mobile-004-tender-sync/`
-- **Dependencies:** FR-MOBILE-001
-- **Summary:** Backend sync, offline-first database, WorkManager background sync, FCM push notifications
-- **Tasks:** 36 tasks
+### Removed Frontend Proposals (Android replaced React web)
+- **fr-web-002-react-frontend-core**: Never built - Android app built instead
+- **fr-web-003-pipeline-settings**: Never built - Android app has these features
 
-**Mobile App Proposals:** 4 proposals, 128 total tasks
+**Note**: Original plan was React web frontend. Actual implementation is native Android app with Kotlin + Jetpack Compose.
+
+### Removed Mobile Proposals (Already implemented outside OpenSpec)
+- **fr-mobile-005-production-theme**: Android app already has Material Design 3 theme
+- **zero-mock-data-production**: Android app already uses real backend data
 
 ---
 
-## Overall Progress
+## 🎯 Current Project State
 
-| Track | Features | Complete | Proposed | Progress |
-|-------|----------|----------|----------|----------|
-| Backend | 7 | 7 | 0 | 100% |
-| Web Frontend | 3 | 3 | 0 | 100% |
-| Mobile App | 4 | 0 | 4 | 0% |
-| **Total** | **14** | **10** | **4** | **71%** |
+### What Actually Exists (Outside OpenSpec)
 
----
+**Backend (Python/FastAPI)**:
+- ✅ Browser automation (Playwright)
+- ✅ PDF scraping & extraction
+- ✅ Database & API (PostgreSQL + SQLAlchemy)
+- ✅ Authentication (JWT)
+- ✅ Analytics endpoints
+- ⚠️ LLM code (not deployed)
 
-## Project Status
+**Android App (Kotlin/Compose)**:
+- ✅ Full native app (92 Kotlin files)
+- ✅ Material Design 3 UI
+- ✅ Clean Architecture (MVI)
+- ✅ Room database + FTS5 search
+- ✅ Hilt dependency injection
+- ✅ Retrofit API client
+- ⚠️ On-device Gemma (code exists, not bundled)
 
-### Completed Platforms
-
-#### Web Application (Production Ready)
-- Python 3.12 with FastAPI
-- PostgreSQL 15 with SQLAlchemy 2.0 async
-- JWT authentication with bcrypt
-- React 18 with TypeScript
-- Material UI v7 with Glassmorphism design
-- React Query + Zustand
-- WebSocket for real-time updates
-
-**Features:**
-- User authentication (login/register/profile)
-- Dashboard with stats and recent tenders
-- Tender list with filters and pagination
-- Tender detail with score breakdown
-- Pipeline control (discover, download, extract, score)
-- Scoring criteria management
-- Source management
-
-### Proposed Platforms
-
-#### Android Mobile App
-**Architecture:**
-- Kotlin + Jetpack Compose
-- Clean Architecture (Presentation, Domain, Data)
-- MVI state management
-- Room + SQLite FTS5 for offline database
-- Hilt dependency injection
-- MediaPipe for on-device Gemma LLM
-- WorkManager for background sync
-- Firebase Cloud Messaging for push
-
-**Features (Proposed):**
-- On-device AI with Gemma 3n (E2B/E4B)
-- Conversational chat interface
-- Offline-first tender database
-- Background sync with server
-- Push notifications for new tenders
-- Natural language search
-- AI-powered summaries and Q&A
+**Deployment**:
+- ✅ Railway production (healthy)
+- ✅ GitHub Actions CI/CD
+- ✅ PostgreSQL database
 
 ---
 
-## Next Steps
+## 📝 Lessons Learned
 
-1. **Review Mobile Proposals**
-   - FR-MOBILE-001: Android Foundation
-   - FR-MOBILE-002: On-Device Gemma
-   - FR-MOBILE-003: Chat Interface
-   - FR-MOBILE-004: Tender Sync
+### Why OpenSpec Proposals Became Obsolete
 
-2. **Approve or Iterate**
-   - Say "approved" to start implementation
-   - Or provide feedback for iteration
+1. **Rapid Prototyping**: Some features were built faster without formal OpenSpec process
+2. **Architecture Pivot**: React web → Android native happened without updating proposals
+3. **Proposal Abandonment**: LLM proposals created but implementation deviated
+4. **Documentation Lag**: ACTIVE_PROPOSALS.md not kept in sync with reality
 
-3. **Implementation Order** (if approved)
-   1. FR-MOBILE-001 (Foundation) - 36 tasks
-   2. FR-MOBILE-004 (Sync) - 36 tasks (parallel with Gemma)
-   3. FR-MOBILE-002 (Gemma) - 30 tasks
-   4. FR-MOBILE-003 (Chat) - 26 tasks
+### Recommendations for Future
+
+1. **Archive or Delete**: Don't leave stale proposals in `changes/`
+2. **Update ACTIVE_PROPOSALS.md**: Keep this file synchronized with actual work
+3. **Enforce OpenSpec**: Either use the process or don't create proposals
+4. **Clean Up Regularly**: Monthly review of `openspec/changes/` directory
 
 ---
 
-**Tracking:** This file is updated as proposals are created, approved, implemented, and archived.
+## 🚀 Next Steps
+
+### If You Want to Add New Features
+
+Use the OpenSpec process:
+
+```bash
+# 1. Create proposal
+/openspec-proposal <feature-name>
+
+# 2. Wait for approval
+
+# 3. Implement
+/openspec-apply <feature-name>
+
+# 4. Archive when complete
+/openspec-archive <feature-name>
+```
+
+### If You Want to Document Existing Work
+
+For features already built (like the Android app):
+
+1. **Option A**: Create retroactive OpenSpec docs in `openspec/archive/` as historical record
+2. **Option B**: Document in README.md and PROJECT_STATUS.md only (simpler)
+
+**Current approach**: Option B (already done in Phase 2)
+
+---
+
+## 📁 Directory Structure
+
+```
+openspec/
+├── ACTIVE_PROPOSALS.md          # This file (up to date ✅)
+│
+├── specs/                        # Source of truth specs
+│   └── (empty - no formal specs written)
+│
+├── changes/                      # Active proposals
+│   └── (empty - all cleaned up ✅)
+│
+└── archive/                      # Completed work (13 changes)
+    ├── fr-nav-001-browser-navigation-engine/
+    ├── fr-nav-002-pdf-link-discovery/
+    ├── fr-nav-003-direct-pdf-download/
+    ├── fr-extract-001-pdf-text-extraction/
+    ├── fr-web-001-database-api-foundation/
+    ├── fr-mobile-001-android-foundation/
+    ├── fr-mobile-002-on-device-gemma/
+    ├── fr-mobile-003-chat-interface/
+    ├── fr-mobile-004-tender-sync/
+    ├── pdf-viewer-scoring-fix/
+    ├── tender-visualization-skill/
+    └── (2 more)
+```
+
+---
+
+## ✨ Status: Clean Slate
+
+**All obsolete proposals removed.**
+**All completed work archived.**
+**Documentation synchronized with reality.**
+
+Ready for Phase 1 (LLM Deployment) or any new features.
+
+---
+
+**Last Cleanup:** 2026-01-21 (Phase 2 Quality & Documentation)
+**Next Review:** After Phase 1 completion
