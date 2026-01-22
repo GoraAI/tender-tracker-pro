@@ -22,7 +22,7 @@ sealed class Screen {
     data class TenderDetail(val tenderId: String) : Screen()
 
     @Serializable
-    data object Chat : Screen()
+    data class Chat(val tenderId: String? = null) : Screen()
 
     @Serializable
     data object Settings : Screen()

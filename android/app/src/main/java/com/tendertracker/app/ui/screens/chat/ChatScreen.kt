@@ -56,10 +56,18 @@ import com.tendertracker.domain.model.MessageRole
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
+    tenderId: String? = null,
     viewModel: ChatViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
     val listState = rememberLazyListState()
+
+    // Set tender context when navigating with a tender
+    LaunchedEffect(tenderId) {
+        if (tenderId != null) {
+            viewModel.setContext(tenderId)
+        }
+    }
 
     LaunchedEffect(state.messages.size) {
         if (state.messages.isNotEmpty()) {

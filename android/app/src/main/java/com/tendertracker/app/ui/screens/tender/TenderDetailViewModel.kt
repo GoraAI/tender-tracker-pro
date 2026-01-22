@@ -25,6 +25,7 @@ sealed class TenderDetailEvent {
     data class OpenUrl(val url: String) : TenderDetailEvent()
     data class DownloadPdf(val url: String, val filename: String) : TenderDetailEvent()
     data class ShowError(val message: String) : TenderDetailEvent()
+    data class NavigateToChat(val tenderId: String) : TenderDetailEvent()
 }
 
 @HiltViewModel
@@ -52,7 +53,12 @@ class TenderDetailViewModel @Inject constructor(
     }
 
     fun onAskAI() {
-        // Navigate to chat with tender context - implemented in FR-MOBILE-003
+        val tenderId = _state.value.tender?.id
+        if (tenderId != null) {
+            viewModelScope.launch {
+                _events.send(TenderDetailEvent.NavigateToChat(tenderId))
+            }
+        }
     }
 
     fun openPdf() {

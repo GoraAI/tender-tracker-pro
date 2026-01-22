@@ -167,17 +167,21 @@ fun TenderTrackerNavHost(
                 val detail: Screen.TenderDetail = backStackEntry.toRoute()
                 TenderDetailScreen(
                     tenderId = detail.tenderId,
-                    onBackClick = { navController.popBackStack() }
+                    onBackClick = { navController.popBackStack() },
+                    onNavigateToChat = { tenderId ->
+                        navController.navigate(Screen.Chat(tenderId = tenderId))
+                    }
                 )
             }
 
-            composable<Screen.Chat> {
+            composable<Screen.Chat> { backStackEntry ->
+                val chat: Screen.Chat = backStackEntry.toRoute()
                 MainScaffold(
                     navController = navController,
                     navItems = navItems,
-                    currentScreen = Screen.Chat
+                    currentScreen = Screen.Chat(tenderId = null)
                 ) {
-                    ChatScreen()
+                    ChatScreen(tenderId = chat.tenderId)
                 }
             }
 

@@ -84,6 +84,7 @@ import com.tendertracker.app.ui.theme.GlassSecondary
 fun TenderDetailScreen(
     tenderId: String,
     onBackClick: () -> Unit,
+    onNavigateToChat: (String) -> Unit = {},
     viewModel: TenderDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -108,6 +109,9 @@ fun TenderDetailScreen(
                 }
                 is TenderDetailEvent.ShowError -> {
                     snackbarHostState.showSnackbar(event.message)
+                }
+                is TenderDetailEvent.NavigateToChat -> {
+                    onNavigateToChat(event.tenderId)
                 }
             }
         }
