@@ -66,7 +66,7 @@ fun TenderTrackerNavHost(
     val navItems = listOf(
         BottomNavItem(Screen.Dashboard, Icons.Default.Home, "Home"),
         BottomNavItem(Screen.TenderList, Icons.Default.List, "Tenders"),
-        BottomNavItem(Screen.Chat, Icons.AutoMirrored.Filled.Chat, "Chat"),
+        BottomNavItem(Screen.Chat(), Icons.AutoMirrored.Filled.Chat, "Chat"),
         BottomNavItem(Screen.Settings, Icons.Default.Settings, "Settings")
     )
 
@@ -128,7 +128,7 @@ fun TenderTrackerNavHost(
                             }
                         },
                         onChatClick = {
-                            navController.navigate(Screen.Chat) {
+                            navController.navigate(Screen.Chat()) {
                                 launchSingleTop = true
                             }
                         },
