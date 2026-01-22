@@ -94,15 +94,14 @@ class ModelDownloadManager @Inject constructor(
     }
 
     fun getModelDirectory(): java.io.File {
-        return java.io.File(context.filesDir, "models").apply {
-            if (!exists()) mkdirs()
-        }
+        // MUST use getExternalFilesDir() to match where DownloadWorker saves files (Google's pattern)
+        return context.getExternalFilesDir(null) ?: context.filesDir
     }
 
     fun getModelPath(modelId: String): String {
         // Google's pattern: {externalFilesDir}/{normalizedName}/{version}/{fileName}
-        // Our pattern: {filesDir}/models/{modelId}/{version}/model.litertlm
-        val modelVersion = "v1" // For now we use static version
+        // Match EXACTLY where DownloadWorker downloads: {externalFilesDir}/{modelId}/{version}/model.litertlm
+        val modelVersion = "v1"
         return java.io.File(
             java.io.File(java.io.File(getModelDirectory(), modelId), modelVersion),
             "model.litertlm"
@@ -115,6 +114,7 @@ class ModelDownloadManager @Inject constructor(
     }
 
     fun deleteModel(modelId: String): Boolean {
+        // Delete from external storage where models are actually stored
         val modelDir = java.io.File(getModelDirectory(), modelId)
         return modelDir.deleteRecursively()
     }
