@@ -4,6 +4,7 @@ data class GemmaModel(
     val id: String,
     val name: String,
     val variant: GemmaVariant,
+    val version: String = "v1", // Model version for download path (like Google's pattern)
     val sizeBytes: Long,
     val downloadUrl: String,
     val fallbackUrl: String? = null,

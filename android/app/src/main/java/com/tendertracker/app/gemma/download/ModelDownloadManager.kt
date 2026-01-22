@@ -16,6 +16,10 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Manager for model downloads using WorkManager.
+ * Based on Google AI Edge Gallery DownloadRepository pattern.
+ */
 @Singleton
 class ModelDownloadManager @Inject constructor(
     @ApplicationContext private val context: Context
@@ -23,14 +27,17 @@ class ModelDownloadManager @Inject constructor(
     private val workManager = WorkManager.getInstance(context)
 
     fun downloadModel(model: GemmaModel): String {
-        val workName = "download_${model.id}"
+        val workName = model.id // Use model.id as unique work name (like Google uses model.name)
 
+        // Build input data with Google's exact KEY constants
         val inputData = Data.Builder()
-            .putString(ModelDownloadWorker.KEY_MODEL_ID, model.id)
-            .putString(ModelDownloadWorker.KEY_MODEL_NAME, model.name)
-            .putString(ModelDownloadWorker.KEY_DOWNLOAD_URL, model.downloadUrl)
-            .putString(ModelDownloadWorker.KEY_FALLBACK_URL, model.fallbackUrl)
-            .putLong(ModelDownloadWorker.KEY_TOTAL_BYTES, model.sizeBytes)
+            .putString(KEY_MODEL_NAME, model.name)
+            .putString(KEY_MODEL_URL, model.downloadUrl)
+            .putString(KEY_MODEL_COMMIT_HASH, model.version)
+            .putString(KEY_MODEL_DOWNLOAD_MODEL_DIR, model.id) // normalized name
+            .putString(KEY_MODEL_DOWNLOAD_FILE_NAME, "model.litertlm") // our filename
+            .putBoolean(KEY_MODEL_IS_ZIP, false) // we don't use zip
+            .putLong(KEY_MODEL_TOTAL_BYTES, model.sizeBytes)
             .build()
 
         val constraints = Constraints.Builder()
@@ -44,9 +51,10 @@ class ModelDownloadManager @Inject constructor(
             .addTag(model.id)
             .build()
 
+        // Use REPLACE policy like Google (allows retry)
         workManager.enqueueUniqueWork(
             workName,
-            ExistingWorkPolicy.REPLACE, // Changed from KEEP to REPLACE to allow retry
+            ExistingWorkPolicy.REPLACE,
             request
         )
 
@@ -59,15 +67,17 @@ class ModelDownloadManager @Inject constructor(
             when (workInfo?.state) {
                 WorkInfo.State.ENQUEUED -> ModelState.Downloading(0)
                 WorkInfo.State.RUNNING -> {
-                    val progress = workInfo.progress.getInt(
-                        ModelDownloadWorker.KEY_PROGRESS, 0
+                    val progress = workInfo.progress.getLong(
+                        KEY_MODEL_DOWNLOAD_RECEIVED_BYTES, 0
                     )
-                    ModelState.Downloading(progress)
+                    val total = workInfo.inputData.getLong(KEY_MODEL_TOTAL_BYTES, 0)
+                    val percentage = if (total > 0) ((progress * 100) / total).toInt() else 0
+                    ModelState.Downloading(percentage)
                 }
                 WorkInfo.State.SUCCEEDED -> ModelState.Downloaded
                 WorkInfo.State.FAILED -> {
                     val error = workInfo.outputData.getString(
-                        ModelDownloadWorker.KEY_ERROR
+                        KEY_MODEL_DOWNLOAD_ERROR_MESSAGE
                     ) ?: "Download failed"
                     ModelState.Error(error)
                 }
@@ -78,7 +88,7 @@ class ModelDownloadManager @Inject constructor(
     }
 
     fun cancelDownload(modelId: String) {
-        workManager.cancelUniqueWork("download_$modelId")
+        workManager.cancelUniqueWork(modelId)
     }
 
     fun getModelDirectory(): java.io.File {
@@ -88,12 +98,17 @@ class ModelDownloadManager @Inject constructor(
     }
 
     fun getModelPath(modelId: String): String {
-        // Return the actual model file path, not just the directory
-        return java.io.File(java.io.File(getModelDirectory(), modelId), "model.litertlm").absolutePath
+        // Google's pattern: {externalFilesDir}/{normalizedName}/{version}/{fileName}
+        // Our pattern: {filesDir}/models/{modelId}/{version}/model.litertlm
+        val modelVersion = "v1" // For now we use static version
+        return java.io.File(
+            java.io.File(java.io.File(getModelDirectory(), modelId), modelVersion),
+            "model.litertlm"
+        ).absolutePath
     }
 
     fun isModelDownloaded(modelId: String): Boolean {
-        val modelFile = java.io.File(java.io.File(getModelDirectory(), modelId), "model.litertlm")
+        val modelFile = java.io.File(getModelPath(modelId))
         return modelFile.exists() && modelFile.isFile && modelFile.length() > 0
     }
 

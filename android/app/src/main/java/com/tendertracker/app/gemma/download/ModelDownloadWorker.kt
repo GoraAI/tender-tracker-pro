@@ -13,7 +13,6 @@ import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
-import androidx.work.workDataOf
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
@@ -26,51 +25,33 @@ import java.net.URL
 
 /**
  * WorkManager worker for downloading AI models with resumable download support.
- * Based on Google AI Edge Gallery implementation.
+ * Based on Google AI Edge Gallery DownloadWorker.kt implementation.
  *
- * Key features:
- * - Resumable downloads using HTTP Range header
- * - Foreground service to prevent termination
- * - Temporary file pattern (.tmp) for partial downloads
- * - Progress tracking every 200ms
+ * Reference: https://github.com/google-ai-edge/gallery
  */
 @HiltWorker
 class ModelDownloadWorker @AssistedInject constructor(
     @Assisted context: Context,
-    @Assisted workerParams: WorkerParameters
-) : CoroutineWorker(context, workerParams) {
+    @Assisted params: WorkerParameters
+) : CoroutineWorker(context, params) {
+
+    private val externalFilesDir = context.getExternalFilesDir(null)
 
     private val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     // Unique notification id based on worker ID
-    private val notificationId: Int = workerParams.id.hashCode()
+    private val notificationId: Int = params.id.hashCode()
 
     companion object {
         private const val TAG = "ModelDownloadWorker"
-        private const val TMP_FILE_EXT = "tmp"
         private const val FOREGROUND_NOTIFICATION_CHANNEL_ID = "model_download_channel_foreground"
         private var channelCreated = false
-
-        // Input data keys
-        const val KEY_MODEL_ID = "model_id"
-        const val KEY_MODEL_NAME = "model_name"
-        const val KEY_DOWNLOAD_URL = "download_url"
-        const val KEY_FALLBACK_URL = "fallback_url"
-        const val KEY_TOTAL_BYTES = "total_bytes"
-
-        // Output/Progress data keys
-        const val KEY_PROGRESS = "progress"
-        const val KEY_DOWNLOADED_BYTES = "downloaded_bytes"
-        const val KEY_DOWNLOAD_RATE = "download_rate"
-        const val KEY_REMAINING_MS = "remaining_ms"
-        const val KEY_MODEL_PATH = "model_path"
-        const val KEY_ERROR = "error"
     }
 
     init {
         if (!channelCreated) {
-            // Create notification channel for download progress
+            // Create notification channel for download progress (same as Google)
             val channel = NotificationChannel(
                 FOREGROUND_NOTIFICATION_CHANNEL_ID,
                 "Model Downloading",
@@ -83,238 +64,182 @@ class ModelDownloadWorker @AssistedInject constructor(
         }
     }
 
-    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        val modelId = inputData.getString(KEY_MODEL_ID)
-            ?: return@withContext Result.failure(
-                workDataOf(KEY_ERROR to "Missing model ID")
-            )
-
+    override suspend fun doWork(): Result {
+        val fileUrl = inputData.getString(KEY_MODEL_URL)
         val modelName = inputData.getString(KEY_MODEL_NAME) ?: "Model"
+        val version = inputData.getString(KEY_MODEL_COMMIT_HASH)!!
+        val fileName = inputData.getString(KEY_MODEL_DOWNLOAD_FILE_NAME)
+        val modelDir = inputData.getString(KEY_MODEL_DOWNLOAD_MODEL_DIR)!!
+        val isZip = inputData.getBoolean(KEY_MODEL_IS_ZIP, false)
+        val unzippedDir = inputData.getString(KEY_MODEL_UNZIPPED_DIR)
+        val extraDataFileUrls = inputData.getString(KEY_MODEL_EXTRA_DATA_URLS)?.split(",") ?: listOf()
+        val extraDataFileNames =
+            inputData.getString(KEY_MODEL_EXTRA_DATA_DOWNLOAD_FILE_NAMES)?.split(",") ?: listOf()
+        val totalBytes = inputData.getLong(KEY_MODEL_TOTAL_BYTES, 0L)
+        val accessToken = inputData.getString(KEY_MODEL_DOWNLOAD_ACCESS_TOKEN)
 
-        val downloadUrl = inputData.getString(KEY_DOWNLOAD_URL)
-            ?: return@withContext Result.failure(
-                workDataOf(KEY_ERROR to "Missing download URL")
-            )
-
-        val fallbackUrl = inputData.getString(KEY_FALLBACK_URL)
-        val totalBytes = inputData.getLong(KEY_TOTAL_BYTES, 0L)
-
-        try {
-            // Set worker as foreground service immediately
-            setForeground(createForegroundInfo(progress = 0, modelName = modelName))
-
-            val modelDir = File(applicationContext.filesDir, "models/$modelId")
-            modelDir.mkdirs()
-
-            val finalFile = File(modelDir, "model.litertlm")
-            val tmpFile = File(modelDir, "model.litertlm.$TMP_FILE_EXT")
-
-            setProgress(workDataOf(KEY_PROGRESS to 0))
-
-            // Try primary URL first
-            var downloadResult = downloadFromUrl(
-                urlString = downloadUrl,
-                tmpFile = tmpFile,
-                finalFile = finalFile,
-                modelName = modelName,
-                totalBytes = totalBytes
-            )
-
-            // If primary fails and fallback exists, try fallback
-            if (!downloadResult && fallbackUrl != null) {
-                Log.w(TAG, "Primary URL failed, trying fallback URL")
-                downloadResult = downloadFromUrl(
-                    urlString = fallbackUrl,
-                    tmpFile = tmpFile,
-                    finalFile = finalFile,
-                    modelName = modelName,
-                    totalBytes = totalBytes
-                )
-            }
-
-            if (downloadResult) {
-                // Clean up tmp file if it exists
-                if (tmpFile.exists()) {
-                    tmpFile.delete()
-                }
-
-                Log.i(TAG, "Model download succeeded: ${finalFile.absolutePath}")
-                Result.success(
-                    workDataOf(
-                        KEY_MODEL_PATH to modelDir.absolutePath
-                    )
-                )
+        return withContext(Dispatchers.IO) {
+            if (fileUrl == null || fileName == null) {
+                Result.failure()
             } else {
-                // Keep tmp file for resume, only delete final file
-                if (finalFile.exists()) {
-                    finalFile.delete()
-                }
-                Log.e(TAG, "Download failed from all sources")
-                Result.failure(
-                    workDataOf(KEY_ERROR to "Download failed from all sources")
-                )
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Download failed with exception", e)
-            Result.failure(
-                workDataOf(KEY_ERROR to (e.message ?: "Download failed"))
-            )
-        }
-    }
+                return@withContext try {
+                    // Set the worker as a foreground service immediately (like Google)
+                    setForeground(createForegroundInfo(progress = 0, modelName = modelName))
 
-    /**
-     * Downloads a file from URL with resumable download support.
-     * Based on Google AI Edge Gallery implementation.
-     */
-    private suspend fun downloadFromUrl(
-        urlString: String,
-        tmpFile: File,
-        finalFile: File,
-        modelName: String,
-        totalBytes: Long
-    ): Boolean {
-        return try {
-            val url = URL(urlString)
-            val connection = url.openConnection() as HttpURLConnection
-            connection.connectTimeout = 30000
-            connection.readTimeout = 60000
-            connection.requestMethod = "GET"
-            connection.setRequestProperty("User-Agent", "TenderTracker/1.0")
-
-            // Check if tmp file exists and has partial download
-            val existingBytes = if (tmpFile.exists()) tmpFile.length() else 0L
-            if (existingBytes > 0) {
-                Log.d(TAG, "Found partial download: $existingBytes bytes. Resuming...")
-                connection.setRequestProperty("Range", "bytes=$existingBytes-")
-            }
-
-            connection.connect()
-            val responseCode = connection.responseCode
-            Log.d(TAG, "Response code: $responseCode")
-
-            // Accept both 200 (full) and 206 (partial content)
-            if (responseCode != HttpURLConnection.HTTP_OK &&
-                responseCode != HttpURLConnection.HTTP_PARTIAL
-            ) {
-                Log.e(TAG, "HTTP error code: $responseCode")
-                connection.disconnect()
-                return false
-            }
-
-            // Parse Content-Range header if present
-            var downloadedBytes = existingBytes
-            val contentRange = connection.getHeaderField("Content-Range")
-            if (contentRange != null) {
-                // Content-Range: bytes 1000000-2999999/3000000
-                val rangeParts = contentRange.substringAfter("bytes ").split("/")
-                val byteRange = rangeParts[0].split("-")
-                val startByte = byteRange[0].toLong()
-                Log.d(TAG, "Server confirmed resume from byte: $startByte")
-                downloadedBytes = startByte
-            } else {
-                Log.d(TAG, "Download starting from beginning")
-                // If no Content-Range but we requested Range, server doesn't support resume
-                if (existingBytes > 0) {
-                    Log.w(TAG, "Server doesn't support resume, starting over")
-                    tmpFile.delete()
-                    downloadedBytes = 0L
-                }
-            }
-
-            // Open output stream in append mode if resuming
-            val outputStream = FileOutputStream(tmpFile, existingBytes > 0)
-            val inputStream = connection.inputStream
-
-            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-            var bytesRead: Int
-            var lastProgressUpdateMs = 0L
-            var deltaBytes = 0L
-
-            // For calculating download rate
-            val bytesReadSizeBuffer = mutableListOf<Long>()
-            val bytesReadLatencyBuffer = mutableListOf<Long>()
-
-            while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                outputStream.write(buffer, 0, bytesRead)
-                downloadedBytes += bytesRead
-                deltaBytes += bytesRead
-
-                // Report progress every 200ms
-                val currentTimeMs = System.currentTimeMillis()
-                if (currentTimeMs - lastProgressUpdateMs > 200) {
-                    // Calculate download rate (moving average over last 5 measurements)
-                    var bytesPerMs = 0f
-                    if (lastProgressUpdateMs != 0L) {
-                        if (bytesReadSizeBuffer.size == 5) {
-                            bytesReadSizeBuffer.removeAt(0)
-                        }
-                        bytesReadSizeBuffer.add(deltaBytes)
-
-                        if (bytesReadLatencyBuffer.size == 5) {
-                            bytesReadLatencyBuffer.removeAt(0)
-                        }
-                        bytesReadLatencyBuffer.add(currentTimeMs - lastProgressUpdateMs)
-                        deltaBytes = 0L
-
-                        bytesPerMs = bytesReadSizeBuffer.sum().toFloat() / bytesReadLatencyBuffer.sum()
-                    }
-
-                    // Calculate remaining time
-                    var remainingMs = 0L
-                    if (bytesPerMs > 0f && totalBytes > 0L) {
-                        remainingMs = ((totalBytes - downloadedBytes) / bytesPerMs).toLong()
-                    }
-
-                    // Update progress data
-                    val progress = if (totalBytes > 0) {
-                        ((downloadedBytes * 100) / totalBytes).toInt()
-                    } else 0
-
-                    setProgress(
-                        workDataOf(
-                            KEY_PROGRESS to progress,
-                            KEY_DOWNLOADED_BYTES to downloadedBytes,
-                            KEY_DOWNLOAD_RATE to (bytesPerMs * 1000).toLong(),
-                            KEY_REMAINING_MS to remainingMs
+                    // Collect data for all files
+                    val allFiles: MutableList<UrlAndFileName> = mutableListOf()
+                    allFiles.add(UrlAndFileName(url = fileUrl, fileName = fileName))
+                    for (index in extraDataFileUrls.indices) {
+                        allFiles.add(
+                            UrlAndFileName(url = extraDataFileUrls[index], fileName = extraDataFileNames[index])
                         )
-                    )
+                    }
+                    Log.d(TAG, "About to download: $allFiles")
 
-                    // Update foreground notification
-                    setForeground(
-                        createForegroundInfo(
-                            progress = progress,
-                            modelName = modelName
-                        )
-                    )
+                    // Download them in sequence (same as Google - they mention parallel as TODO)
+                    var downloadedBytes = 0L
+                    val bytesReadSizeBuffer: MutableList<Long> = mutableListOf()
+                    val bytesReadLatencyBuffer: MutableList<Long> = mutableListOf()
 
-                    Log.d(TAG, "Progress: $progress% ($downloadedBytes / $totalBytes bytes)")
-                    lastProgressUpdateMs = currentTimeMs
+                    for (file in allFiles) {
+                        val url = URL(file.url)
+
+                        val connection = url.openConnection() as HttpURLConnection
+                        if (accessToken != null) {
+                            Log.d(TAG, "Using access token: ${accessToken.subSequence(0, 10)}...")
+                            connection.setRequestProperty("Authorization", "Bearer $accessToken")
+                        }
+
+                        // Prepare output file's dir
+                        val outputDir =
+                            File(
+                                applicationContext.getExternalFilesDir(null),
+                                listOf(modelDir, version).joinToString(separator = File.separator),
+                            )
+                        if (!outputDir.exists()) {
+                            outputDir.mkdirs()
+                        }
+
+                        // Read the tmp file and see if it is partially downloaded (RESUMABLE DOWNLOAD)
+                        val outputTmpFile =
+                            File(
+                                applicationContext.getExternalFilesDir(null),
+                                listOf(modelDir, version, "${file.fileName}.$TMP_FILE_EXT")
+                                    .joinToString(separator = File.separator),
+                            )
+                        val outputFileBytes = outputTmpFile.length()
+                        if (outputFileBytes > 0) {
+                            Log.d(
+                                TAG,
+                                "File '${outputTmpFile.name}' partial size: ${outputFileBytes}. Trying to resume download",
+                            )
+                            connection.setRequestProperty("Range", "bytes=${outputFileBytes}-")
+                        }
+                        connection.connect()
+                        Log.d(TAG, "response code: ${connection.responseCode}")
+
+                        if (
+                            connection.responseCode == HttpURLConnection.HTTP_OK ||
+                            connection.responseCode == HttpURLConnection.HTTP_PARTIAL
+                        ) {
+                            val contentRange = connection.getHeaderField("Content-Range")
+
+                            if (contentRange != null) {
+                                // Parse the Content-Range header
+                                val rangeParts = contentRange.substringAfter("bytes ").split("/")
+                                val byteRange = rangeParts[0].split("-")
+                                val startByte = byteRange[0].toLong()
+                                val endByte = byteRange[1].toLong()
+
+                                Log.d(
+                                    TAG,
+                                    "Content-Range: $contentRange. Start bytes: ${startByte}, end bytes: $endByte",
+                                )
+
+                                downloadedBytes += startByte
+                            } else {
+                                Log.d(TAG, "Download starts from beginning.")
+                            }
+                        } else {
+                            throw IOException("HTTP error code: ${connection.responseCode}")
+                        }
+
+                        val inputStream = connection.inputStream
+                        val outputStream = FileOutputStream(outputTmpFile, true /* append */)
+
+                        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                        var bytesRead: Int
+                        var lastSetProgressTs: Long = 0
+                        var deltaBytes = 0L
+
+                        while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                            outputStream.write(buffer, 0, bytesRead)
+                            downloadedBytes += bytesRead
+                            deltaBytes += bytesRead
+
+                            // Report progress every 200 ms (same as Google)
+                            val curTs = System.currentTimeMillis()
+                            if (curTs - lastSetProgressTs > 200) {
+                                // Calculate download rate (exact same algorithm as Google)
+                                var bytesPerMs = 0f
+                                if (lastSetProgressTs != 0L) {
+                                    if (bytesReadSizeBuffer.size == 5) {
+                                        bytesReadSizeBuffer.removeAt(0)
+                                    }
+                                    bytesReadSizeBuffer.add(deltaBytes)
+                                    if (bytesReadLatencyBuffer.size == 5) {
+                                        bytesReadLatencyBuffer.removeAt(0)
+                                    }
+                                    bytesReadLatencyBuffer.add(curTs - lastSetProgressTs)
+                                    deltaBytes = 0L
+                                    bytesPerMs = bytesReadSizeBuffer.sum().toFloat() / bytesReadLatencyBuffer.sum()
+                                }
+
+                                // Calculate remaining seconds
+                                var remainingMs = 0f
+                                if (bytesPerMs > 0f && totalBytes > 0L) {
+                                    remainingMs = (totalBytes - downloadedBytes) / bytesPerMs
+                                }
+
+                                setProgress(
+                                    Data.Builder()
+                                        .putLong(KEY_MODEL_DOWNLOAD_RECEIVED_BYTES, downloadedBytes)
+                                        .putLong(KEY_MODEL_DOWNLOAD_RATE, (bytesPerMs * 1000).toLong())
+                                        .putLong(KEY_MODEL_DOWNLOAD_REMAINING_MS, remainingMs.toLong())
+                                        .build()
+                                )
+                                setForeground(
+                                    createForegroundInfo(
+                                        progress = (downloadedBytes * 100 / totalBytes).toInt(),
+                                        modelName = modelName,
+                                    )
+                                )
+                                Log.d(TAG, "downloadedBytes: $downloadedBytes")
+                                lastSetProgressTs = curTs
+                            }
+                        }
+
+                        outputStream.close()
+                        inputStream.close()
+
+                        // Rename the tmp file to the original file name by removing the tmp file ext
+                        val originalFilePath = outputTmpFile.absolutePath.replace(".$TMP_FILE_EXT", "")
+                        val originalFile = File(originalFilePath)
+                        if (originalFile.exists()) {
+                            originalFile.delete()
+                        }
+                        outputTmpFile.renameTo(originalFile)
+                        Log.d(TAG, "Download done")
+
+                        // TODO: Unzip if the downloaded file is a zip (skipping for now as we don't use zip)
+                    }
+                    Result.success()
+                } catch (e: IOException) {
+                    Result.failure(
+                        Data.Builder().putString(KEY_MODEL_DOWNLOAD_ERROR_MESSAGE, e.message).build()
+                    )
                 }
             }
-
-            outputStream.close()
-            inputStream.close()
-            connection.disconnect()
-
-            // Rename tmp file to final file
-            if (finalFile.exists()) {
-                finalFile.delete()
-            }
-            val renamed = tmpFile.renameTo(finalFile)
-            if (!renamed) {
-                Log.e(TAG, "Failed to rename tmp file to final file")
-                return false
-            }
-
-            Log.i(TAG, "Download completed successfully")
-            true
-        } catch (e: IOException) {
-            Log.e(TAG, "IOException during download", e)
-            // Keep tmp file for resume
-            false
-        } catch (e: Exception) {
-            Log.e(TAG, "Unexpected exception during download", e)
-            false
         }
     }
 
@@ -325,15 +250,14 @@ class ModelDownloadWorker @AssistedInject constructor(
 
     /**
      * Creates a ForegroundInfo object for the download worker's ongoing notification.
-     * Based on Google AI Edge Gallery implementation.
+     * Exact copy from Google AI Edge Gallery implementation.
      */
     private fun createForegroundInfo(progress: Int, modelName: String? = null): ForegroundInfo {
-        val title = if (modelName != null) {
-            "Downloading \"$modelName\""
-        } else {
-            "Downloading model"
+        var title = "Downloading model"
+        if (modelName != null) {
+            title = "Downloading \"$modelName\""
         }
-        val content = "Download in progress: $progress%"
+        val content = "Downloading in progress: $progress%"
 
         val intent = applicationContext.packageManager
             .getLaunchIntentForPackage(applicationContext.packageName)
@@ -341,29 +265,34 @@ class ModelDownloadWorker @AssistedInject constructor(
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             }
 
-        val pendingIntent = PendingIntent.getActivity(
-            applicationContext,
-            0,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
+        val pendingIntent =
+            PendingIntent.getActivity(
+                applicationContext,
+                0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            )
 
-        val notification = NotificationCompat.Builder(
-            applicationContext,
-            FOREGROUND_NOTIFICATION_CHANNEL_ID
-        )
-            .setContentTitle(title)
-            .setContentText(content)
-            .setSmallIcon(android.R.drawable.stat_sys_download)
-            .setOngoing(true) // Makes notification non-dismissable
-            .setProgress(100, progress, false) // Show progress bar
-            .setContentIntent(pendingIntent)
-            .build()
+        val notification =
+            NotificationCompat.Builder(applicationContext, FOREGROUND_NOTIFICATION_CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(content)
+                .setSmallIcon(android.R.drawable.stat_sys_download)
+                .setOngoing(true) // Makes the notification non-dismissable
+                .setProgress(100, progress, false) // Show progress
+                .setContentIntent(pendingIntent)
+                .build()
 
         return ForegroundInfo(
             notificationId,
             notification,
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC,
         )
     }
 }
+
+/**
+ * Data class for URL and filename pairs.
+ * Copied from Google AI Edge Gallery.
+ */
+data class UrlAndFileName(val url: String, val fileName: String)
