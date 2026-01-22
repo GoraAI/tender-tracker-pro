@@ -30,7 +30,8 @@ sealed class TenderDetailEvent {
 
 @HiltViewModel
 class TenderDetailViewModel @Inject constructor(
-    private val tenderRepository: TenderRepository
+    private val tenderRepository: TenderRepository,
+    private val scoringService: com.tendertracker.app.gemma.ScoringService
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TenderDetailState())
@@ -90,22 +91,38 @@ class TenderDetailViewModel @Inject constructor(
     }
 
     fun rescore() {
-        val tenderId = _state.value.tender?.id
-        if (tenderId == null) {
+        val tender = _state.value.tender
+        if (tender == null) {
             viewModelScope.launch {
                 _events.send(TenderDetailEvent.ShowError("Tender not loaded"))
             }
             return
         }
 
-        // TODO: Call API to trigger re-scoring
-        // For MVP, show a message that scoring has been queued
-        // In production, this would:
-        // 1. Call POST /tenders/{id}/score
-        // 2. Poll or wait for scoring to complete
-        // 3. Reload tender to get updated score
         viewModelScope.launch {
-            _events.send(TenderDetailEvent.ShowError("Scoring queued. Refresh in a few moments to see updated score."))
+            _state.update { it.copy(isLoading = true) }
+
+            val result = scoringService.scoreTender(tender)
+
+            result.fold(
+                onSuccess = { tenderScore ->
+                    // Update tender with new score
+                    val updatedTender = tender.copy(
+                        score = tenderScore.score,
+                        scoreExplanation = tenderScore.explanation
+                    )
+                    tenderRepository.updateTender(updatedTender)
+                    _state.update { it.copy(tender = updatedTender, isLoading = false) }
+                },
+                onFailure = { error ->
+                    _state.update { it.copy(isLoading = false) }
+                    _events.send(
+                        TenderDetailEvent.ShowError(
+                            error.message ?: "Failed to score tender. Make sure the AI model is loaded."
+                        )
+                    )
+                }
+            )
         }
     }
 }
