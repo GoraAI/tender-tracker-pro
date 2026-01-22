@@ -173,7 +173,7 @@ tender_tracker_pro/
 │       └── gemma/            # On-device LLM (NOT DEPLOYED)
 │
 ├── tests/                    # 190 tests (all collecting ✅)
-├── config/sources/           # 2 tender sources (sars, joburg)
+├── config/sources/           # 1 tender source (joburg)
 ├── openspec/                 # 7 un-archived changes ⚠️
 ├── Dockerfile                # Railway deployment ✅
 └── railway.json              # Healthcheck config ✅
@@ -377,7 +377,7 @@ CI includes: `./gradlew test` and `./gradlew lint`
 - ✅ Backend API serving requests in production
 - ✅ Android app building via CI/CD
 - ✅ JWT authentication functional
-- ✅ PDF scraping (sars, joburg)
+- ✅ PDF scraping (joburg)
 - ✅ PDF extraction with pdfplumber
 - ✅ PostgreSQL database with full schema
 - ✅ 190 tests collecting successfully

@@ -19,12 +19,12 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Remove jhb_water source (non-functional)
+    # Remove ALL existing sources (keep only Johannesburg as requested by user)
     op.execute("""
-        DELETE FROM sources WHERE id IN ('jhb-water', 'jhb_water');
+        DELETE FROM sources WHERE id IN ('jhb-water', 'jhb_water', 'sars');
     """)
 
-    # Add City of Johannesburg source
+    # Add City of Johannesburg source (ONLY source)
     op.execute("""
         INSERT INTO sources (id, name, url, config_path, is_active, last_scraped_at, created_at)
         VALUES (
@@ -32,25 +32,6 @@ def upgrade() -> None:
             'City of Johannesburg',
             'https://joburg.org.za/work_/Pages/2026-Tenders/Request-for-Quotations.aspx',
             'config/sources/joburg.yaml',
-            true,
-            NULL,
-            NOW()
-        )
-        ON CONFLICT (id) DO UPDATE SET
-            name = EXCLUDED.name,
-            url = EXCLUDED.url,
-            config_path = EXCLUDED.config_path,
-            is_active = EXCLUDED.is_active;
-    """)
-
-    # Update SARS source if it exists (ensure correct config path)
-    op.execute("""
-        INSERT INTO sources (id, name, url, config_path, is_active, last_scraped_at, created_at)
-        VALUES (
-            'sars',
-            'SARS - South African Revenue Service',
-            'https://www.sars.gov.za/procurement/published-tenders/',
-            'config/sources/sars.yaml',
             true,
             NULL,
             NOW()

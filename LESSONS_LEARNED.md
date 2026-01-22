@@ -415,5 +415,4 @@ tender_tracker_pro/
 - `schedule`: cron schedule for automated runs
 
 **Proven Patterns**:
-- SARS (National government) - Direct navigation to tender listing
 - City of Johannesburg (Municipal, SharePoint) - Dynamic content with wait conditions
