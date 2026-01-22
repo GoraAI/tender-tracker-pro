@@ -267,7 +267,22 @@ This pattern will work for:
 
 ---
 
-**Status:** PROPOSED
+**Status:** COMPLETED ✅
 **Created:** 2026-01-22
+**Archived:** 2026-01-22
 **Author:** Claude Sonnet 4.5
-**Requires Approval:** YES
+**Requires Approval:** YES (APPROVED)
+
+## Completion Record
+
+- **Archived**: 2026-01-22
+- **Commits**:
+  - 43a1dc5 - chore: remove non-working jhb_water source
+  - 38930ac - feat: add City of Johannesburg scraper
+  - 9a9326c - docs: update documentation
+  - 523d7fb - chore: mark all tasks complete
+- **CI Run**: 21262284086 (SUCCESS)
+- **Lessons Learned**: SharePoint scraping patterns added to LESSONS_LEARNED.md
+- **Files Added**: config/sources/joburg.yaml (256 lines)
+- **Files Deleted**: config/sources/jhb_water.yaml, test files, manual test files, tracking data
+- **Files Modified**: README.md, LESSONS_LEARNED.md, PROJECT_STATUS.md, SETUP_COMPLETE.md
