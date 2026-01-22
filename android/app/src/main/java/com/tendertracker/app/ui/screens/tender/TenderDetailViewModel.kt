@@ -106,12 +106,17 @@ class TenderDetailViewModel @Inject constructor(
 
             result.fold(
                 onSuccess = { tenderScore ->
-                    // Update tender with new score
+                    // Update tender score in repository
+                    tenderRepository.updateScore(
+                        id = tender.id,
+                        score = tenderScore.score,
+                        explanation = tenderScore.explanation
+                    )
+                    // Update local state
                     val updatedTender = tender.copy(
                         score = tenderScore.score,
                         scoreExplanation = tenderScore.explanation
                     )
-                    tenderRepository.updateTender(updatedTender)
                     _state.update { it.copy(tender = updatedTender, isLoading = false) }
                 },
                 onFailure = { error ->

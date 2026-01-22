@@ -100,7 +100,7 @@ CONFIDENCE: [high/medium/low]
             }
 
             // Extract explanation
-            val explanationPattern = Regex("EXPLANATION:\\s*(.+?)(?=CONFIDENCE:|$)", RegexOption.IGNORE_CASE or RegexOption.DOT_MATCHES_ALL)
+            val explanationPattern = Regex("EXPLANATION:\\s*(.+?)(?=CONFIDENCE:|$)", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
             explanationPattern.find(response)?.let { match ->
                 explanation = match.groupValues[1].trim()
             }
