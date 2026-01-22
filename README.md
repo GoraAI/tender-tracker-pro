@@ -469,10 +469,16 @@ adb install -r app-debug.apk
 
 | Source | URL | Status |
 |--------|-----|--------|
-| JHB Water | https://www.johannesburgwater.co.za/tenders | ✅ Active |
-| SARS | https://www.sars.gov.za/documents/procurement | ✅ Active |
+| SARS - South African Revenue Service | https://www.sars.gov.za/procurement/published-tenders/ | ✅ Active (National) |
+| City of Johannesburg | https://joburg.org.za/work_/Pages/2026-Tenders/Request-for-Quotations.aspx | ✅ Active (Municipal - Gauteng) |
 
-Add more sources in `config/sources/`
+### Configuration
+
+Scraper configurations are located in `config/sources/`:
+- `sars.yaml` - SARS tender configuration
+- `joburg.yaml` - City of Johannesburg tender configuration
+
+Add more sources by creating new YAML configuration files.
 
 ---
 

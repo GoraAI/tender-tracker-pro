@@ -369,3 +369,51 @@ tender_tracker_pro/
 - Railway needs explicit PostgreSQL linking - default DATABASE_URL points to SQLite
 - Playwright browser automation runs on backend, not Android
 - LLM inference runs on Android (Gemma), not backend
+
+## SharePoint Site Scraping
+
+### Pattern: City of Johannesburg
+
+**Challenge**: SharePoint sites use dynamic content loading, direct HTTP requests may not work.
+
+**Solution**:
+- Use `browser_navigation` method with Playwright
+- Add `wait_for: "networkidle"` to ensure page fully loads
+- Use `wait_for_selector` to wait for dynamic content (PDF links)
+- Set generous timeouts (30s for page load, 10s for selectors)
+
+**Selectors**:
+- PDF links: `a[href$='.pdf']` (attribute selector for PDF extension)
+- Table cells: `td.ms-vb2` (SharePoint default table class)
+
+**Timing**:
+- Page load: 30 seconds (SharePoint can be slow)
+- Selector wait: 10 seconds (dynamic content)
+
+**Fallback**:
+- Direct HTTP requests may not work with SharePoint
+- Browser automation is the most reliable method
+
+## Configuration-Driven Scraper Architecture
+
+**Pattern**: All tender sources configured via YAML files in `config/sources/`
+
+**Benefits**:
+- Add new sources without code changes
+- Consistent structure across all scrapers
+- Easy to test and validate configurations
+
+**Configuration Requirements**:
+- `source`: id, name, enabled status
+- `urls`: all URLs used in navigation
+- `navigation`: browser settings and step-by-step navigation
+- `pdf_discovery`: patterns for finding tender documents
+- `download`: download settings and validation
+- `extraction`: PDF text extraction configuration
+- `fallback`: fallback scraping if browser automation fails
+- `monitoring`: alerts and tracking
+- `schedule`: cron schedule for automated runs
+
+**Proven Patterns**:
+- SARS (National government) - Direct navigation to tender listing
+- City of Johannesburg (Municipal, SharePoint) - Dynamic content with wait conditions
