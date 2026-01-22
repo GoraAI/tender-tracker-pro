@@ -1,0 +1,256 @@
+# City of Johannesburg Tender Scraper Configuration
+# Source: https://joburg.org.za/
+# Navigation: Main site → Tenders and Quotations → Quotations → RFQ Listing → PDFs
+
+source:
+  id: "joburg"
+  name: "City of Johannesburg"
+  display_name: "City of Johannesburg"
+  description: "Tenders and quotations from the City of Johannesburg"
+  enabled: true
+  priority: "P0"
+
+  # Source metadata
+  organization: "City of Johannesburg Metropolitan Municipality"
+  category: "municipal"
+  region: "Gauteng"
+  website: "https://joburg.org.za/"
+
+# URLs
+urls:
+  main_site: "https://joburg.org.za/"
+  tenders_landing: "https://joburg.org.za/work_/Pages/Work%20in%20Joburg/Tenders%20and%20Quotations/Tenders-and-Quotations.aspx"
+  quotations: "https://joburg.org.za/work_/Pages/Work%20in%20Joburg/Tenders%20and%20Quotations/Links/Quotations/Quotations.aspx"
+  rfq_listing: "https://joburg.org.za/work_/Pages/2026-Tenders/Request-for-Quotations.aspx"
+
+# Navigation configuration for browser automation (Playwright)
+navigation:
+  # Method: browser_navigation (primary) - SharePoint requires JS
+  method: "browser_navigation"
+
+  # Browser settings
+  browser:
+    type: "chromium"
+    headless: true
+    viewport:
+      width: 1920
+      height: 1080
+    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+  # Navigation steps
+  steps:
+    # Go directly to RFQ listing page (most efficient path)
+    - action: "goto"
+      url: "${urls.rfq_listing}"
+      wait_for: "networkidle"
+      timeout_ms: 30000  # SharePoint can be slow
+
+    # Wait for PDF links to appear (SharePoint dynamic content)
+    - action: "wait_for_selector"
+      selector: "a[href$='.pdf']"
+      timeout_ms: 10000
+      optional: false
+
+  # Human-like behavior
+  delays:
+    min_ms: 1000
+    max_ms: 3000
+    between_downloads_ms: 2000
+
+  # Pagination
+  pagination:
+    enabled: false  # Single page listing for now
+
+# PDF Discovery
+pdf_discovery:
+  # Selector for PDF links on RFQ listing page
+  patterns:
+    # Direct PDF links
+    - regex: ".*\\.pdf$"
+    # Reference number pattern: COJ####-##-##
+    - regex: "COJ\\d{4}-\\d{2}-\\d{2}"
+
+  # Link attributes to extract
+  extract:
+    - attribute: "href"
+      name: "url"
+    - attribute: "innerText"
+      name: "link_text"
+    - attribute: "title"
+      name: "title"
+      optional: true
+
+  # Tender metadata extraction patterns
+  metadata_patterns:
+    # Title: Extract from link text or adjacent text
+    title:
+      selector: "a[href$='.pdf']"
+      attribute: "text"
+      fallback_selector: "td.ms-vb2"
+
+    # Reference number: Usually in format COJ####-##-##
+    reference_number:
+      pattern: "COJ\\d{4}-\\d{2}-\\d{2}"
+      selector: "a[href$='.pdf']"
+      attribute: "text"
+
+    # Closing date: Look for date patterns near PDF link
+    closing_date:
+      pattern: "\\d{2}/\\d{2}/\\d{4}"
+      selector: "td"
+      date_format: "%d/%m/%Y"
+
+    # Description: Extract from adjacent table cells
+    description:
+      selector: "td.ms-vb2"
+      attribute: "text"
+      max_length: 500
+
+  # Context extraction (tender details from SharePoint table)
+  extract_context:
+    enabled: true
+    parent_selector: "tr"  # Table row context
+    max_length: 500
+
+  # Deduplication key
+  dedup_key: "url"
+
+  # Filtering
+  exclude_patterns:
+    - ".*archive.*"
+    - ".*cancelled.*"
+    - ".*withdrawn.*"
+
+# Download Configuration
+download:
+  # Storage path template
+  path_template: "documents/downloads/${source.id}/${year}-${month}/${filename}"
+
+  # Filename pattern: {reference_number}_{title}.pdf
+  filename_pattern: "${reference_number}_${title}.pdf"
+
+  # Download method
+  method: "auto"
+
+  # Validation
+  validate:
+    min_size_bytes: 1000
+    max_size_mb: 50  # CoJ tender documents
+    check_pdf_header: true
+
+  # Retry logic
+  retry_attempts: 3
+  retry_delay_ms: 5000
+  retry_on_errors:
+    - "NetworkError"
+    - "TimeoutError"
+    - "DownloadError"
+
+  # Concurrency
+  max_concurrent: 2
+
+  # Skip existing
+  skip_existing: true
+  compare_by: "size_and_name"
+
+# Text Extraction Configuration
+extraction:
+  # Extract text from downloaded PDFs
+  enabled: true
+
+  # Storage path for extracted text
+  path_template: "documents/extracted/${source.id}/${year}-${month}/${filename}.txt"
+
+  # Extraction method
+  method: "pdfplumber"
+  fallback_method: "pypdf2"
+
+  # OCR settings (if needed)
+  ocr_language: "eng"
+  ocr_confidence_threshold: 0.7
+
+  # Validation
+  min_text_length: 100
+  clean_text: true
+  extract_tables: false
+
+  # Performance
+  max_concurrent: 3
+
+  # Caching
+  skip_existing: true
+
+# Fallback scraping if browser automation fails
+fallback:
+  enabled: true
+  trigger_after_failures: 3
+
+  # Scraper configuration
+  scraper:
+    method: "requests_beautifulsoup"
+    parser: "lxml"
+    timeout_seconds: 30
+
+    # CSS selectors for fallback
+    selectors:
+      pdf_links: "a[href$='.pdf']"
+      tender_rows: "table tr"
+
+    # Headers
+    headers:
+      User-Agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+      Accept: "text/html,application/xhtml+xml"
+
+  # Recovery
+  recovery_hours: 24
+  alert_on_activation: true
+
+# Monitoring and error handling
+monitoring:
+  # Alert if no tenders found (might indicate site structure change)
+  alert_on_consecutive_failures: 2
+  alert_on_zero_results: true
+  alert_on_slow_response: 60
+
+  # Screenshots
+  screenshot_on_error: true
+  screenshot_path: "logs/screenshots/${source.id}_${timestamp}.png"
+
+  # Metrics
+  track_metrics:
+    - "response_time_ms"
+    - "tender_count"
+    - "download_success_rate"
+    - "extraction_time_ms"
+
+# Expected patterns (for validation)
+expected:
+  min_tenders_per_scrape: 1  # Alert if site returns zero
+  max_tenders_per_scrape: 50  # CoJ publishes many quotations
+
+  # Typical file sizes
+  typical_pdf_size_kb:
+    min: 100
+    max: 10000
+
+  # File naming pattern
+  filename_pattern: "COJ\\d{4}-\\d{2}-\\d{2}.*"
+
+# Scheduling
+schedule:
+  # Run daily at 8 AM SAST
+  cron: "0 8 * * *"
+  timezone: "Africa/Johannesburg"
+
+  # Enable scheduled runs
+  enabled: true
+
+  # Skip on holidays
+  skip_holidays: false
+
+# Notes
+# - Johannesburg uses SharePoint, which requires browser automation
+# - PDF links are dynamically loaded, so wait_for_selector is critical
+# - Reference numbers follow pattern: COJ####-##-## (e.g., COJ0082-25-26)
+# - Site structure may change; monitor min_expected_tenders
+# - Fallback scraping may not work with SharePoint dynamic content
