@@ -37,7 +37,8 @@ All 4 requested tasks have been completed successfully:
 │   ├── company_profile.example.yaml    Tender scoring profile
 │   ├── email_config.example.yaml       SMTP settings
 │   └── sources/
-│       └── jhb_water.yaml              JHB Water navigation config
+│       ├── sars.yaml                   SARS navigation config
+│       └── joburg.yaml                 City of Johannesburg config
 │
 ├── docs/                           ✅ Complete documentation
 │   ├── PRD.md                          Product requirements reference
@@ -235,7 +236,8 @@ All 4 requested tasks have been completed successfully:
 | `config/app_config.example.yaml` | Main app settings |
 | `config/company_profile.example.yaml` | Tender scoring profile |
 | `config/email_config.example.yaml` | SMTP configuration |
-| `config/sources/jhb_water.yaml` | JHB Water navigation |
+| `config/sources/sars.yaml` | SARS navigation |
+| `config/sources/joburg.yaml` | City of Johannesburg |
 
 ### OpenSpec Proposal
 
@@ -407,7 +409,7 @@ git commit -m "feat: description"
 - **App Config:** `config/app_config.example.yaml`
 - **Company Profile:** `config/company_profile.example.yaml`
 - **Email Config:** `config/email_config.example.yaml`
-- **Source Config:** `config/sources/jhb_water.yaml`
+- **Source Configs:** `config/sources/sars.yaml`, `config/sources/joburg.yaml`
 
 ---
 
