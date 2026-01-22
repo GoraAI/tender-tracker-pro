@@ -2,8 +2,17 @@ package com.tendertracker.app.gemma.engine
 
 import android.content.Context
 import android.util.Log
-import com.google.mediapipe.tasks.genai.llminference.LlmInference
+import com.google.ai.edge.litertlm.Backend
+import com.google.ai.edge.litertlm.Content
+import com.google.ai.edge.litertlm.Conversation
+import com.google.ai.edge.litertlm.ConversationConfig
+import com.google.ai.edge.litertlm.Engine
+import com.google.ai.edge.litertlm.EngineConfig
+import com.google.ai.edge.litertlm.Message
+import com.google.ai.edge.litertlm.MessageCallback
+import com.google.ai.edge.litertlm.SamplerConfig
 import com.tendertracker.app.gemma.model.GemmaModel
+import com.tendertracker.app.gemma.model.InferenceBackend
 import com.tendertracker.app.gemma.model.InferenceConfig
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -11,11 +20,23 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import java.util.concurrent.CancellationException
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.resume
 
 typealias ResultListener = (text: String, done: Boolean) -> Unit
+
+/**
+ * Data class to hold the LiteRT LM engine and conversation instances.
+ * This follows the pattern from Google AI Edge Gallery.
+ */
+data class LlmModelInstance(
+    val engine: Engine,
+    var conversation: Conversation
+)
 
 @Singleton
 class GemmaInferenceEngine @Inject constructor(
@@ -28,7 +49,7 @@ class GemmaInferenceEngine @Inject constructor(
     private var currentModel: GemmaModel? = null
     private var modelPath: String? = null
     private var isInitialized = false
-    private var llmInference: LlmInference? = null
+    private var modelInstance: LlmModelInstance? = null
 
     suspend fun initialize(model: GemmaModel, path: String): Result<Unit> =
         withContext(Dispatchers.IO) {
@@ -38,15 +59,44 @@ class GemmaInferenceEngine @Inject constructor(
                 // Clean up any existing instance
                 cleanup()
 
-                // Build options for LLM inference
-                val options = LlmInference.LlmInferenceOptions.builder()
-                    .setModelPath(path)
-                    .setMaxTokens(model.contextLength)
-                    .build()
+                // Determine backend based on GPU support
+                val backend = if (model.supportsGpu) Backend.GPU else Backend.CPU
+                Log.d(TAG, "Using backend: $backend")
 
-                // Create the inference instance
-                llmInference = LlmInference.createFromOptions(context, options)
+                // Build engine config
+                val engineConfig = EngineConfig(
+                    modelPath = path,
+                    backend = backend,
+                    visionBackend = if (model.supportsVision) Backend.GPU else null,
+                    audioBackend = if (model.supportsAudio) Backend.CPU else null,
+                    maxNumTokens = model.contextLength,
+                    // Set cache dir for models in app data directory
+                    cacheDir = if (path.startsWith("/data/data/")) {
+                        context.getExternalFilesDir(null)?.absolutePath
+                    } else null
+                )
 
+                // Create and initialize engine
+                Log.d(TAG, "Creating LiteRT LM Engine...")
+                val engine = Engine(engineConfig)
+                engine.initialize()
+                Log.d(TAG, "Engine initialized successfully")
+
+                // Create conversation with default config
+                Log.d(TAG, "Creating conversation...")
+                val conversation = engine.createConversation(
+                    ConversationConfig(
+                        samplerConfig = SamplerConfig(
+                            topK = 40,
+                            topP = 0.95,
+                            temperature = 0.7
+                        )
+                    )
+                )
+                Log.d(TAG, "Conversation created successfully")
+
+                // Store the instance
+                modelInstance = LlmModelInstance(engine = engine, conversation = conversation)
                 currentModel = model
                 modelPath = path
                 isInitialized = true
@@ -56,6 +106,7 @@ class GemmaInferenceEngine @Inject constructor(
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize LLM", e)
                 isInitialized = false
+                cleanup()
                 Result.failure(e)
             }
         }
@@ -64,7 +115,7 @@ class GemmaInferenceEngine @Inject constructor(
         prompt: String,
         config: InferenceConfig = InferenceConfig()
     ): Result<String> = withContext(Dispatchers.IO) {
-        if (!isInitialized || llmInference == null) {
+        if (!isInitialized || modelInstance == null) {
             return@withContext Result.failure(
                 IllegalStateException("Engine not initialized. Please load a model first.")
             )
@@ -73,7 +124,31 @@ class GemmaInferenceEngine @Inject constructor(
         try {
             Log.d(TAG, "Generating response for prompt: ${prompt.take(50)}...")
 
-            val response = llmInference!!.generateResponse(prompt)
+            // Use suspendCancellableCoroutine to convert callback to suspend function
+            val response = suspendCancellableCoroutine { continuation ->
+                val fullResponse = StringBuilder()
+
+                modelInstance!!.conversation.sendMessageAsync(
+                    Message.of(Content.Text(prompt)),
+                    object : MessageCallback {
+                        override fun onMessage(message: Message) {
+                            fullResponse.append(message.toString())
+                        }
+
+                        override fun onDone() {
+                            continuation.resume(fullResponse.toString())
+                        }
+
+                        override fun onError(throwable: Throwable) {
+                            if (throwable is CancellationException) {
+                                continuation.cancel(throwable)
+                            } else {
+                                continuation.resume("Error: ${throwable.message}")
+                            }
+                        }
+                    }
+                )
+            }
 
             Log.d(TAG, "Generated response: ${response.take(100)}...")
             Result.success(response)
@@ -87,22 +162,38 @@ class GemmaInferenceEngine @Inject constructor(
         prompt: String,
         config: InferenceConfig = InferenceConfig()
     ): Flow<String> = callbackFlow {
-        if (!isInitialized || llmInference == null) {
+        if (!isInitialized || modelInstance == null) {
             throw IllegalStateException("Engine not initialized. Please load a model first.")
         }
 
         Log.d(TAG, "Starting streaming generation for prompt: ${prompt.take(50)}...")
 
-        // Set up result listener for streaming
-        llmInference!!.generateResponseAsync(prompt) { partialResult, done ->
-            if (partialResult.isNotEmpty()) {
-                trySend(partialResult)
+        // Use sendMessageAsync with MessageCallback for streaming
+        modelInstance!!.conversation.sendMessageAsync(
+            Message.of(Content.Text(prompt)),
+            object : MessageCallback {
+                override fun onMessage(message: Message) {
+                    val partialResult = message.toString()
+                    if (partialResult.isNotEmpty()) {
+                        trySend(partialResult)
+                    }
+                }
+
+                override fun onDone() {
+                    Log.d(TAG, "Streaming generation complete")
+                    close()
+                }
+
+                override fun onError(throwable: Throwable) {
+                    if (throwable is CancellationException) {
+                        Log.i(TAG, "The inference is cancelled.")
+                    } else {
+                        Log.e(TAG, "onError", throwable)
+                    }
+                    close(throwable)
+                }
             }
-            if (done) {
-                Log.d(TAG, "Streaming generation complete")
-                close()
-            }
-        }
+        )
 
         awaitClose {
             Log.d(TAG, "Streaming flow closed")
@@ -114,7 +205,7 @@ class GemmaInferenceEngine @Inject constructor(
         config: InferenceConfig,
         listener: ResultListener
     ) = withContext(Dispatchers.IO) {
-        if (!isInitialized || llmInference == null) {
+        if (!isInitialized || modelInstance == null) {
             listener("Error: Engine not initialized. Please load a model first.", true)
             return@withContext
         }
@@ -122,29 +213,102 @@ class GemmaInferenceEngine @Inject constructor(
         try {
             Log.d(TAG, "Generating response with listener for prompt: ${prompt.take(50)}...")
 
-            llmInference!!.generateResponseAsync(prompt) { partialResult, done ->
-                listener(partialResult, done)
-            }
+            modelInstance!!.conversation.sendMessageAsync(
+                Message.of(Content.Text(prompt)),
+                object : MessageCallback {
+                    override fun onMessage(message: Message) {
+                        val partialResult = message.toString()
+                        listener(partialResult, false)
+                    }
+
+                    override fun onDone() {
+                        listener("", true)
+                    }
+
+                    override fun onError(throwable: Throwable) {
+                        if (throwable is CancellationException) {
+                            Log.i(TAG, "The inference is cancelled.")
+                            listener("", true)
+                        } else {
+                            Log.e(TAG, "onError", throwable)
+                            listener("Error: ${throwable.message}", true)
+                        }
+                    }
+                }
+            )
         } catch (e: Exception) {
             Log.e(TAG, "Failed to generate response", e)
             listener("Error: ${e.message}", true)
         }
     }
 
+    /**
+     * Resets the conversation while keeping the engine initialized.
+     * This clears the conversation history and creates a new conversation instance.
+     */
+    suspend fun resetConversation(config: InferenceConfig = InferenceConfig()): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            try {
+                if (modelInstance == null) {
+                    return@withContext Result.failure(
+                        IllegalStateException("Engine not initialized")
+                    )
+                }
+
+                Log.d(TAG, "Resetting conversation...")
+
+                // Close old conversation
+                modelInstance!!.conversation.close()
+
+                // Create new conversation with provided config
+                val newConversation = modelInstance!!.engine.createConversation(
+                    ConversationConfig(
+                        samplerConfig = SamplerConfig(
+                            topK = config.topK,
+                            topP = config.topP.toDouble(),
+                            temperature = config.temperature.toDouble()
+                        )
+                    )
+                )
+
+                modelInstance!!.conversation = newConversation
+                Log.d(TAG, "Conversation reset successfully")
+
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to reset conversation", e)
+                Result.failure(e)
+            }
+        }
+
     fun cleanup() {
         Log.d(TAG, "Cleaning up LLM inference engine")
-        try {
-            llmInference?.close()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error closing LLM inference", e)
+
+        modelInstance?.let { instance ->
+            try {
+                instance.conversation.close()
+                Log.d(TAG, "Conversation closed")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error closing conversation", e)
+            }
+
+            try {
+                instance.engine.close()
+                Log.d(TAG, "Engine closed")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error closing engine", e)
+            }
         }
-        llmInference = null
+
+        modelInstance = null
         isInitialized = false
         currentModel = null
         modelPath = null
+
+        Log.d(TAG, "Cleanup complete")
     }
 
-    fun isReady(): Boolean = isInitialized && llmInference != null
+    fun isReady(): Boolean = isInitialized && modelInstance != null
 
     fun getCurrentModel(): GemmaModel? = currentModel
 }
