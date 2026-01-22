@@ -27,8 +27,10 @@ class ModelDownloadManager @Inject constructor(
 
         val inputData = Data.Builder()
             .putString(ModelDownloadWorker.KEY_MODEL_ID, model.id)
+            .putString(ModelDownloadWorker.KEY_MODEL_NAME, model.name)
             .putString(ModelDownloadWorker.KEY_DOWNLOAD_URL, model.downloadUrl)
             .putString(ModelDownloadWorker.KEY_FALLBACK_URL, model.fallbackUrl)
+            .putLong(ModelDownloadWorker.KEY_TOTAL_BYTES, model.sizeBytes)
             .build()
 
         val constraints = Constraints.Builder()
@@ -44,7 +46,7 @@ class ModelDownloadManager @Inject constructor(
 
         workManager.enqueueUniqueWork(
             workName,
-            ExistingWorkPolicy.KEEP,
+            ExistingWorkPolicy.REPLACE, // Changed from KEEP to REPLACE to allow retry
             request
         )
 
