@@ -179,7 +179,7 @@ fun TenderTrackerNavHost(
                 MainScaffold(
                     navController = navController,
                     navItems = navItems,
-                    currentScreen = Screen.Chat(tenderId = null)
+                    currentScreen = Screen.Chat() // Fix: Match the nav item definition
                 ) {
                     ChatScreen(tenderId = chat.tenderId)
                 }
