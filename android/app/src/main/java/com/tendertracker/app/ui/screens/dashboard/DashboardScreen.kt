@@ -172,7 +172,8 @@ fun DashboardScreen(
                         highPriorityCount = state.highPriorityCount,
                         avgScore = state.avgScore,
                         modelStatus = state.modelStatus,
-                        onModelClick = onModelManagerClick
+                        onModelClick = onModelManagerClick,
+                        onViewAllTenders = onViewAllTenders
                     )
                 }
 
@@ -365,7 +366,8 @@ private fun StatsGrid(
     highPriorityCount: Int,
     avgScore: Float,
     modelStatus: ModelStatus,
-    onModelClick: () -> Unit
+    onModelClick: () -> Unit,
+    onViewAllTenders: () -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -379,7 +381,8 @@ private fun StatsGrid(
                 title = "Total Tenders",
                 value = totalTenders.toString(),
                 icon = Icons.Default.Description,
-                iconTint = GlassPrimary
+                iconTint = GlassPrimary,
+                onClick = onViewAllTenders
             )
             StatCard(
                 modifier = Modifier.weight(1f),

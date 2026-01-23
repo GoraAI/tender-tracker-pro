@@ -280,10 +280,9 @@ private fun MainScaffold(
                         onClick = {
                             navController.navigate(item.screen) {
                                 popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+                                    inclusive = false
                                 }
                                 launchSingleTop = true
-                                restoreState = true
                             }
                         }
                     )
