@@ -1,7 +1,7 @@
 # Tender Tracker Pro - Production Dockerfile for Railway
 # Based on: https://playwright.dev/python/docs/docker
 # and https://docs.railway.com/guides/fastapi
-# Cache bust: 2026-01-16-v2
+# Cache bust: 2026-01-22-v3-migrations
 
 # Use Python 3.12 bookworm (recommended by Playwright docs)
 FROM python:3.12-bookworm
@@ -42,10 +42,14 @@ COPY . .
 # Run migrations before starting the server
 RUN printf '#!/bin/bash\n\
 set -e\n\
+echo "========================================"\n\
+echo "Tender Tracker Pro - Startup Script v3"\n\
+echo "========================================"\n\
 echo "Running database migrations..."\n\
-alembic upgrade head\n\
+alembic upgrade head || { echo "Migration failed!"; exit 1; }\n\
 echo "Migrations complete. Starting server..."\n\
 RUN_PORT="${PORT:-8000}"\n\
+echo "Server will listen on port: $RUN_PORT"\n\
 exec uvicorn src.api.main:app --host 0.0.0.0 --port "$RUN_PORT" --loop asyncio\n' > /app/start.sh && \
     chmod +x /app/start.sh
 
