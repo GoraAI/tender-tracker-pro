@@ -39,7 +39,12 @@ COPY . .
 
 # Create startup script for Railway
 # Using --loop asyncio to avoid uvloop DNS resolution issues
+# Run migrations before starting the server
 RUN printf '#!/bin/bash\n\
+set -e\n\
+echo "Running database migrations..."\n\
+alembic upgrade head\n\
+echo "Migrations complete. Starting server..."\n\
 RUN_PORT="${PORT:-8000}"\n\
 exec uvicorn src.api.main:app --host 0.0.0.0 --port "$RUN_PORT" --loop asyncio\n' > /app/start.sh && \
     chmod +x /app/start.sh
