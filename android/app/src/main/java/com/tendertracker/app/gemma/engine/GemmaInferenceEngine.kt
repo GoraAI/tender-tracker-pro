@@ -63,15 +63,15 @@ class GemmaInferenceEngine @Inject constructor(
                 val backend = if (model.supportsGpu) Backend.GPU else Backend.CPU
                 Log.d(TAG, "Using backend: $backend")
 
-                // Build engine config
+                // Build engine config (following Google AI Edge Gallery pattern)
                 val engineConfig = EngineConfig(
                     modelPath = path,
                     backend = backend,
-                    visionBackend = if (model.supportsVision) Backend.GPU else null,
-                    audioBackend = if (model.supportsAudio) Backend.CPU else null,
+                    visionBackend = if (model.supportsVision) Backend.GPU else null, // must be GPU for Gemma 3n
+                    audioBackend = if (model.supportsAudio) Backend.CPU else null, // must be CPU for Gemma 3n
                     maxNumTokens = model.contextLength,
-                    // Set cache dir for models in app data directory
-                    cacheDir = if (path.startsWith("/data/data/")) {
+                    // Match Google's pattern: only set cacheDir for /data/local/tmp paths
+                    cacheDir = if (path.startsWith("/data/local/tmp")) {
                         context.getExternalFilesDir(null)?.absolutePath
                     } else null
                 )
