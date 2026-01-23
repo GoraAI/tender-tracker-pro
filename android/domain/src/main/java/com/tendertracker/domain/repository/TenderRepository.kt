@@ -15,12 +15,12 @@ interface TenderRepository {
 
     /**
      * Run the pipeline to discover new tenders, wait for completion, then sync.
-     * @param sourceId The source to scrape (e.g., "jhb-water")
+     * @param sourceId The source to scrape (e.g., "joburg")
      * @param onProgress Callback for progress updates (0-100)
      * @return Result with number of tenders synced
      */
     suspend fun runPipelineAndSync(
-        sourceId: String = "jhb-water",
+        sourceId: String = "joburg",
         onProgress: (Int) -> Unit = {}
     ): Result<Int>
 }

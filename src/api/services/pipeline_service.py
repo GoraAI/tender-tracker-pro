@@ -142,7 +142,7 @@ class PipelineService:
                 # Get job to check source_id
                 result = await db.execute(select(Job).where(Job.id == job_id))
                 job = result.scalar_one_or_none()
-                source_id = job.source_id or "jhb-water"
+                source_id = job.source_id or "joburg"
 
                 await service.add_log(job_id, f"Loading source config: {source_id}")
 
@@ -242,7 +242,7 @@ class PipelineService:
                 # Get job source
                 result = await db.execute(select(Job).where(Job.id == job_id))
                 job = result.scalar_one_or_none()
-                source_id = job.source_id or "jhb-water"
+                source_id = job.source_id or "joburg"
 
                 # Load config
                 config_path = Path(f"config/sources/{source_id.replace('-', '_')}.yaml")
@@ -327,7 +327,7 @@ class PipelineService:
                 # Get job source
                 result = await db.execute(select(Job).where(Job.id == job_id))
                 job = result.scalar_one_or_none()
-                source_id = job.source_id or "jhb-water"
+                source_id = job.source_id or "joburg"
 
                 # Get tenders needing extraction
                 tenders_result = await db.execute(
@@ -401,7 +401,7 @@ class PipelineService:
                 # Get job info
                 result = await db.execute(select(Job).where(Job.id == job_id))
                 job = result.scalar_one_or_none()
-                source_id = job.source_id or "jhb-water"
+                source_id = job.source_id or "joburg"
 
                 # Get tenders needing scoring (have raw_text but no scores)
                 from ..models.score import Score

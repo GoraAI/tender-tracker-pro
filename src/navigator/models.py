@@ -22,7 +22,7 @@ class PDFLink:
     context: str  # Surrounding text (e.g., from parent <tr>)
     discovered_at: datetime  # Discovery timestamp
     source_url: str  # Page URL where found
-    source_id: str  # Source identifier (e.g., "jhb-water")
+    source_id: str  # Source identifier (e.g., "joburg")
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""

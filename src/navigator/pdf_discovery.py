@@ -75,7 +75,7 @@ class PDFDiscovery:
 
         Args:
             page: Playwright Page object
-            source_id: Source identifier (e.g., "jhb-water")
+            source_id: Source identifier (e.g., "joburg")
 
         Returns:
             List of PDFLink objects (deduplicated, filtered)

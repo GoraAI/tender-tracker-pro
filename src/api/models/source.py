@@ -18,7 +18,7 @@ class Source(Base):
 
     __tablename__ = "sources"
 
-    id: Mapped[str] = mapped_column(String(50), primary_key=True)  # e.g., 'jhb-water'
+    id: Mapped[str] = mapped_column(String(50), primary_key=True)  # e.g., 'joburg'
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     url: Mapped[str] = mapped_column(String(500), nullable=False)
     config_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
