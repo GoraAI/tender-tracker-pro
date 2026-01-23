@@ -71,10 +71,19 @@ class ModelDownloadManager @Inject constructor(
                     val downloadedBytes = workInfo.progress.getLong(
                         KEY_MODEL_DOWNLOAD_RECEIVED_BYTES, 0
                     )
-                    // Get total bytes from the model (we know the model size)
-                    // Google calculates percentage in the UI layer based on known model size
-                    // For now, just return 0 percentage - ViewModel should calculate it
-                    ModelState.Downloading(0)
+                    // Get total bytes from input data
+                    val totalBytes = workInfo.progress.getLong(
+                        KEY_MODEL_TOTAL_BYTES, 0
+                    )
+
+                    // Calculate percentage
+                    val percentage = if (totalBytes > 0) {
+                        ((downloadedBytes.toFloat() / totalBytes.toFloat()) * 100).toInt()
+                    } else {
+                        0
+                    }
+
+                    ModelState.Downloading(percentage)
                 }
                 WorkInfo.State.SUCCEEDED -> ModelState.Downloaded
                 WorkInfo.State.FAILED -> {

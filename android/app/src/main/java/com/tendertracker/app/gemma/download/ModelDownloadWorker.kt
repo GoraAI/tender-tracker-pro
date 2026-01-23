@@ -204,6 +204,7 @@ class ModelDownloadWorker @AssistedInject constructor(
                                 setProgress(
                                     Data.Builder()
                                         .putLong(KEY_MODEL_DOWNLOAD_RECEIVED_BYTES, downloadedBytes)
+                                        .putLong(KEY_MODEL_TOTAL_BYTES, totalBytes)
                                         .putLong(KEY_MODEL_DOWNLOAD_RATE, (bytesPerMs * 1000).toLong())
                                         .putLong(KEY_MODEL_DOWNLOAD_REMAINING_MS, remainingMs.toLong())
                                         .build()
