@@ -487,9 +487,13 @@ private fun downloadPdf(context: Context, url: String, filename: String) {
     val request = DownloadManager.Request(Uri.parse(url))
         .setTitle(filename)
         .setDescription("Downloading tender PDF")
+        .setMimeType("application/pdf")  // Set MIME type for PDF
         .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
         .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename)
         .setAllowedOverMetered(true)
         .setAllowedOverRoaming(true)
-    downloadManager.enqueue(request)
+        .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE or DownloadManager.Request.NETWORK_WIFI)
+
+    val downloadId = downloadManager.enqueue(request)
+    android.util.Log.d("TenderDetail", "PDF download started: $filename (ID: $downloadId) from URL: $url")
 }
