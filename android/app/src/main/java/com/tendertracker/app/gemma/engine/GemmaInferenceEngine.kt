@@ -64,16 +64,15 @@ class GemmaInferenceEngine @Inject constructor(
                 Log.d(TAG, "Using backend: $backend")
 
                 // Build engine config
+                // NOTE: Vision and audio backends are disabled for now as they cause model load failures
+                // with the current LiteRT LM API. Text-only inference works fine.
                 val engineConfig = EngineConfig(
                     modelPath = path,
                     backend = backend,
-                    visionBackend = if (model.supportsVision) Backend.GPU else null,
-                    audioBackend = if (model.supportsAudio) Backend.CPU else null,
+                    visionBackend = null, // Disabled - causes "Failed to load model from buffer"
+                    audioBackend = null,  // Disabled - causes "Failed to load model from buffer"
                     maxNumTokens = model.contextLength,
-                    // Set cache dir for models in app data directory
-                    cacheDir = if (path.startsWith("/data/data/")) {
-                        context.getExternalFilesDir(null)?.absolutePath
-                    } else null
+                    cacheDir = null // Let LiteRT use default cache location
                 )
 
                 // Create and initialize engine
