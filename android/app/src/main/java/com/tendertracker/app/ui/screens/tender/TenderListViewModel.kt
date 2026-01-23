@@ -84,7 +84,7 @@ class TenderListViewModel @Inject constructor(
             }
 
             tenderRepository.runPipelineAndSync(
-                sourceId = "jhb-water",
+                sourceId = "joburg",
                 onProgress = { progress ->
                     val message = when {
                         progress < 10 -> "Starting pipeline..."
