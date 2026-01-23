@@ -1,14 +1,16 @@
 package com.tendertracker.app.ui.screens.tender
 
 import android.app.DownloadManager
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.net.Uri
 import android.os.Environment
 import android.widget.Toast
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -562,7 +564,7 @@ private fun registerDownloadReceiver(context: Context, downloadId: Long, filenam
     androidx.core.content.ContextCompat.registerReceiver(
         context,
         receiver,
-        android.content.IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+        IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
         androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED
     )
 }
