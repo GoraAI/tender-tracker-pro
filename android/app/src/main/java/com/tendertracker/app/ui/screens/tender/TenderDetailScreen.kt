@@ -483,17 +483,29 @@ private fun DetailRow(label: String, value: String) {
 }
 
 private fun downloadPdf(context: Context, url: String, filename: String) {
-    val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-    val request = DownloadManager.Request(Uri.parse(url))
-        .setTitle(filename)
-        .setDescription("Downloading tender PDF")
-        .setMimeType("application/pdf")  // Set MIME type for PDF
-        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename)
-        .setAllowedOverMetered(true)
-        .setAllowedOverRoaming(true)
-        .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE or DownloadManager.Request.NETWORK_WIFI)
+    try {
+        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
 
-    val downloadId = downloadManager.enqueue(request)
-    android.util.Log.d("TenderDetail", "PDF download started: $filename (ID: $downloadId) from URL: $url")
+        // Clean filename - remove invalid characters
+        val cleanFilename = filename.replace(Regex("[^a-zA-Z0-9._-]"), "_")
+
+        val request = DownloadManager.Request(Uri.parse(url))
+            .setTitle(cleanFilename)
+            .setDescription("Downloading tender PDF")
+            .setMimeType("application/pdf")
+            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, cleanFilename)
+            .setAllowedOverMetered(true)
+            .setAllowedOverRoaming(true)
+            .setRequiresCharging(false)
+
+        val downloadId = downloadManager.enqueue(request)
+        android.util.Log.d("TenderDetail", "PDF download started - ID: $downloadId, File: $cleanFilename, URL: $url")
+    } catch (e: SecurityException) {
+        android.util.Log.e("TenderDetail", "Permission denied for download", e)
+        Toast.makeText(context, "Storage permission required for downloads", Toast.LENGTH_LONG).show()
+    } catch (e: Exception) {
+        android.util.Log.e("TenderDetail", "PDF download failed", e)
+        Toast.makeText(context, "Download failed: ${e.message}", Toast.LENGTH_LONG).show()
+    }
 }
