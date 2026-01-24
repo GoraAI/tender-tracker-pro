@@ -6,7 +6,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- DownloadManager to public Downloads requires NO permissions on minSdk 31+ -->
+    <!-- DuckDuckGo pattern: maxSdkVersion="29" for backward compatibility -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
 
     <application
         android:name=".TenderTrackerApplication"

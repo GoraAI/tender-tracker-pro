@@ -1,10 +1,8 @@
 package com.tendertracker.app.ui.screens.tender
 
 import android.app.DownloadManager
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.net.Uri
 import android.os.Environment
 import android.widget.Toast
@@ -484,125 +482,21 @@ private fun DetailRow(label: String, value: String) {
     }
 }
 
+// Simple, battle-tested download pattern from DuckDuckGo Android browser
 private fun downloadPdf(context: Context, url: String, filename: String) {
-    try {
-        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-
-        // Sanitize filename following Android filesystem rules
-        val sanitizedFilename = sanitizeFileName(filename)
-
-        val request = DownloadManager.Request(Uri.parse(url))
-            .setTitle(sanitizedFilename)
-            .setDescription("Downloading tender PDF")
-            .setMimeType("application/pdf")
-            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, sanitizedFilename)
-            .setAllowedNetworkTypes(
-                DownloadManager.Request.NETWORK_WIFI or
-                DownloadManager.Request.NETWORK_MOBILE
-            )
-            .setAllowedOverMetered(true)
-            .setAllowedOverRoaming(true)
-
-        val downloadId = downloadManager.enqueue(request)
-        android.util.Log.d("TenderDetail", "PDF download enqueued - ID: $downloadId, File: $sanitizedFilename, URL: $url")
-
-        // Register receiver to check for completion/errors
-        registerDownloadReceiver(context, downloadId, sanitizedFilename)
-
-    } catch (e: IllegalArgumentException) {
-        android.util.Log.e("TenderDetail", "Invalid download URL: $url", e)
-        Toast.makeText(context, "Invalid download URL", Toast.LENGTH_LONG).show()
-    } catch (e: SecurityException) {
-        android.util.Log.e("TenderDetail", "Security error downloading PDF", e)
-        Toast.makeText(context, "Download blocked by security policy", Toast.LENGTH_LONG).show()
-    } catch (e: Exception) {
-        android.util.Log.e("TenderDetail", "PDF download failed", e)
-        Toast.makeText(context, "Download failed: ${e.message}", Toast.LENGTH_LONG).show()
-    }
-}
-
-/**
- * Sanitize filename for Android filesystem.
- * Removes forbidden characters: \ / : * ? " < > |
- * Limits length, ensures .pdf extension.
- */
-private fun sanitizeFileName(rawName: String): String {
-    if (rawName.isBlank()) {
-        return "download_${System.currentTimeMillis()}.pdf"
-    }
-
-    return rawName
-        .replace(Regex("""[\\/:*?"<>|]"""), "_")  // Forbidden filesystem chars
-        .replace(Regex("""[\x00-\x1F]"""), "")     // Control characters
-        .replace("..", "_")                         // Path traversal attempt
-        .trim('.', ' ')                             // Leading/trailing dots/spaces
-        .take(250)                                  // Filesystem length limit
-        .let { if (it.lowercase().endsWith(".pdf")) it else "$it.pdf" }
-        .ifBlank { "download_${System.currentTimeMillis()}.pdf" }
-}
-
-/**
- * Register receiver to monitor download completion and check for errors.
- */
-private fun registerDownloadReceiver(context: Context, downloadId: Long, filename: String) {
-    val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-            if (id == downloadId) {
-                checkDownloadStatus(context, downloadId, filename)
-                try {
-                    context.unregisterReceiver(this)
-                } catch (e: Exception) {
-                    // Already unregistered
-                }
-            }
-        }
-    }
-
-    // Register with RECEIVER_NOT_EXPORTED for API 33+ compliance
-    androidx.core.content.ContextCompat.registerReceiver(
-        context,
-        receiver,
-        IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
-        androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED
-    )
-}
-
-/**
- * Check download status and report errors to user.
- */
-private fun checkDownloadStatus(context: Context, downloadId: Long, filename: String) {
     val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-    val query = DownloadManager.Query().setFilterById(downloadId)
 
-    downloadManager.query(query)?.use { cursor ->
-        if (cursor.moveToFirst()) {
-            val status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
-            val reason = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_REASON))
+    // Simple filename sanitization - just replace slashes
+    val cleanFilename = filename.replace("/", "_")
 
-            when (status) {
-                DownloadManager.STATUS_SUCCESSFUL -> {
-                    android.util.Log.d("TenderDetail", "Download successful: $filename")
-                    Toast.makeText(context, "Downloaded: $filename", Toast.LENGTH_SHORT).show()
-                }
-                DownloadManager.STATUS_FAILED -> {
-                    val errorMsg = when (reason) {
-                        DownloadManager.ERROR_CANNOT_RESUME -> "Cannot resume download"
-                        DownloadManager.ERROR_DEVICE_NOT_FOUND -> "Storage not found"
-                        DownloadManager.ERROR_FILE_ALREADY_EXISTS -> "File already exists"
-                        DownloadManager.ERROR_FILE_ERROR -> "Storage error"
-                        DownloadManager.ERROR_HTTP_DATA_ERROR -> "HTTP error - check network"
-                        DownloadManager.ERROR_INSUFFICIENT_SPACE -> "Insufficient storage space"
-                        DownloadManager.ERROR_TOO_MANY_REDIRECTS -> "Too many redirects"
-                        DownloadManager.ERROR_UNHANDLED_HTTP_CODE -> "HTTP error code: $reason"
-                        DownloadManager.ERROR_UNKNOWN -> "Unknown error"
-                        else -> "Download failed (code: $reason)"
-                    }
-                    android.util.Log.e("TenderDetail", "Download failed: $filename - $errorMsg")
-                    Toast.makeText(context, "Download failed: $errorMsg", Toast.LENGTH_LONG).show()
-                }
-            }
-        }
-    }
+    val request = DownloadManager.Request(Uri.parse(url))
+        .setTitle(cleanFilename)
+        .setDescription("Downloading tender PDF")
+        .setMimeType("application/pdf")
+        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, cleanFilename)
+        .setAllowedOverMetered(true)
+        .setAllowedOverRoaming(false)
+
+    downloadManager.enqueue(request)
 }
