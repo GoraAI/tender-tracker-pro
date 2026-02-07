@@ -39,4 +39,7 @@ sealed class Screen {
 
     @Serializable
     data object Pipeline : Screen()
+
+    @Serializable
+    data object CompanyProfile : Screen()
 }

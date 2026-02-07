@@ -4,6 +4,9 @@ import com.tendertracker.data.remote.dto.CompanyProfileRequest
 import com.tendertracker.data.remote.dto.CompanyProfileResponse
 import com.tendertracker.data.remote.dto.ComplianceItemRequest
 import com.tendertracker.data.remote.dto.ComplianceItemResponse
+import com.tendertracker.data.remote.dto.CriteriaCreateRequest
+import com.tendertracker.data.remote.dto.CriteriaResponse
+import com.tendertracker.data.remote.dto.CriteriaUpdateRequest
 import com.tendertracker.data.remote.dto.ComplianceStatusResponse
 import com.tendertracker.data.remote.dto.CostAnalyticsResponse
 import com.tendertracker.data.remote.dto.CostItemRequest
@@ -182,4 +185,32 @@ interface TenderApi {
     suspend fun recordOutcome(
         @Body request: TenderOutcomeRequest
     ): Response<TenderOutcomeResponse>
+
+    // ==========================================================================
+    // CRITERIA ENDPOINTS - Company Profile / Scoring Criteria
+    // ==========================================================================
+
+    @GET("config/criteria")
+    suspend fun getCriteria(): Response<List<CriteriaResponse>>
+
+    @GET("config/criteria/{criteriaId}")
+    suspend fun getCriteriaById(
+        @Path("criteriaId") criteriaId: String
+    ): Response<CriteriaResponse>
+
+    @POST("config/criteria")
+    suspend fun createCriteria(
+        @Body request: CriteriaCreateRequest
+    ): Response<CriteriaResponse>
+
+    @PUT("config/criteria/{criteriaId}")
+    suspend fun updateCriteria(
+        @Path("criteriaId") criteriaId: String,
+        @Body request: CriteriaUpdateRequest
+    ): Response<CriteriaResponse>
+
+    @DELETE("config/criteria/{criteriaId}")
+    suspend fun deleteCriteria(
+        @Path("criteriaId") criteriaId: String
+    ): Response<Unit>
 }

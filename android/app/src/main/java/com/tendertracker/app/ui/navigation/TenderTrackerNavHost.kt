@@ -42,6 +42,7 @@ import com.tendertracker.app.ui.screens.compliance.ComplianceScreen
 import com.tendertracker.app.ui.screens.dashboard.DashboardScreen
 import com.tendertracker.app.ui.screens.model.ModelManagerScreen
 import com.tendertracker.app.ui.screens.pipeline.PipelineScreen
+import com.tendertracker.app.ui.screens.profile.CompanyProfileScreen
 import com.tendertracker.app.ui.screens.settings.SettingsScreen
 import com.tendertracker.app.ui.screens.tender.TenderDetailScreen
 import com.tendertracker.app.ui.screens.tender.TenderListScreen
@@ -195,6 +196,9 @@ fun TenderTrackerNavHost(
                         onModelManagerClick = {
                             navController.navigate(Screen.ModelManager)
                         },
+                        onCompanyProfileClick = {
+                            navController.navigate(Screen.CompanyProfile)
+                        },
                         onLogoutClick = {
                             authViewModel.onLogout()
                             navController.navigate(Screen.Login) {
@@ -230,6 +234,12 @@ fun TenderTrackerNavHost(
                     onTenderClick = { tenderId ->
                         navController.navigate(Screen.TenderDetail(tenderId))
                     }
+                )
+            }
+
+            composable<Screen.CompanyProfile> {
+                CompanyProfileScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
         }

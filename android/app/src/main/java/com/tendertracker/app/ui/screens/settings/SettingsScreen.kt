@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Memory
@@ -51,6 +52,7 @@ import com.tendertracker.app.ui.theme.GlassSecondary
 @Composable
 fun SettingsScreen(
     onModelManagerClick: () -> Unit,
+    onCompanyProfileClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -87,6 +89,16 @@ fun SettingsScreen(
                 subtitle = state.modelStatus,
                 icon = Icons.Default.Memory,
                 onClick = onModelManagerClick
+            )
+
+            Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
+
+            // Company Profile - Glassmorphism Card
+            SettingsCard(
+                title = "Company Profile",
+                subtitle = "Manage scoring criteria",
+                icon = Icons.Default.Business,
+                onClick = onCompanyProfileClick
             )
 
             Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
