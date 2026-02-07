@@ -33,9 +33,9 @@ class CompanyProfileViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            when (val result = criteriaRepository.getCriteria()) {
-                is Result.Success -> {
-                    val defaultCriteria = result.data.firstOrNull { it.isDefault }
+            criteriaRepository.getCriteria().fold(
+                onSuccess = { criteriaList ->
+                    val defaultCriteria = criteriaList.firstOrNull { it.isDefault }
                     if (defaultCriteria != null) {
                         _uiState.update {
                             it.copy(
@@ -58,13 +58,13 @@ class CompanyProfileViewModel @Inject constructor(
                     } else {
                         _uiState.update { it.copy(isLoading = false) }
                     }
-                }
-                is Result.Error -> {
+                },
+                onFailure = { exception ->
                     _uiState.update {
-                        it.copy(isLoading = false, error = result.message)
+                        it.copy(isLoading = false, error = exception.message)
                     }
                 }
-            }
+            )
         }
     }
 
@@ -231,25 +231,25 @@ class CompanyProfileViewModel @Inject constructor(
                 criteriaRepository.createCriteria(criteria)
             }
 
-            when (result) {
-                is Result.Success -> {
+            result.fold(
+                onSuccess = { savedCriteria ->
                     _uiState.update {
                         it.copy(
                             isSaving = false,
                             saveSuccess = true,
-                            existingCriteria = result.data
+                            existingCriteria = savedCriteria
                         )
                     }
-                }
-                is Result.Error -> {
+                },
+                onFailure = { exception ->
                     _uiState.update {
                         it.copy(
                             isSaving = false,
-                            error = result.message
+                            error = exception.message
                         )
                     }
                 }
-            }
+            )
         }
     }
 

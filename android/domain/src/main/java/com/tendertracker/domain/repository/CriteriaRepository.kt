@@ -1,7 +1,6 @@
 package com.tendertracker.domain.repository
 
 import com.tendertracker.domain.model.UserCriteria
-import com.tendertracker.domain.util.Result
 
 /**
  * Repository for managing user scoring criteria.

@@ -8,7 +8,6 @@ import com.tendertracker.data.remote.dto.toCreateRequest
 import com.tendertracker.data.remote.dto.toDomain
 import com.tendertracker.domain.model.UserCriteria
 import com.tendertracker.domain.repository.CriteriaRepository
-import com.tendertracker.domain.util.Result
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,12 +20,12 @@ class CriteriaRepositoryImpl @Inject constructor(
         return try {
             val response = api.getCriteria()
             if (response.isSuccessful && response.body() != null) {
-                Result.Success(response.body()!!.map { it.toDomain() })
+                Result.success(response.body()!!.map { it.toDomain() })
             } else {
-                Result.Error("Failed to fetch criteria: ${response.code()}")
+                Result.failure(Exception("Failed to fetch criteria: ${response.code()}"))
             }
         } catch (e: Exception) {
-            Result.Error("Network error: ${e.message}")
+            Result.failure(Exception("Network error: ${e.message}"))
         }
     }
 
@@ -34,12 +33,12 @@ class CriteriaRepositoryImpl @Inject constructor(
         return try {
             val response = api.getCriteriaById(id)
             if (response.isSuccessful && response.body() != null) {
-                Result.Success(response.body()!!.toDomain())
+                Result.success(response.body()!!.toDomain())
             } else {
-                Result.Error("Failed to fetch criteria: ${response.code()}")
+                Result.failure(Exception("Failed to fetch criteria: ${response.code()}"))
             }
         } catch (e: Exception) {
-            Result.Error("Network error: ${e.message}")
+            Result.failure(Exception("Network error: ${e.message}"))
         }
     }
 
@@ -48,12 +47,12 @@ class CriteriaRepositoryImpl @Inject constructor(
             val request = criteria.toCreateRequest()
             val response = api.createCriteria(request)
             if (response.isSuccessful && response.body() != null) {
-                Result.Success(response.body()!!.toDomain())
+                Result.success(response.body()!!.toDomain())
             } else {
-                Result.Error("Failed to create criteria: ${response.code()}")
+                Result.failure(Exception("Failed to create criteria: ${response.code()}"))
             }
         } catch (e: Exception) {
-            Result.Error("Network error: ${e.message}")
+            Result.failure(Exception("Network error: ${e.message}"))
         }
     }
 
@@ -80,12 +79,12 @@ class CriteriaRepositoryImpl @Inject constructor(
             )
             val response = api.updateCriteria(criteria.id, request)
             if (response.isSuccessful && response.body() != null) {
-                Result.Success(response.body()!!.toDomain())
+                Result.success(response.body()!!.toDomain())
             } else {
-                Result.Error("Failed to update criteria: ${response.code()}")
+                Result.failure(Exception("Failed to update criteria: ${response.code()}"))
             }
         } catch (e: Exception) {
-            Result.Error("Network error: ${e.message}")
+            Result.failure(Exception("Network error: ${e.message}"))
         }
     }
 
@@ -93,22 +92,24 @@ class CriteriaRepositoryImpl @Inject constructor(
         return try {
             val response = api.deleteCriteria(id)
             if (response.isSuccessful) {
-                Result.Success(Unit)
+                Result.success(Unit)
             } else {
-                Result.Error("Failed to delete criteria: ${response.code()}")
+                Result.failure(Exception("Failed to delete criteria: ${response.code()}"))
             }
         } catch (e: Exception) {
-            Result.Error("Network error: ${e.message}")
+            Result.failure(Exception("Network error: ${e.message}"))
         }
     }
 
     override suspend fun getDefaultCriteria(): Result<UserCriteria?> {
-        return when (val result = getCriteria()) {
-            is Result.Success -> {
-                val defaultCriteria = result.data.firstOrNull { it.isDefault }
-                Result.Success(defaultCriteria)
+        return getCriteria().fold(
+            onSuccess = { criteriaList ->
+                val defaultCriteria = criteriaList.firstOrNull { it.isDefault }
+                Result.success(defaultCriteria)
+            },
+            onFailure = { exception ->
+                Result.failure(exception)
             }
-            is Result.Error -> result
-        }
+        )
     }
 }
