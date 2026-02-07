@@ -417,6 +417,7 @@ private fun ChipInputField(
                     selected = false,
                     onClick = { onRemove(item) },
                     label = { Text(item) },
+                    enabled = true,
                     trailingIcon = {
                         Icon(
                             Icons.Default.Close,
