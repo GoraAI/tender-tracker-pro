@@ -6,7 +6,6 @@ import com.tendertracker.domain.model.ScoringWeights
 import com.tendertracker.domain.model.UserCriteria
 import com.tendertracker.domain.model.ValueRange
 import com.tendertracker.domain.repository.CriteriaRepository
-import com.tendertracker.domain.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
