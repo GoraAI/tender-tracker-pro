@@ -424,15 +424,7 @@ private fun ChipInputField(
                             contentDescription = "Remove",
                             modifier = Modifier.padding(start = 4.dp)
                         )
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        containerColor = GlassCardBackground,
-                        labelColor = MaterialTheme.colorScheme.onSurface
-                    ),
-                    border = FilterChipDefaults.filterChipBorder(
-                        borderColor = GlassBorder,
-                        selectedBorderColor = GlassPrimary
-                    )
+                    }
                 )
             }
         }
