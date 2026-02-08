@@ -1,5 +1,6 @@
 package com.tendertracker.app.services
 
+import com.tendertracker.app.gemma.ScoringService
 import com.tendertracker.domain.model.CompanyProfile
 import com.tendertracker.domain.model.Tender
 import javax.inject.Inject
@@ -7,7 +8,7 @@ import javax.inject.Singleton
 
 @Singleton
 class GemmaResponseGenerator @Inject constructor(
-    private val scoringService: com.tendertracker.app.services.scoring.ScoringService
+    private val scoringService: ScoringService
 ) {
 
     /**
