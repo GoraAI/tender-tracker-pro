@@ -25,6 +25,9 @@ sealed class Screen {
     data class Chat(val tenderId: String? = null) : Screen()
 
     @Serializable
+    data class ApplicationPreview(val tenderId: String, val applicationId: String? = null) : Screen()
+
+    @Serializable
     data object Settings : Screen()
 
     @Serializable

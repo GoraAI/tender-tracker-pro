@@ -348,7 +348,26 @@ class PipelineService:
                 await service.update_job_status(job_id, "running", total_items=total)
                 await service.add_log(job_id, f"Found {total} PDFs to extract")
 
-                # Use pdfplumber for text extraction
+                # Try to use TenderExtractor (structured extraction), fall back to pdfplumber
+                use_structured_extraction = False
+                tender_extractor = None
+
+                try:
+                    from src.extraction.tender_extractor import TenderExtractor
+                    from src.llm import ModelManager
+
+                    await service.add_log(job_id, "Loading LLM model for structured extraction...")
+                    model_manager = ModelManager()
+                    tender_extractor = TenderExtractor(model_manager)
+                    use_structured_extraction = True
+                    await service.add_log(job_id, "Using structured extraction (TenderExtractor)")
+                except ImportError as e:
+                    await service.add_log(
+                        job_id, f"LLM not available, using basic text extraction: {e}", level="warning"
+                    )
+                    use_structured_extraction = False
+
+                # Import pdfplumber for fallback or text extraction
                 import pdfplumber
 
                 extracted = 0
@@ -358,7 +377,7 @@ class PipelineService:
                         if not pdf_path.exists():
                             raise Exception(f"PDF not found: {pdf_path}")
 
-                        # Extract text
+                        # Extract text first (needed for both modes)
                         text_parts = []
                         with pdfplumber.open(pdf_path) as pdf:
                             for page in pdf.pages:
@@ -366,8 +385,48 @@ class PipelineService:
                                 if page_text:
                                     text_parts.append(page_text)
 
-                        tender.raw_text = "\n\n".join(text_parts)
-                        tender.extracted_at = datetime.utcnow()
+                        raw_text = "\n\n".join(text_parts)
+
+                        if use_structured_extraction and tender_extractor:
+                            try:
+                                # Use TenderExtractor for structured data
+                                tender_info = await asyncio.to_thread(
+                                    tender_extractor.extract_single, pdf_path, raw_text
+                                )
+
+                                # Update tender with structured data
+                                tender.raw_text = raw_text
+                                tender.title = tender_info.title or tender.title
+                                tender.reference = tender_info.reference or tender.reference
+                                tender.deadline = tender_info.deadline
+                                tender.estimated_value = tender_info.estimated_value
+                                tender.requirements_summary = tender_info.requirements_summary
+                                tender.contact_name = tender_info.contact_name
+                                tender.contact_email = tender_info.contact_email
+                                tender.extraction_confidence = tender_info.confidence
+                                tender.extracted_at = datetime.utcnow()
+
+                                await service.add_log(
+                                    job_id,
+                                    f"Extracted (structured, confidence={tender_info.confidence:.2f}): {tender.reference}"
+                                )
+
+                            except Exception as extraction_error:
+                                # Fall back to raw text if structured extraction fails
+                                await service.add_log(
+                                    job_id,
+                                    f"Structured extraction failed for {tender.reference}, using raw text: {extraction_error}",
+                                    level="warning"
+                                )
+                                tender.raw_text = raw_text
+                                tender.extracted_at = datetime.utcnow()
+                                tender.extraction_confidence = 0.3  # Low confidence for raw text only
+                        else:
+                            # Basic text extraction only
+                            tender.raw_text = raw_text
+                            tender.extracted_at = datetime.utcnow()
+                            tender.extraction_confidence = 0.5  # Medium confidence for text-only
+
                         await db.commit()
 
                         extracted += 1
@@ -375,7 +434,6 @@ class PipelineService:
                         await service.update_job_status(
                             job_id, "running", progress=progress, processed_items=extracted
                         )
-                        await service.add_log(job_id, f"Extracted: {tender.reference}")
 
                     except Exception as e:
                         await service.add_log(

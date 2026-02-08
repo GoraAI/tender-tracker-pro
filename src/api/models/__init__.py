@@ -12,6 +12,10 @@ from src.api.models.compliance_registration import ComplianceRegistration
 from src.api.models.cost_item import CostItem
 from src.api.models.tender_outcome import TenderOutcome
 from src.api.models.pipeline_tender import PipelineTender
+from src.api.models.tender_application import TenderApplication
+from src.api.models.answer_library import AnswerLibrary
+from src.api.models.document_library import DocumentLibrary
+from src.api.models.application_template import ApplicationTemplate
 
 __all__ = [
     "Base",
@@ -29,4 +33,8 @@ __all__ = [
     "CostItem",
     "TenderOutcome",
     "PipelineTender",
+    "TenderApplication",
+    "AnswerLibrary",
+    "DocumentLibrary",
+    "ApplicationTemplate",
 ]

@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.config import get_settings
 from src.api.database import close_db, init_db
-from src.api.routers import analytics, auth, config, dashboard, pipeline, tenders
+from src.api.routers import analytics, auth, config, dashboard, pipeline, tenders, applications, qualification
 from src.api.websocket import job_stream
 
 settings = get_settings()
@@ -58,6 +58,8 @@ app.include_router(dashboard.router, prefix="/api/v1")
 app.include_router(pipeline.router, prefix="/api/v1/pipeline", tags=["pipeline"])
 app.include_router(config.router, prefix="/api/v1/config", tags=["config"])
 app.include_router(analytics.router, prefix="/api/v1")
+app.include_router(applications.router, prefix="/api/v1")
+app.include_router(qualification.router, prefix="/api/v1")
 
 # WebSocket endpoint for job streaming
 app.add_api_websocket_route("/ws/pipeline/jobs/{job_id}/stream", job_stream.websocket_endpoint)

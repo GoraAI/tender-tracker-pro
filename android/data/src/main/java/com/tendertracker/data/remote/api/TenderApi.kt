@@ -213,4 +213,52 @@ interface TenderApi {
     suspend fun deleteCriteria(
         @Path("criteriaId") criteriaId: String
     ): Response<Unit>
+
+    // ==========================================================================
+    // APPLICATION ENDPOINTS - Auto-Fill Tender Applications
+    // ==========================================================================
+
+    @GET("qualification/tenders/{tenderId}")
+    suspend fun checkQualification(
+        @Path("tenderId") tenderId: String
+    ): Response<com.tendertracker.data.remote.dto.QualificationResponse>
+
+    @POST("applications")
+    suspend fun createApplication(
+        @Body request: com.tendertracker.data.remote.dto.ApplicationCreateRequest
+    ): Response<com.tendertracker.data.remote.dto.ApplicationResponse>
+
+    @GET("applications/{applicationId}")
+    suspend fun getApplication(
+        @Path("applicationId") applicationId: String
+    ): Response<com.tendertracker.data.remote.dto.ApplicationResponse>
+
+    @PUT("applications/{applicationId}/fields")
+    suspend fun updateApplicationFields(
+        @Path("applicationId") applicationId: String,
+        @Body request: com.tendertracker.data.remote.dto.ApplicationUpdateRequest
+    ): Response<com.tendertracker.data.remote.dto.ApplicationResponse>
+
+    @PUT("applications/{applicationId}/pricing")
+    suspend fun updateApplicationPricing(
+        @Path("applicationId") applicationId: String,
+        @Body request: com.tendertracker.data.remote.dto.PricingUpdateRequest
+    ): Response<com.tendertracker.data.remote.dto.ApplicationResponse>
+
+    @PUT("applications/{applicationId}/todos/{todoId}")
+    suspend fun updateTodoStatus(
+        @Path("applicationId") applicationId: String,
+        @Path("todoId") todoId: String,
+        @Body request: com.tendertracker.data.remote.dto.TodoUpdateRequest
+    ): Response<com.tendertracker.data.remote.dto.ApplicationResponse>
+
+    @POST("applications/{applicationId}/submit")
+    suspend fun submitApplication(
+        @Path("applicationId") applicationId: String
+    ): Response<com.tendertracker.data.remote.dto.ApplicationResponse>
+
+    @DELETE("applications/{applicationId}")
+    suspend fun deleteApplication(
+        @Path("applicationId") applicationId: String
+    ): Response<Unit>
 }

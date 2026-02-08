@@ -34,6 +34,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.tendertracker.app.ui.screens.analytics.AnalyticsScreen
+import com.tendertracker.app.ui.screens.applications.ApplicationPreviewScreen
 import com.tendertracker.app.ui.screens.auth.AuthViewModel
 import com.tendertracker.app.ui.screens.auth.LoginScreen
 import com.tendertracker.app.ui.screens.auth.RegisterScreen
@@ -171,7 +172,19 @@ fun TenderTrackerNavHost(
                     onBackClick = { navController.popBackStack() },
                     onNavigateToChat = { tenderId ->
                         navController.navigate(Screen.Chat(tenderId = tenderId))
+                    },
+                    onNavigateToApplication = { tenderId ->
+                        navController.navigate(Screen.ApplicationPreview(tenderId = tenderId))
                     }
+                )
+            }
+
+            composable<Screen.ApplicationPreview> { backStackEntry ->
+                val preview: Screen.ApplicationPreview = backStackEntry.toRoute()
+                ApplicationPreviewScreen(
+                    tenderId = preview.tenderId,
+                    applicationId = preview.applicationId,
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 

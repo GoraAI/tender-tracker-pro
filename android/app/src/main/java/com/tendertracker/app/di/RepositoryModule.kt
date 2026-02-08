@@ -1,12 +1,14 @@
 package com.tendertracker.app.di
 
 import com.tendertracker.data.repository.AnalyticsRepositoryImpl
+import com.tendertracker.data.repository.ApplicationRepositoryImpl
 import com.tendertracker.data.repository.AuthRepositoryImpl
 import com.tendertracker.data.repository.ChatRepositoryImpl
 import com.tendertracker.data.repository.CriteriaRepositoryImpl
 import com.tendertracker.data.repository.SettingsRepositoryImpl
 import com.tendertracker.data.repository.TenderRepositoryImpl
 import com.tendertracker.domain.repository.AnalyticsRepository
+import com.tendertracker.domain.repository.ApplicationRepository
 import com.tendertracker.domain.repository.AuthRepository
 import com.tendertracker.domain.repository.ChatRepository
 import com.tendertracker.domain.repository.CriteriaRepository
@@ -57,4 +59,10 @@ abstract class RepositoryModule {
     abstract fun bindCriteriaRepository(
         impl: CriteriaRepositoryImpl
     ): CriteriaRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindApplicationRepository(
+        impl: ApplicationRepositoryImpl
+    ): ApplicationRepository
 }

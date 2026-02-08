@@ -78,6 +78,10 @@ import com.tendertracker.app.ui.theme.GlassCardBackground
 import com.tendertracker.app.ui.theme.GlassEffect
 import com.tendertracker.app.ui.theme.GlassPrimary
 import com.tendertracker.app.ui.theme.GlassSecondary
+import com.tendertracker.app.ui.screens.applications.ApplicationViewModel
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,14 +89,18 @@ fun TenderDetailScreen(
     tenderId: String,
     onBackClick: () -> Unit,
     onNavigateToChat: (String) -> Unit = {},
-    viewModel: TenderDetailViewModel = hiltViewModel()
+    onNavigateToApplication: (String) -> Unit = {},
+    viewModel: TenderDetailViewModel = hiltViewModel(),
+    applicationViewModel: ApplicationViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val applicationState by applicationViewModel.uiState.collectAsState()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(tenderId) {
         viewModel.loadTender(tenderId)
+        applicationViewModel.checkQualification(tenderId)
     }
 
     // Handle events from ViewModel
@@ -232,6 +240,99 @@ fun TenderDetailScreen(
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text("Re-score", color = GlassSecondary)
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
+                    }
+
+                    // Qualification Card
+                    applicationState.qualificationResult?.let { qualification ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(GlassEffect.cornerRadius),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (qualification.qualifies)
+                                    Color(0xFF4CAF50).copy(alpha = 0.15f)
+                                else
+                                    Color(0xFFFF9800).copy(alpha = 0.15f)
+                            ),
+                            border = BorderStroke(
+                                GlassEffect.borderWidth,
+                                if (qualification.qualifies) Color(0xFF4CAF50) else Color(0xFFFF9800)
+                            )
+                        ) {
+                            Column(modifier = Modifier.padding(GlassEffect.cardPadding)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.AutoAwesome,
+                                            contentDescription = null,
+                                            tint = if (qualification.qualifies) Color(0xFF4CAF50) else Color(0xFFFF9800),
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = if (qualification.qualifies) "Auto-Fill Ready" else "Manual Application",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = if (qualification.qualifies) Color(0xFF4CAF50) else Color(0xFFFF9800)
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Text(
+                                    text = if (qualification.qualifies) "WHY Qualified:" else "WHY Not Qualified:",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+
+                                Spacer(modifier = Modifier.height(4.dp))
+
+                                qualification.reasons.forEach { reason ->
+                                    Row(
+                                        modifier = Modifier.padding(vertical = 2.dp),
+                                        verticalAlignment = Alignment.Top
+                                    ) {
+                                        Text(
+                                            text = "• ",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            text = reason,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+
+                                if (qualification.qualifies) {
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Button(
+                                        onClick = { onNavigateToApplication(tenderId) },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = GlassPrimary,
+                                            contentColor = Color.White
+                                        ),
+                                        shape = RoundedCornerShape(GlassEffect.cornerRadius)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.AutoAwesome,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Start Application")
+                                    }
                                 }
                             }
                         }
