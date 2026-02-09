@@ -68,7 +68,7 @@ class GemmaResponseGenerator @Inject constructor(
             appendLine("- Title: ${tender.title}")
             appendLine("- Reference: ${tender.reference}")
             if (tender.requirementsSummary != null) {
-                val summary = tender.requirementsSummary.take(300) // Limit context
+                val summary = tender.requirementsSummary.toString().take(300) // Limit context
                 appendLine("- Requirements: $summary...")
             }
             appendLine()
