@@ -52,6 +52,36 @@ class ScoringService @Inject constructor(
         }
     }
 
+    /**
+     * Generate a text response from a custom prompt using Gemma.
+     *
+     * @param prompt The prompt to send to the AI model
+     * @return Generated text response, or empty string if model not ready or error occurs
+     */
+    suspend fun generateResponse(prompt: String): String {
+        if (!inferenceEngine.isReady()) {
+            Log.w(TAG, "AI model not loaded, returning empty response")
+            return ""
+        }
+
+        return try {
+            val response = inferenceEngine.generateText(prompt, InferenceDefaults.SCORING_CONFIG)
+            response.fold(
+                onSuccess = { text ->
+                    Log.d(TAG, "Generated response: ${text.take(100)}...")
+                    text
+                },
+                onFailure = { error ->
+                    Log.e(TAG, "Failed to generate response", error)
+                    ""
+                }
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception while generating response", e)
+            ""
+        }
+    }
+
     private fun buildScoringPrompt(tender: Tender, userProfile: String): String {
         val profileContext = if (userProfile.isNotBlank()) {
             "User Profile: $userProfile\n\n"
