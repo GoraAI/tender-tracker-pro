@@ -445,8 +445,12 @@ class ApplicationViewModelTest {
                     priority = "high",
                     title = "Provide pricing",
                     description = "Add pricing details",
+                    sectionReference = null,
+                    estimatedTime = null,
+                    canUseAi = false,
+                    autoFilledField = null,
                     completed = false,
-                    sectionReference = null
+                    completedAt = null
                 ),
                 ToDoItem(
                     id = "todo-2",
@@ -454,8 +458,12 @@ class ApplicationViewModelTest {
                     priority = "medium",
                     title = "Review company overview",
                     description = "Verify auto-filled content",
+                    sectionReference = null,
+                    estimatedTime = null,
+                    canUseAi = false,
+                    autoFilledField = null,
                     completed = false,
-                    sectionReference = null
+                    completedAt = null
                 ),
                 ToDoItem(
                     id = "todo-3",
@@ -463,11 +471,18 @@ class ApplicationViewModelTest {
                     priority = "low",
                     title = "Final review",
                     description = "Review before submission",
+                    sectionReference = null,
+                    estimatedTime = null,
+                    canUseAi = false,
+                    autoFilledField = null,
                     completed = false,
-                    sectionReference = null
+                    completedAt = null
                 )
             ),
-            progress = progress
+            progress = progress,
+            userId = "user-123",
+            createdAt = "2024-01-01T12:00:00Z",
+            submittedAt = null
         )
     }
 }
