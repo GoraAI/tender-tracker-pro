@@ -59,8 +59,9 @@ class TenderRepositoryImpl @Inject constructor(
                 tenderDao.insertTenders(entities)
                 Result.success(entities.size)
             } else {
-                val errorBody = response.errorBody()?.string() ?: "Failed to fetch tenders"
-                Result.failure(Exception(errorBody))
+                val message = parseApiError(response.errorBody()?.string())
+                    ?: "Failed to fetch tenders (${response.code()})"
+                Result.failure(Exception(message))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -81,8 +82,9 @@ class TenderRepositoryImpl @Inject constructor(
             val pipelineResponse = tenderApi.runFullPipeline(PipelineRequest(sourceId))
 
             if (!pipelineResponse.isSuccessful) {
-                val error = pipelineResponse.errorBody()?.string() ?: "Failed to start pipeline"
-                return Result.failure(Exception(error))
+                val message = parseApiError(pipelineResponse.errorBody()?.string())
+                    ?: "Server unavailable. Please try again later. (${pipelineResponse.code()})"
+                return Result.failure(Exception(message))
             }
 
             val job = pipelineResponse.body()!!
@@ -121,6 +123,17 @@ class TenderRepositoryImpl @Inject constructor(
             syncResult
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    private fun parseApiError(body: String?): String? {
+        if (body.isNullOrBlank()) return null
+        return try {
+            val json = org.json.JSONObject(body)
+            json.optString("message").takeIf { it.isNotEmpty() }
+                ?: json.optString("detail").takeIf { it.isNotEmpty() }
+        } catch (e: Exception) {
+            null
         }
     }
 }

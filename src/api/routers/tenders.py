@@ -1,13 +1,17 @@
 """Tenders router - list, detail, and filtering."""
 
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
 from uuid import UUID
 
+import pdfplumber
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, status
 from sqlalchemy import select
 
+from src.api.database import async_session_maker as _session_factory
 from src.api.dependencies import CurrentUser, DbSession
+from src.api.models.score import Score
 from src.api.models.tender import Tender
 from src.api.schemas import TenderList, TenderListItem, TenderResponse
 from src.api.services.tender_service import get_tender_by_id, list_tenders
@@ -146,17 +150,28 @@ async def trigger_extraction(
             detail="No PDF available for extraction. Download PDF first.",
         )
 
-    # TODO: Trigger actual extraction in background
-    # For now, we'll mark it as needing extraction
-    # In production, this would:
-    # 1. Load the PDF text from tender.pdf_path or extract from PDF
-    # 2. Call TenderExtractor to extract structured info
-    # 3. Update tender.requirements_summary, tender.extracted_at, etc.
-    #
-    # background_tasks.add_task(extract_tender_info, db, tender_id)
+    async def _extract_tender(t_id: UUID) -> None:
+        async with _session_factory() as _db:
+            _res = await _db.execute(select(Tender).where(Tender.id == t_id))
+            _t = _res.scalar_one_or_none()
+            if not _t or not _t.pdf_path:
+                return
+            _path = Path(_t.pdf_path)
+            if not _path.exists():
+                return
+            _parts = []
+            with pdfplumber.open(_path) as _pdf:
+                for _page in _pdf.pages:
+                    _text = _page.extract_text()
+                    if _text:
+                        _parts.append(_text)
+            _t.raw_text = "\n\n".join(_parts)
+            _t.extracted_at = datetime.utcnow()
+            _t.extraction_confidence = 0.5
+            await _db.commit()
 
-    # For MVP, return current tender state with message
-    # Users will need to run the full pipeline for actual extraction
+    background_tasks.add_task(_extract_tender, tender.id)
+
     user_score = getattr(tender, "_user_score", None)
 
     return TenderResponse(
@@ -214,17 +229,31 @@ async def trigger_scoring(
             detail="Tender must be extracted before scoring. Call /extract first.",
         )
 
-    # TODO: Trigger actual scoring in background
-    # For now, we'll mark it as needing scoring
-    # In production, this would:
-    # 1. Load user's scoring criteria (or use defaults)
-    # 2. Call RelevanceScorer to score the tender
-    # 3. Store score in Score table
-    # 4. Return updated tender with score
-    #
-    # background_tasks.add_task(score_tender, db, tender_id, current_user.id)
+    async def _score_tender(t_id: UUID, u_id: UUID) -> None:
+        async with _session_factory() as _db:
+            _res = await _db.execute(select(Tender).where(Tender.id == t_id))
+            _t = _res.scalar_one_or_none()
+            if not _t or not _t.raw_text:
+                return
+            _keywords = [
+                "water", "pipe", "treatment", "supply", "maintenance",
+                "infrastructure", "construction", "sanitation", "civil",
+            ]
+            _text = (_t.raw_text or "").lower()
+            _matches = sum(1 for kw in _keywords if kw in _text)
+            _score_value = min(100, max(20, _matches * 12))
+            _score = Score(
+                tender_id=_t.id,
+                user_id=u_id,
+                score=_score_value,
+                explanation=f"Keyword relevance: {_matches} matching terms found.",
+                relevance_category="Good" if _score_value >= 60 else "Moderate",
+            )
+            _db.add(_score)
+            await _db.commit()
 
-    # For MVP, return current tender state with message
+    background_tasks.add_task(_score_tender, tender.id, current_user.id)
+
     user_score = getattr(tender, "_user_score", None)
 
     return TenderResponse(

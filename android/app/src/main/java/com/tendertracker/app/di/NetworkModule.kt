@@ -1,5 +1,6 @@
 package com.tendertracker.app.di
 
+import com.tendertracker.app.BuildConfig
 import com.tendertracker.data.local.TokenManager
 import com.tendertracker.data.remote.AuthInterceptor
 import com.tendertracker.data.remote.api.TenderApi
@@ -18,21 +19,15 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    // Production URL (Railway)
-    private const val BASE_URL = "https://tender-tracker-pro-production.up.railway.app/api/v1/"
-
-    // Development URL (Local Backend via adb reverse)
-    // private const val BASE_URL = "http://127.0.0.1:8000/api/v1/"
-
-    // Other Development URLs:
-    // For emulator use: http://10.0.2.2:8000/api/v1/
-    // For physical device on same network, use host IP: http://192.168.x.x:8000/api/v1/
-
     @Provides
     @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = if (BuildConfig.DEBUG) {
+                HttpLoggingInterceptor.Level.BODY
+            } else {
+                HttpLoggingInterceptor.Level.BASIC
+            }
         }
     }
 
@@ -61,7 +56,7 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(BuildConfig.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

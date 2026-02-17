@@ -2,8 +2,12 @@
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 from src.api.config import get_settings
 from src.api.database import close_db, init_db
@@ -11,6 +15,8 @@ from src.api.routers import analytics, auth, config, dashboard, pipeline, tender
 from src.api.websocket import job_stream
 
 settings = get_settings()
+
+limiter = Limiter(key_func=get_remote_address)
 
 
 @asynccontextmanager
@@ -33,6 +39,10 @@ app = FastAPI(
     openapi_url="/openapi.json",
     lifespan=lifespan,
 )
+
+# Rate limiting
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Configure CORS
 app.add_middleware(

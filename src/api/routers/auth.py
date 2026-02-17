@@ -1,6 +1,8 @@
 """Authentication router - register, login, token management."""
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from src.api.dependencies import CurrentUser, DbSession
 from src.api.schemas import PasswordChange, Token, UserCreate, UserLogin, UserResponse, UserUpdate
@@ -14,10 +16,12 @@ from src.api.services.auth_service import (
 )
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
-async def register(user_data: UserCreate, db: DbSession) -> Token:
+@limiter.limit("5/minute")
+async def register(request: Request, user_data: UserCreate, db: DbSession) -> Token:
     """Register a new user account."""
     # Check if email already exists
     existing_user = await get_user_by_email(db, user_data.email)
@@ -43,7 +47,8 @@ async def register(user_data: UserCreate, db: DbSession) -> Token:
 
 
 @router.post("/login", response_model=Token)
-async def login(credentials: UserLogin, db: DbSession) -> Token:
+@limiter.limit("10/minute")
+async def login(request: Request, credentials: UserLogin, db: DbSession) -> Token:
     """Authenticate and get JWT token."""
     user = await authenticate_user(db, credentials.email, credentials.password)
 

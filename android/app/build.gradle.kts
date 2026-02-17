@@ -23,7 +23,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "BASE_URL", "\"http://127.0.0.1:8000/api/v1/\"")
+        }
         release {
+            buildConfigField("String", "BASE_URL", "\"https://tender-tracker-pro-production.up.railway.app/api/v1/\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
