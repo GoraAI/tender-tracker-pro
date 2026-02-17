@@ -58,7 +58,7 @@ class AuthRepositoryImpl @Inject constructor(
                 Result.failure(Exception(parseErrorMessage(errorBody)))
             }
         } catch (e: Exception) {
-            Result.failure(Exception("Connection failed: ${e.message}"))
+            Result.failure(Exception("Unable to connect to server. Please check your connection."))
         }
     }
 
@@ -105,7 +105,7 @@ class AuthRepositoryImpl @Inject constructor(
                 Result.failure(Exception(parseErrorMessage(errorBody)))
             }
         } catch (e: Exception) {
-            Result.failure(Exception("Connection failed: ${e.message}"))
+            Result.failure(Exception("Unable to connect to server. Please check your connection."))
         }
     }
 
@@ -148,34 +148,23 @@ class AuthRepositoryImpl @Inject constructor(
      */
     private fun parseErrorMessage(errorBody: String): String {
         return try {
-            // Try to extract "detail" from JSON like {"detail":"message"} or {"detail":[{"msg":"..."}]}
-            if (errorBody.contains("\"detail\"")) {
-                val detailStart = errorBody.indexOf("\"detail\"")
-                val afterDetail = errorBody.substring(detailStart + 9)
-                when {
-                    afterDetail.trimStart().startsWith("[") -> {
-                        // Array format: extract first "msg"
-                        val msgStart = afterDetail.indexOf("\"msg\"")
-                        if (msgStart >= 0) {
-                            val msgValue = afterDetail.substring(msgStart + 6)
-                            val start = msgValue.indexOf("\"") + 1
-                            val end = msgValue.indexOf("\"", start)
-                            if (end > start) msgValue.substring(start, end) else errorBody
-                        } else errorBody
-                    }
-                    afterDetail.trimStart().startsWith("\"") -> {
-                        // String format: extract value
-                        val start = afterDetail.indexOf("\"") + 1
-                        val end = afterDetail.indexOf("\"", start)
-                        if (end > start) afterDetail.substring(start, end) else errorBody
-                    }
-                    else -> errorBody
+            val json = org.json.JSONObject(errorBody)
+            // FastAPI errors use "detail", Railway infrastructure errors use "message"
+            val detail = json.optString("detail").takeIf { it.isNotEmpty() }
+            val message = json.optString("message").takeIf { it.isNotEmpty() }
+            when {
+                detail != null && detail.startsWith("[") -> {
+                    // Validation error array - extract first msg
+                    val arr = org.json.JSONArray(detail)
+                    arr.optJSONObject(0)?.optString("msg") ?: "Validation error"
                 }
-            } else {
-                errorBody
+                detail != null -> detail
+                message == "Application not found" -> "Server is unavailable. Please try again later."
+                message != null -> message
+                else -> "An error occurred. Please try again."
             }
         } catch (e: Exception) {
-            errorBody
+            "An error occurred. Please try again."
         }
     }
 }
