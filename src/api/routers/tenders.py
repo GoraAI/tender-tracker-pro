@@ -222,8 +222,8 @@ async def trigger_scoring(
             detail="Tender not found",
         )
 
-    # Check if tender has been extracted (needs summary for scoring)
-    if not tender.requirements_summary:
+    # Check if tender has been extracted (needs raw_text for keyword scoring)
+    if not tender.raw_text and not tender.requirements_summary:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Tender must be extracted before scoring. Call /extract first.",
