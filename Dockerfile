@@ -11,7 +11,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
     MALLOC_ARENA_MAX=2 \
-    BUILD_VERSION=2026-02-18-v6
+    BUILD_VERSION=2026-02-18-v7
 
 # Create virtual environment (Railway best practice)
 RUN python -m venv /opt/venv
