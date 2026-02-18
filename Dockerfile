@@ -37,21 +37,8 @@ RUN playwright install chromium --with-deps
 # Copy application code
 COPY . .
 
-# Create startup script for Railway
-# Using --loop asyncio to avoid uvloop DNS resolution issues
-# Run migrations before starting the server
-RUN printf '#!/bin/bash\n\
-set -e\n\
-echo "========================================"\n\
-echo "Tender Tracker Pro - Startup Script v3"\n\
-echo "========================================"\n\
-echo "Running database migrations..."\n\
-alembic upgrade head || { echo "Migration failed!"; exit 1; }\n\
-echo "Migrations complete. Starting server..."\n\
-RUN_PORT="${PORT:-8000}"\n\
-echo "Server will listen on port: $RUN_PORT"\n\
-exec uvicorn src.api.main:app --host 0.0.0.0 --port "$RUN_PORT" --loop asyncio\n' > /app/start.sh && \
-    chmod +x /app/start.sh
+# Copy and set up startup script
+RUN chmod +x /app/scripts/start.sh
 
 # Clean up apt cache to reduce image size
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -62,4 +49,4 @@ RUN useradd -m -u 1000 appuser && \
 USER appuser
 
 # Start command
-CMD ["/app/start.sh"]
+CMD ["/app/scripts/start.sh"]
