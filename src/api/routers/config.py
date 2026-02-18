@@ -82,7 +82,7 @@ async def create_criteria(
         capabilities=data.capabilities,
         preferred_sectors=data.preferred_sectors,
         preferred_locations=data.preferred_locations,
-        value_range=data.value_range,
+        value_range=data.value_range.model_dump(),
         keywords=data.keywords,
         weights=data.weights,
         is_default=data.is_default,
