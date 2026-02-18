@@ -285,7 +285,7 @@ class PipelineService:
                                 link_text=tender.title or "",
                                 title=tender.reference,
                                 context=tender.requirements_summary or "",
-                                discovered_at=tender.created_at or datetime.utcnow(),
+                                discovered_at=tender.discovered_at or datetime.utcnow(),
                                 source_url=config.get("urls", {}).get("rfq_listing", ""),
                                 source_id=source_id,
                             )
@@ -496,9 +496,17 @@ class PipelineService:
                             from src.extraction.models import TenderInfo
 
                             tender_info = TenderInfo(
-                                title=tender.title,
-                                reference=tender.reference,
-                                description=tender.raw_text[:2000] if tender.raw_text else "",
+                                pdf_path=Path(tender.pdf_path or ""),
+                                title=tender.title or "",
+                                reference=tender.reference or "",
+                                deadline=None,
+                                estimated_value=tender.estimated_value,
+                                requirements_summary=tender.requirements_summary or (tender.raw_text[:2000] if tender.raw_text else ""),
+                                contact_name=None,
+                                contact_email=None,
+                                confidence=tender.extraction_confidence or 0.5,
+                                extraction_time_ms=0,
+                                raw_response="",
                             )
 
                             result = await asyncio.to_thread(
@@ -531,8 +539,8 @@ class PipelineService:
                                 level="warning"
                             )
 
-                except ImportError:
-                    # Fall back to simple keyword scoring
+                except Exception:
+                    # Fall back to simple keyword scoring (LLM unavailable or failed to init)
                     await service.add_log(
                         job_id, "LLM not available, using keyword matching", level="warning"
                     )
