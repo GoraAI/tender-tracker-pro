@@ -8,10 +8,14 @@
             "src/**",
             "config/**",
             "railway.json",
-            "Dockerfile"
+            "Dockerfile",
+            "scripts/**",
+            "alembic/**",
+            "Procfile"
         ]
     },
     "deploy": {
+        "startCommand": "bash /app/scripts/start.sh",
         "healthcheckPath": "/health",
         "healthcheckTimeout": 300,
         "startupTimeout": 300,

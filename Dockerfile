@@ -48,5 +48,5 @@ RUN useradd -m -u 1000 appuser && \
     chown -R appuser:appuser /app /opt/venv /ms-playwright
 USER appuser
 
-# Start command
-CMD ["/app/scripts/start.sh"]
+# Start command - explicit bash ensures $PORT expands properly
+CMD ["/bin/bash", "/app/scripts/start.sh"]
