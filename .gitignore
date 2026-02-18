@@ -81,3 +81,4 @@ android/build/
 
 # Database
 *.db
+.env
