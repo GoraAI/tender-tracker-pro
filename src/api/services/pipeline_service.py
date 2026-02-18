@@ -284,7 +284,7 @@ class PipelineService:
                                 url=tender.pdf_url,
                                 link_text=tender.title or "",
                                 title=tender.reference,
-                                context=tender.description or "",
+                                context=tender.requirements_summary or "",
                                 discovered_at=tender.created_at or datetime.utcnow(),
                                 source_url=config.get("urls", {}).get("rfq_listing", ""),
                                 source_id=source_id,
