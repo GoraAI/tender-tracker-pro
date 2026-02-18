@@ -4,6 +4,7 @@ set -e
 echo "========================================"
 echo "Tender Tracker Pro - Startup Script"
 echo "========================================"
+echo "DATABASE_URL scheme: ${DATABASE_URL%%:*}"
 echo "Running database migrations..."
 alembic upgrade head || { echo "Migration failed!"; exit 1; }
 echo "Migrations complete. Starting server..."

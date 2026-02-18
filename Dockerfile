@@ -9,10 +9,9 @@ FROM python:3.12-bookworm
 # Set Python environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    # Playwright browser path - critical for user context
     PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
-    # Memory optimization for containers
-    MALLOC_ARENA_MAX=2
+    MALLOC_ARENA_MAX=2 \
+    BUILD_VERSION=2026-02-18-v6
 
 # Create virtual environment (Railway best practice)
 RUN python -m venv /opt/venv

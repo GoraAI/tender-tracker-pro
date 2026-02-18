@@ -20,14 +20,16 @@ class Settings(BaseSettings):
     @field_validator("database_url", mode="before")
     @classmethod
     def fix_database_url(cls, v: str) -> str:
-        """Convert Railway's postgres:// or postgresql:// to postgresql+asyncpg://."""
+        """Normalize any postgres:// variant to postgresql+asyncpg://."""
         if not isinstance(v, str):
             return v
         v = v.strip()
-        if v.startswith("postgres://"):
-            return "postgresql+asyncpg://" + v[len("postgres://"):]
-        if v.startswith("postgresql://"):
-            return "postgresql+asyncpg://" + v[len("postgresql://"):]
+        # Strip any scheme that begins with "postgres" and replace with correct async scheme.
+        # Handles: postgres://, postgresql://, postgres+anything://, postgresql+anything://
+        import re
+        match = re.match(r'^postgres(?:ql)?(?:\+[^:]+)?://(.*)', v, re.DOTALL)
+        if match:
+            return "postgresql+asyncpg://" + match.group(1)
         return v
 
     # JWT Authentication
