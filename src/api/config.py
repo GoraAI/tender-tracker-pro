@@ -48,6 +48,14 @@ class Settings(BaseSettings):
     api_port: int = Field(default=8000, description="API server port")
     debug: bool = Field(default=False, description="Enable debug mode")
 
+    @field_validator("debug", mode="before")
+    @classmethod
+    def strip_debug(cls, v: object) -> object:
+        """Strip whitespace from debug value (Railway UI sometimes adds trailing space)."""
+        if isinstance(v, str):
+            return v.strip()
+        return v
+
     # Application
     app_name: str = Field(default="Tender Tracker Pro", description="Application name")
     app_version: str = Field(default="1.0.3", description="Application version")
