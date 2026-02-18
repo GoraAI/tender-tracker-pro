@@ -76,7 +76,9 @@ class PDFDownloader:
 
     async def __aenter__(self):
         """Context manager entry."""
-        self.session = aiohttp.ClientSession()
+        # Disable SSL verification: SA government sites use local CAs not in default bundle
+        connector = aiohttp.TCPConnector(ssl=False)
+        self.session = aiohttp.ClientSession(connector=connector)
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
