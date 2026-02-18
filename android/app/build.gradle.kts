@@ -24,10 +24,10 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"https://tender-tracker-pro-production.up.railway.app/api/v1/\"")
+            buildConfigField("String", "BASE_URL", "\"https://web-production-829df.up.railway.app/api/v1/\"")
         }
         release {
-            buildConfigField("String", "BASE_URL", "\"https://tender-tracker-pro-production.up.railway.app/api/v1/\"")
+            buildConfigField("String", "BASE_URL", "\"https://web-production-829df.up.railway.app/api/v1/\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
