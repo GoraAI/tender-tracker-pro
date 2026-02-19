@@ -3,6 +3,7 @@ package com.tendertracker.app.ui.screens.tender
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tendertracker.domain.model.Tender
+import com.tendertracker.domain.repository.CriteriaRepository
 import com.tendertracker.domain.repository.TenderRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -31,7 +32,8 @@ sealed class TenderDetailEvent {
 @HiltViewModel
 class TenderDetailViewModel @Inject constructor(
     private val tenderRepository: TenderRepository,
-    private val scoringService: com.tendertracker.app.gemma.ScoringService
+    private val scoringService: com.tendertracker.app.gemma.ScoringService,
+    private val criteriaRepository: CriteriaRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TenderDetailState())
@@ -102,16 +104,56 @@ class TenderDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            val result = scoringService.scoreTender(tender)
+            // Fetch user's default criteria to build a profile string
+            val profileString = try {
+                val criteriaResult = criteriaRepository.getDefaultCriteria()
+                criteriaResult.getOrNull()?.let { criteria ->
+                    buildString {
+                        if (criteria.capabilities.isNotEmpty()) {
+                            append("Capabilities: ${criteria.capabilities.joinToString(", ")}. ")
+                        }
+                        if (criteria.preferredSectors.isNotEmpty()) {
+                            append("Sectors: ${criteria.preferredSectors.joinToString(", ")}. ")
+                        }
+                        if (criteria.preferredLocations.isNotEmpty()) {
+                            append("Locations: ${criteria.preferredLocations.joinToString(", ")}. ")
+                        }
+                        if (criteria.keywords.isNotEmpty()) {
+                            append("Keywords: ${criteria.keywords.joinToString(", ")}. ")
+                        }
+                        append("Value range: R${"%,.0f".format(criteria.valueRange.min)}")
+                        criteria.valueRange.max?.let { max ->
+                            append(" - R${"%,.0f".format(max)}")
+                        }
+                        append(".")
+                    }
+                } ?: ""
+            } catch (_: Exception) {
+                ""
+            }
+
+            val result = scoringService.scoreTender(tender, profileString)
 
             result.fold(
                 onSuccess = { tenderScore ->
-                    // Update tender score in repository
+                    // Update tender score in local DB
                     tenderRepository.updateScore(
                         id = tender.id,
                         score = tenderScore.score,
                         explanation = tenderScore.explanation
                     )
+                    // Submit score to backend (fire-and-forget)
+                    launch {
+                        try {
+                            tenderRepository.submitScoreToBackend(
+                                tenderId = tender.id,
+                                score = tenderScore.score,
+                                explanation = tenderScore.explanation
+                            )
+                        } catch (_: Exception) {
+                            // Backend submission is best-effort
+                        }
+                    }
                     // Update local state
                     val updatedTender = tender.copy(
                         score = tenderScore.score,

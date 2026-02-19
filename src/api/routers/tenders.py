@@ -233,7 +233,7 @@ async def trigger_scoring(
         async with _session_factory() as _db:
             _res = await _db.execute(select(Tender).where(Tender.id == t_id))
             _t = _res.scalar_one_or_none()
-            if not _t or not _t.raw_text:
+            if not _t or (not _t.raw_text and not _t.requirements_summary):
                 return
 
             # Load user's default criteria for keywords and criteria_id
@@ -255,18 +255,35 @@ async def trigger_scoring(
                     "infrastructure", "construction", "sanitation", "civil",
                 ]
             )
-            _text = (_t.raw_text or "").lower()
+            _text = (_t.raw_text or _t.requirements_summary or "").lower()
             _matches = sum(1 for kw in _keywords if kw.lower() in _text)
             _score_value = min(100, max(20, _matches * 12))
-            _score = Score(
-                tender_id=_t.id,
-                user_id=u_id,
-                criteria_id=_criteria.id if _criteria else None,
-                score=_score_value,
-                explanation=f"Keyword relevance: {_matches}/{len(_keywords)} matching terms found.",
-                relevance_category="Good" if _score_value >= 60 else "Moderate",
+            _criteria_id = _criteria.id if _criteria else None
+
+            # Upsert: update existing score or insert new
+            _existing = await _db.execute(
+                select(Score).where(
+                    Score.tender_id == _t.id,
+                    Score.user_id == u_id,
+                    Score.criteria_id == _criteria_id if _criteria_id else Score.criteria_id.is_(None),
+                )
             )
-            _db.add(_score)
+            _existing_score = _existing.scalar_one_or_none()
+
+            if _existing_score:
+                _existing_score.score = _score_value
+                _existing_score.explanation = f"Keyword relevance: {_matches}/{len(_keywords)} matching terms found."
+                _existing_score.relevance_category = "Good" if _score_value >= 70 else ("Moderate" if _score_value >= 50 else "Weak")
+            else:
+                _score = Score(
+                    tender_id=_t.id,
+                    user_id=u_id,
+                    criteria_id=_criteria_id,
+                    score=_score_value,
+                    explanation=f"Keyword relevance: {_matches}/{len(_keywords)} matching terms found.",
+                    relevance_category="Good" if _score_value >= 70 else ("Moderate" if _score_value >= 50 else "Weak"),
+                )
+                _db.add(_score)
             await _db.commit()
 
     background_tasks.add_task(_score_tender, tender.id, current_user.id)

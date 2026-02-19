@@ -11,8 +11,8 @@ from typing import List, Optional
 import structlog
 import yaml
 
-from extraction.models import TenderInfo
-from llm import ModelManager
+from src.extraction.models import TenderInfo
+from src.llm import ModelManager
 from .models import ScoredTender, ScoringResult
 
 logger = structlog.get_logger()
@@ -24,6 +24,7 @@ class RelevanceScorer:
     def __init__(
         self,
         model_manager: ModelManager,
+        criteria: dict | None = None,
         criteria_path: str = "config/user/criteria.yaml",
         config_path: str = "config/scoring/relevance_scoring.yaml",
     ):
@@ -32,29 +33,68 @@ class RelevanceScorer:
 
         Args:
             model_manager: ModelManager instance with loaded model
-            criteria_path: Path to user criteria YAML
+            criteria: Optional criteria dict (skips YAML loading if provided)
+            criteria_path: Path to user criteria YAML (fallback)
             config_path: Path to scoring config YAML
         """
-        # Load criteria
-        with open(criteria_path) as f:
-            self.criteria = yaml.safe_load(f)["user_criteria"]
+        # Load criteria from dict or YAML
+        if criteria is not None:
+            self.criteria = criteria
+        else:
+            try:
+                with open(criteria_path) as f:
+                    self.criteria = yaml.safe_load(f)["user_criteria"]
+            except FileNotFoundError:
+                logger.warning("criteria_yaml_not_found", path=criteria_path)
+                self.criteria = {
+                    "company_name": "General Business",
+                    "industry": "Government Contracting",
+                    "capabilities": [],
+                    "preferred_sectors": [],
+                    "preferred_locations": [],
+                    "value_range": {"min": 0, "max": 50000000},
+                    "keywords": [],
+                }
 
         # Load config
-        with open(config_path) as f:
-            self.config = yaml.safe_load(f)["scoring"]
+        try:
+            with open(config_path) as f:
+                self.config = yaml.safe_load(f)["scoring"]
+        except FileNotFoundError:
+            logger.warning("scoring_config_not_found", path=config_path)
+            self.config = {
+                "retry_attempts": 2,
+                "retry_delay_ms": 1000,
+                "max_concurrent": 3,
+                "max_tokens": 500,
+                "temperature": 0.3,
+                "top_p": 0.9,
+                "top_k": 40,
+                "repeat_penalty": 1.1,
+                "min_score_threshold": 0,
+                "sort_by_score": True,
+            }
 
         self.model_manager = model_manager
         self.model = None  # Lazy load
 
-        # Load prompts
-        system_prompt_path = self.config["system_prompt_file"]
-        user_prompt_path = self.config["user_prompt_template"]
+        # Load prompts (with fallback defaults)
+        self.system_prompt = "You are a tender relevance scoring assistant. Score tenders from 0-100 based on relevance to the company profile. Respond with valid JSON containing 'score' and 'explanation' fields."
+        self.user_prompt_template = None
 
-        with open(system_prompt_path) as f:
-            self.system_prompt = f.read().strip()
+        if "system_prompt_file" in self.config:
+            try:
+                with open(self.config["system_prompt_file"]) as f:
+                    self.system_prompt = f.read().strip()
+            except FileNotFoundError:
+                logger.warning("system_prompt_not_found")
 
-        with open(user_prompt_path) as f:
-            self.user_prompt_template = f.read().strip()
+        if "user_prompt_template" in self.config:
+            try:
+                with open(self.config["user_prompt_template"]) as f:
+                    self.user_prompt_template = f.read().strip()
+            except FileNotFoundError:
+                logger.warning("user_prompt_template_not_found")
 
     def _ensure_model_loaded(self):
         """Ensure model is loaded (lazy loading)."""
@@ -221,10 +261,10 @@ class RelevanceScorer:
             Formatted prompt
         """
         # Format criteria
-        capabilities_str = "\n  - ".join(self.criteria["capabilities"])
-        sectors_str = ", ".join(self.criteria["preferred_sectors"])
-        locations_str = ", ".join(self.criteria["preferred_locations"])
-        keywords_str = ", ".join(self.criteria["keywords"])
+        capabilities_str = "\n  - ".join(self.criteria.get("capabilities", []))
+        sectors_str = ", ".join(self.criteria.get("preferred_sectors", []))
+        locations_str = ", ".join(self.criteria.get("preferred_locations", []))
+        keywords_str = ", ".join(self.criteria.get("keywords", []))
 
         # Format tender info
         value_str = (
@@ -239,22 +279,41 @@ class RelevanceScorer:
         )
         requirements_str = tender_info.requirements_summary or "Not available"
 
-        # Build prompt
-        return self.user_prompt_template.format(
-            company_name=self.criteria["company_name"],
-            industry=self.criteria["industry"],
-            capabilities=capabilities_str,
-            preferred_sectors=sectors_str,
-            preferred_locations=locations_str,
-            value_min=self.criteria["value_range"]["min"],
-            value_max=self.criteria["value_range"]["max"],
-            keywords=keywords_str,
-            tender_title=tender_info.title,
-            tender_reference=tender_info.reference,
-            tender_deadline=deadline_str,
-            tender_value=value_str,
-            tender_requirements=requirements_str,
-        )
+        # Use template if available, otherwise build a default prompt
+        if self.user_prompt_template:
+            return self.user_prompt_template.format(
+                company_name=self.criteria.get("company_name", "General Business"),
+                industry=self.criteria.get("industry", "Government Contracting"),
+                capabilities=capabilities_str,
+                preferred_sectors=sectors_str,
+                preferred_locations=locations_str,
+                value_min=self.criteria.get("value_range", {}).get("min", 0),
+                value_max=self.criteria.get("value_range", {}).get("max", 50000000),
+                keywords=keywords_str,
+                tender_title=tender_info.title,
+                tender_reference=tender_info.reference,
+                tender_deadline=deadline_str,
+                tender_value=value_str,
+                tender_requirements=requirements_str,
+            )
+
+        # Fallback prompt when no template file exists
+        return f"""Score this tender for relevance to the company profile.
+
+Company: {self.criteria.get("company_name", "General Business")}
+Industry: {self.criteria.get("industry", "Government Contracting")}
+Capabilities: {capabilities_str or "Not specified"}
+Preferred Sectors: {sectors_str or "Not specified"}
+Preferred Locations: {locations_str or "Not specified"}
+Keywords: {keywords_str or "Not specified"}
+
+Tender Title: {tender_info.title}
+Reference: {tender_info.reference}
+Deadline: {deadline_str}
+Estimated Value: {value_str}
+Requirements: {requirements_str}
+
+Respond with JSON: {{"score": 0-100, "explanation": "brief reason"}}"""
 
     async def _call_llm(self, prompt: str) -> str:
         """

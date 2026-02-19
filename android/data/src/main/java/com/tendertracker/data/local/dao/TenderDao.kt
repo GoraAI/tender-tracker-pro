@@ -41,4 +41,13 @@ interface TenderDao {
 
     @Query("SELECT COUNT(*) FROM tenders")
     suspend fun getTenderCount(): Int
+
+    @Query("SELECT id, score, scoreExplanation FROM tenders WHERE score IS NOT NULL")
+    suspend fun getScoredTenderIds(): List<ScoredTenderRef>
 }
+
+data class ScoredTenderRef(
+    val id: String,
+    val score: Int,
+    val scoreExplanation: String?
+)

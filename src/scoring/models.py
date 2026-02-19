@@ -4,7 +4,7 @@ Data models for tender relevance scoring.
 
 from dataclasses import dataclass
 
-from extraction.models import TenderInfo
+from src.extraction.models import TenderInfo
 
 
 @dataclass

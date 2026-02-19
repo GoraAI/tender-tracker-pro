@@ -197,7 +197,8 @@ fun TenderDetailScreen(
                         .padding(GlassEffect.screenPadding)  // 24dp
                 ) {
                     // Score Card - Glassmorphism
-                    tender.score?.let { score ->
+                    if (tender.score != null) {
+                        val score = tender.score!!
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(GlassEffect.cornerRadius),
@@ -210,7 +211,7 @@ fun TenderDetailScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Column {
+                                    Column(modifier = Modifier.weight(1f)) {
                                         Text(
                                             text = "Relevance Score",
                                             style = MaterialTheme.typography.titleMedium,
@@ -240,6 +241,45 @@ fun TenderDetailScreen(
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text("Re-score", color = GlassSecondary)
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(GlassEffect.itemSpacing))
+                    } else {
+                        // Unscored tender — show "Score with AI" button
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(GlassEffect.cornerRadius),
+                            colors = CardDefaults.cardColors(
+                                containerColor = GlassPrimary.copy(alpha = 0.1f)
+                            ),
+                            border = BorderStroke(GlassEffect.borderWidth, GlassPrimary.copy(alpha = 0.3f))
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(GlassEffect.cardPadding),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "No score yet",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Button(
+                                    onClick = { viewModel.rescore() },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = GlassPrimary,
+                                        contentColor = Color.White
+                                    ),
+                                    shape = RoundedCornerShape(GlassEffect.cornerRadius)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.AutoAwesome,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Score with AI")
                                 }
                             }
                         }

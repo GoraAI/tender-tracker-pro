@@ -10,6 +10,7 @@ interface TenderRepository {
     fun getHighPriorityTenders(minScore: Int = 70): Flow<List<Tender>>
     suspend fun insertTender(tender: Tender)
     suspend fun updateScore(id: String, score: Int, explanation: String)
+    suspend fun submitScoreToBackend(tenderId: String, score: Int, explanation: String)
     suspend fun deleteTender(id: String)
     suspend fun syncFromApi(): Result<Int>
 

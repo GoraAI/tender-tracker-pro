@@ -464,10 +464,11 @@ class PipelineService:
                 # Get tenders needing scoring (have raw_text but no scores)
                 from ..models.score import Score
 
+                from sqlalchemy import or_
                 tenders_result = await db.execute(
                     select(Tender).where(
                         Tender.source_id == source_id,
-                        Tender.raw_text.isnot(None)
+                        or_(Tender.raw_text.isnot(None), Tender.requirements_summary.isnot(None))
                     )
                 )
                 tenders = list(tenders_result.scalars().all())
@@ -499,7 +500,21 @@ class PipelineService:
 
                     await service.add_log(job_id, "Loading LLM model for scoring...")
                     model_manager = ModelManager()
-                    scorer = RelevanceScorer(model_manager)
+
+                    # Build criteria dict from user's DB criteria
+                    criteria_dict = None
+                    if default_criteria:
+                        criteria_dict = {
+                            "company_name": "User Company",
+                            "industry": "Government Contracting",
+                            "capabilities": default_criteria.capabilities or [],
+                            "preferred_sectors": default_criteria.preferred_sectors or [],
+                            "preferred_locations": default_criteria.preferred_locations or [],
+                            "value_range": default_criteria.value_range or {"min": 0, "max": 50000000},
+                            "keywords": default_criteria.keywords or [],
+                        }
+
+                    scorer = RelevanceScorer(model_manager, criteria=criteria_dict)
 
                     scored = 0
                     for i, tender in enumerate(tenders):
@@ -522,16 +537,31 @@ class PipelineService:
 
                             result = await scorer.score_single(tender_info)
 
-                            # Create score record
-                            score = Score(
-                                tender_id=tender.id,
-                                user_id=job.user_id,
-                                criteria_id=default_criteria.id if default_criteria else None,
-                                score=result.score,
-                                explanation=result.explanation,
-                                relevance_category=result.category,
+                            # Upsert: update existing score or insert new
+                            _cid = default_criteria.id if default_criteria else None
+                            existing_result = await db.execute(
+                                select(Score).where(
+                                    Score.tender_id == tender.id,
+                                    Score.user_id == job.user_id,
+                                    Score.criteria_id == _cid if _cid else Score.criteria_id.is_(None),
+                                )
                             )
-                            db.add(score)
+                            existing_score = existing_result.scalar_one_or_none()
+
+                            if existing_score:
+                                existing_score.score = result.score
+                                existing_score.explanation = result.explanation
+                                existing_score.relevance_category = result.relevance_category
+                            else:
+                                score = Score(
+                                    tender_id=tender.id,
+                                    user_id=job.user_id,
+                                    criteria_id=_cid,
+                                    score=result.score,
+                                    explanation=result.explanation,
+                                    relevance_category=result.relevance_category,
+                                )
+                                db.add(score)
                             await db.commit()
 
                             scored += 1
@@ -564,19 +594,36 @@ class PipelineService:
 
                     for i, tender in enumerate(tenders):
                         try:
-                            text = (tender.raw_text or "").lower()
+                            text = (tender.raw_text or tender.requirements_summary or "").lower()
                             matches = sum(1 for kw in keywords if kw.lower() in text)
                             score_value = min(100, max(20, matches * 12))
+                            _cid = default_criteria.id if default_criteria else None
+                            _cat = "Good" if score_value >= 70 else ("Moderate" if score_value >= 50 else "Weak")
 
-                            score = Score(
-                                tender_id=tender.id,
-                                user_id=job.user_id,
-                                criteria_id=default_criteria.id if default_criteria else None,
-                                score=score_value,
-                                explanation=f"Matched {matches}/{len(keywords)} keywords",
-                                relevance_category="Good" if score_value >= 60 else "Moderate",
+                            # Upsert: update existing score or insert new
+                            existing_result = await db.execute(
+                                select(Score).where(
+                                    Score.tender_id == tender.id,
+                                    Score.user_id == job.user_id,
+                                    Score.criteria_id == _cid if _cid else Score.criteria_id.is_(None),
+                                )
                             )
-                            db.add(score)
+                            existing_score = existing_result.scalar_one_or_none()
+
+                            if existing_score:
+                                existing_score.score = score_value
+                                existing_score.explanation = f"Matched {matches}/{len(keywords)} keywords"
+                                existing_score.relevance_category = _cat
+                            else:
+                                score = Score(
+                                    tender_id=tender.id,
+                                    user_id=job.user_id,
+                                    criteria_id=_cid,
+                                    score=score_value,
+                                    explanation=f"Matched {matches}/{len(keywords)} keywords",
+                                    relevance_category=_cat,
+                                )
+                                db.add(score)
                             await db.commit()
 
                             scored += 1

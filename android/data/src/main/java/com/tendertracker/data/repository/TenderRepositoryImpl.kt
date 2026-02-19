@@ -4,11 +4,13 @@ import com.tendertracker.data.local.dao.TenderDao
 import com.tendertracker.data.local.entity.TenderEntity
 import com.tendertracker.data.remote.api.TenderApi
 import com.tendertracker.data.remote.dto.PipelineRequest
+import com.tendertracker.data.remote.dto.ScoreSubmission
 import com.tendertracker.domain.model.Tender
 import com.tendertracker.domain.repository.TenderRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.Instant
 import javax.inject.Inject
 
 class TenderRepositoryImpl @Inject constructor(
@@ -42,6 +44,22 @@ class TenderRepositoryImpl @Inject constructor(
         tenderDao.updateScore(id, score, explanation)
     }
 
+    override suspend fun submitScoreToBackend(tenderId: String, score: Int, explanation: String) {
+        try {
+            tenderApi.submitScore(
+                tenderId,
+                ScoreSubmission(
+                    score = score,
+                    explanation = explanation,
+                    scoredAt = Instant.now().toString()
+                )
+            )
+        } catch (e: Exception) {
+            // Best-effort: log but don't fail
+            android.util.Log.w("TenderRepo", "Failed to submit score to backend: ${e.message}")
+        }
+    }
+
     override suspend fun deleteTender(id: String) {
         tenderDao.deleteTender(id)
     }
@@ -52,10 +70,27 @@ class TenderRepositoryImpl @Inject constructor(
      */
     override suspend fun syncFromApi(): Result<Int> {
         return try {
+            // Snapshot local scores before overwrite
+            val localScores = tenderDao.getScoredTenderIds()
+                .associateBy({ it.id }, { it })
+
             val response = tenderApi.getTenders(page = 1, perPage = 100)
             if (response.isSuccessful) {
                 val tenderList = response.body()!!
-                val entities = tenderList.tenders.map { it.toEntity() }
+                val entities = tenderList.tenders.map { dto ->
+                    val entity = dto.toEntity()
+                    // Preserve local score if backend returns null
+                    if (entity.score == null) {
+                        localScores[entity.id]?.let { local ->
+                            entity.copy(
+                                score = local.score,
+                                scoreExplanation = local.scoreExplanation
+                            )
+                        } ?: entity
+                    } else {
+                        entity
+                    }
+                }
                 tenderDao.insertTenders(entities)
                 Result.success(entities.size)
             } else {
