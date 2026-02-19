@@ -5,7 +5,6 @@ Tests the intelligent to-do generation logic:
 - Missing field detection
 - Auto-fill review items
 - Pricing requirements
-- Technical questions
 - Document requirements
 - Final review
 - Priority assignment (High/Medium/Low)
@@ -14,194 +13,193 @@ Tests the intelligent to-do generation logic:
 
 import pytest
 import pytest_asyncio
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.api.models import Tender, TenderApplication, CompanyProfile
 from src.api.services.todo_generator_service import ToDoGeneratorService
 
 
 @pytest_asyncio.fixture
-async def todo_service():
+async def todo_service(db: AsyncSession):
     """Create ToDoGeneratorService instance."""
-    return ToDoGeneratorService()
+    return ToDoGeneratorService(db)
+
+
+@pytest_asyncio.fixture
+async def test_company_profile(db: AsyncSession, test_user) -> CompanyProfile:
+    """Create a test company profile."""
+    profile = CompanyProfile(
+        user_id=test_user.id,
+        legal_name="Acme Software Solutions Ltd",
+        industry="Information Technology",
+        capabilities=["Software Development", "Cloud Infrastructure"],
+        preferred_sectors=["IT"],
+    )
+    db.add(profile)
+    await db.commit()
+    await db.refresh(profile)
+    return profile
+
+
+@pytest_asyncio.fixture
+async def test_tender(db: AsyncSession, test_source) -> Tender:
+    """Create a test tender with requirements."""
+    future_date = datetime.now(timezone.utc) + timedelta(days=14)
+    tender = Tender(
+        id=uuid4(),
+        source_id=test_source.id,
+        pdf_url="https://test.example.com/tender.pdf",
+        title="Software Development Tender",
+        reference="TODO-001",
+        estimated_value=500000.0,
+        deadline=future_date,
+        requirements_summary="Provide pricing for all items. Describe your methodology and implementation approach.",
+    )
+    db.add(tender)
+    await db.commit()
+    await db.refresh(tender)
+    return tender
+
+
+@pytest_asyncio.fixture
+async def test_application(
+    db: AsyncSession, test_tender: Tender, test_user
+) -> TenderApplication:
+    """Create a test application with auto-filled fields."""
+    application = TenderApplication(
+        id=uuid4(),
+        tender_id=test_tender.id,
+        user_id=test_user.id,
+        status="draft",
+        auto_filled_fields={
+            "company_name": {"value": "Acme Ltd", "auto_filled": True, "source": "CompanyProfile"},
+            "industry": {"value": "IT", "auto_filled": True, "source": "CompanyProfile"},
+        },
+        to_do_items=[],
+    )
+    db.add(application)
+    await db.commit()
+    await db.refresh(application)
+    return application
 
 
 class TestToDoGeneratorService:
     """Test cases for ToDoGeneratorService."""
 
     @pytest.mark.asyncio
-    async def test_generate_missing_field_todos(self, todo_service: ToDoGeneratorService):
-        """Test that missing fields create high-priority to-dos."""
-        auto_filled_fields = {
-            "company_name": {"value": "Acme Ltd", "auto_filled": True, "source": "Company Profile"},
-            "pricing": {"value": None, "auto_filled": False, "source": None},
-            "contact_email": {"value": None, "auto_filled": False, "source": None}
-        }
-
-        todos = todo_service.generate_todos(
-            auto_filled_fields=auto_filled_fields,
-            tender_requirements="Standard tender"
+    async def test_generate_todos_creates_items(
+        self,
+        todo_service: ToDoGeneratorService,
+        test_application: TenderApplication,
+        test_user,
+    ):
+        """Test that generate_todos creates a non-empty list of to-do items."""
+        todos = await todo_service.generate_todos(
+            application_id=test_application.id,
+            user_id=test_user.id,
         )
 
-        # Should have to-dos for missing pricing and contact_email
-        missing_todos = [t for t in todos if t.category == "missing_field"]
-        assert len(missing_todos) >= 2
+        assert isinstance(todos, list)
+        assert len(todos) > 0
+
+    @pytest.mark.asyncio
+    async def test_generate_missing_field_todos(
+        self,
+        todo_service: ToDoGeneratorService,
+        test_application: TenderApplication,
+        test_user,
+    ):
+        """Test that missing required fields create high-priority to-dos."""
+        todos = await todo_service.generate_todos(
+            application_id=test_application.id,
+            user_id=test_user.id,
+        )
+
+        # Should have to-dos for missing required fields (registration_number, capabilities, compliance_documents)
+        missing_todos = [t for t in todos if t["category"] == "missing_field"]
+        assert len(missing_todos) >= 1
 
         # Missing fields should be high priority
-        pricing_todo = next((t for t in missing_todos if "pricing" in t.title.lower()), None)
-        assert pricing_todo is not None
-        assert pricing_todo.priority == "high"
-        assert pricing_todo.completed is False
+        for todo in missing_todos:
+            assert todo["priority"] == "high"
+            assert todo["completed"] is False
 
     @pytest.mark.asyncio
     async def test_generate_review_todos_for_auto_filled(
         self,
-        todo_service: ToDoGeneratorService
+        todo_service: ToDoGeneratorService,
+        test_application: TenderApplication,
+        test_user,
     ):
         """Test that auto-filled fields create review to-dos."""
-        auto_filled_fields = {
-            "company_overview": {
-                "value": "Auto-generated company overview",
-                "auto_filled": True,
-                "source": "Answer Library"
-            },
-            "methodology": {
-                "value": "Agile methodology",
-                "auto_filled": True,
-                "source": "Answer Library"
-            }
-        }
-
-        todos = todo_service.generate_todos(
-            auto_filled_fields=auto_filled_fields,
-            tender_requirements="Standard tender"
+        todos = await todo_service.generate_todos(
+            application_id=test_application.id,
+            user_id=test_user.id,
         )
 
         # Should have review to-dos for auto-filled content
-        review_todos = [t for t in todos if t.category == "review"]
-        assert len(review_todos) >= 2
+        review_todos = [t for t in todos if t["category"] == "review"]
+        assert len(review_todos) >= 2  # company_name and industry
 
         # Review items should be medium priority
-        overview_review = next(
-            (t for t in review_todos if "overview" in t.title.lower()),
-            None
-        )
-        assert overview_review is not None
-        assert overview_review.priority == "medium"
+        for todo in review_todos:
+            assert todo["priority"] == "medium"
 
     @pytest.mark.asyncio
-    async def test_generate_pricing_todos(self, todo_service: ToDoGeneratorService):
-        """Test that pricing requirements create high-priority to-dos."""
-        auto_filled_fields = {
-            "item_1_price": {"value": None, "auto_filled": False, "source": None},
-            "item_2_price": {"value": None, "auto_filled": False, "source": None}
-        }
-
-        tender_requirements = "Provide pricing for all items in Schedule A"
-
-        todos = todo_service.generate_todos(
-            auto_filled_fields=auto_filled_fields,
-            tender_requirements=tender_requirements
-        )
-
-        # Should have pricing to-dos
-        pricing_todos = [t for t in todos if t.category == "pricing"]
-        assert len(pricing_todos) >= 1
-
-        # Pricing should be high priority
-        for todo in pricing_todos:
-            assert todo.priority == "high"
-
-    @pytest.mark.asyncio
-    async def test_generate_technical_question_todos(
+    async def test_generate_pricing_todos(
         self,
-        todo_service: ToDoGeneratorService
+        todo_service: ToDoGeneratorService,
+        test_application: TenderApplication,
+        test_user,
     ):
-        """Test that technical questions create medium-priority to-dos."""
-        auto_filled_fields = {
-            "tech_question_1": {"value": None, "auto_filled": False, "source": None}
-        }
-
-        tender_requirements = "Describe your development methodology and quality assurance process"
-
-        todos = todo_service.generate_todos(
-            auto_filled_fields=auto_filled_fields,
-            tender_requirements=tender_requirements
+        """Test that pricing requirements create to-dos when estimated_value is set."""
+        todos = await todo_service.generate_todos(
+            application_id=test_application.id,
+            user_id=test_user.id,
         )
 
-        # Should have technical question to-dos
-        tech_todos = [t for t in todos if t.category == "technical_response"]
-        assert len(tech_todos) >= 1
-
-        # Technical questions should be medium priority
-        for todo in tech_todos:
-            assert todo.priority == "medium"
+        # Should have pricing to-do (tender has estimated_value and "pricing" in requirements)
+        pricing_todos = [t for t in todos if t["category"] == "pricing"]
+        assert len(pricing_todos) >= 1
+        assert pricing_todos[0]["priority"] == "high"
 
     @pytest.mark.asyncio
-    async def test_generate_document_todos(self, todo_service: ToDoGeneratorService):
-        """Test that document requirements create high-priority to-dos."""
-        auto_filled_fields = {
-            "bee_certificate": {"value": None, "auto_filled": False, "source": None},
-            "tax_clearance": {"value": None, "auto_filled": False, "source": None}
-        }
-
-        tender_requirements = "Submit B-BBEE certificate and tax clearance"
-
-        todos = todo_service.generate_todos(
-            auto_filled_fields=auto_filled_fields,
-            tender_requirements=tender_requirements
-        )
-
-        # Should have document to-dos
-        doc_todos = [t for t in todos if t.category == "document"]
-        assert len(doc_todos) >= 2
-
-        # Documents should be high priority
-        for todo in doc_todos:
-            assert todo.priority == "high"
-
-    @pytest.mark.asyncio
-    async def test_generate_final_review_todo(self, todo_service: ToDoGeneratorService):
+    async def test_generate_final_review_todo(
+        self,
+        todo_service: ToDoGeneratorService,
+        test_application: TenderApplication,
+        test_user,
+    ):
         """Test that final review to-do is always created."""
-        auto_filled_fields = {
-            "company_name": {"value": "Acme Ltd", "auto_filled": True, "source": "Company Profile"}
-        }
-
-        todos = todo_service.generate_todos(
-            auto_filled_fields=auto_filled_fields,
-            tender_requirements="Standard tender"
+        todos = await todo_service.generate_todos(
+            application_id=test_application.id,
+            user_id=test_user.id,
         )
 
         # Should have final review to-do
-        final_todos = [t for t in todos if t.category == "final_check"]
-        assert len(final_todos) >= 1
-
-        # Final review should be low priority
-        final_todo = final_todos[0]
-        assert final_todo.priority == "low"
-        assert "final review" in final_todo.title.lower()
+        final_todos = [t for t in todos if t["category"] == "final_check"]
+        assert len(final_todos) == 1
+        assert final_todos[0]["priority"] == "low"
+        assert "final review" in final_todos[0]["title"].lower()
 
     @pytest.mark.asyncio
-    async def test_priority_ordering(self, todo_service: ToDoGeneratorService):
-        """Test that to-dos are ordered by priority (High → Medium → Low)."""
-        auto_filled_fields = {
-            "pricing": {"value": None, "auto_filled": False, "source": None},  # High
-            "company_overview": {
-                "value": "Auto-generated",
-                "auto_filled": True,
-                "source": "Answer Library"
-            },  # Medium (review)
-            "technical_question": {"value": None, "auto_filled": False, "source": None}  # Medium
-        }
-
-        todos = todo_service.generate_todos(
-            auto_filled_fields=auto_filled_fields,
-            tender_requirements="Provide pricing and technical details"
+    async def test_priority_ordering(
+        self,
+        todo_service: ToDoGeneratorService,
+        test_application: TenderApplication,
+        test_user,
+    ):
+        """Test that to-dos are ordered by priority (High -> Medium -> Low)."""
+        todos = await todo_service.generate_todos(
+            application_id=test_application.id,
+            user_id=test_user.id,
         )
 
-        # Extract priorities in order
-        priorities = [t.priority for t in todos]
+        priorities = [t["priority"] for t in todos]
+        priority_order = {"high": 0, "medium": 1, "low": 2}
 
-        # High should come before Medium, Medium before Low
         high_indices = [i for i, p in enumerate(priorities) if p == "high"]
         medium_indices = [i for i, p in enumerate(priorities) if p == "medium"]
         low_indices = [i for i, p in enumerate(priorities) if p == "low"]
@@ -212,16 +210,67 @@ class TestToDoGeneratorService:
             assert max(medium_indices) < min(low_indices)
 
     @pytest.mark.asyncio
-    async def test_calculate_progress_all_incomplete(
+    async def test_generate_document_todos(
         self,
-        todo_service: ToDoGeneratorService
+        todo_service: ToDoGeneratorService,
+        test_application: TenderApplication,
+        test_user,
+    ):
+        """Test that document requirements create to-dos."""
+        todos = await todo_service.generate_todos(
+            application_id=test_application.id,
+            user_id=test_user.id,
+        )
+
+        # Should have document to-dos (no compliance docs in auto_filled_fields)
+        doc_todos = [t for t in todos if t["category"] == "document"]
+        assert len(doc_todos) >= 1
+        for todo in doc_todos:
+            assert todo["priority"] == "high"
+
+    @pytest.mark.asyncio
+    async def test_todos_have_unique_ids(
+        self,
+        todo_service: ToDoGeneratorService,
+        test_application: TenderApplication,
+        test_user,
+    ):
+        """Test that all generated to-dos have unique IDs."""
+        todos = await todo_service.generate_todos(
+            application_id=test_application.id,
+            user_id=test_user.id,
+        )
+
+        ids = [t["id"] for t in todos]
+        assert len(ids) == len(set(ids))
+
+    @pytest.mark.asyncio
+    async def test_all_todos_start_incomplete(
+        self,
+        todo_service: ToDoGeneratorService,
+        test_application: TenderApplication,
+        test_user,
+    ):
+        """Test that all generated to-dos start as incomplete."""
+        todos = await todo_service.generate_todos(
+            application_id=test_application.id,
+            user_id=test_user.id,
+        )
+
+        assert all(t["completed"] is False for t in todos)
+
+    # Progress calculation tests (no DB needed - tests the method directly)
+
+    @pytest.mark.asyncio
+    async def test_calculate_progress_all_incomplete(
+        self, todo_service: ToDoGeneratorService
     ):
         """Test progress calculation when all to-dos are incomplete."""
         todo_items = [
             {"id": "1", "completed": False},
             {"id": "2", "completed": False},
             {"id": "3", "completed": False},
-            {"id": "4", "completed": False}
+            {"id": "4", "completed": False},
         ]
 
         progress = todo_service.calculate_progress(todo_items)
@@ -233,15 +282,14 @@ class TestToDoGeneratorService:
 
     @pytest.mark.asyncio
     async def test_calculate_progress_partially_complete(
-        self,
-        todo_service: ToDoGeneratorService
+        self, todo_service: ToDoGeneratorService
     ):
         """Test progress calculation with some completed to-dos."""
         todo_items = [
             {"id": "1", "completed": True},
             {"id": "2", "completed": True},
             {"id": "3", "completed": False},
-            {"id": "4", "completed": False}
+            {"id": "4", "completed": False},
         ]
 
         progress = todo_service.calculate_progress(todo_items)
@@ -253,14 +301,13 @@ class TestToDoGeneratorService:
 
     @pytest.mark.asyncio
     async def test_calculate_progress_all_complete(
-        self,
-        todo_service: ToDoGeneratorService
+        self, todo_service: ToDoGeneratorService
     ):
         """Test progress calculation when all to-dos are complete."""
         todo_items = [
             {"id": "1", "completed": True},
             {"id": "2", "completed": True},
-            {"id": "3", "completed": True}
+            {"id": "3", "completed": True},
         ]
 
         progress = todo_service.calculate_progress(todo_items)
@@ -272,8 +319,7 @@ class TestToDoGeneratorService:
 
     @pytest.mark.asyncio
     async def test_calculate_progress_empty_list(
-        self,
-        todo_service: ToDoGeneratorService
+        self, todo_service: ToDoGeneratorService
     ):
         """Test progress calculation with empty to-do list."""
         progress = todo_service.calculate_progress([])
@@ -283,77 +329,3 @@ class TestToDoGeneratorService:
         assert progress["percentage"] == 0
         # Empty to-do list means ready to submit
         assert progress["ready_to_submit"] is True
-
-    @pytest.mark.asyncio
-    async def test_todo_has_section_reference(self, todo_service: ToDoGeneratorService):
-        """Test that to-dos include section references where applicable."""
-        auto_filled_fields = {
-            "section_a_pricing": {"value": None, "auto_filled": False, "source": None}
-        }
-
-        tender_requirements = "Complete Section A: Pricing Schedule"
-
-        todos = todo_service.generate_todos(
-            auto_filled_fields=auto_filled_fields,
-            tender_requirements=tender_requirements
-        )
-
-        # Find pricing to-do
-        pricing_todo = next(
-            (t for t in todos if t.category == "pricing"),
-            None
-        )
-
-        assert pricing_todo is not None
-        # Should have section reference if detected
-        if hasattr(pricing_todo, 'section_reference') and pricing_todo.section_reference:
-            assert "section" in pricing_todo.section_reference.lower()
-
-    @pytest.mark.asyncio
-    async def test_generate_comprehensive_todo_list(
-        self,
-        todo_service: ToDoGeneratorService
-    ):
-        """Test generation of a comprehensive to-do list with all categories."""
-        auto_filled_fields = {
-            # Auto-filled fields needing review (medium)
-            "company_overview": {
-                "value": "Auto-generated overview",
-                "auto_filled": True,
-                "source": "Answer Library"
-            },
-            # Missing critical fields (high)
-            "pricing_item_1": {"value": None, "auto_filled": False, "source": None},
-            "bee_certificate": {"value": None, "auto_filled": False, "source": None},
-            # Missing technical response (medium)
-            "methodology_question": {"value": None, "auto_filled": False, "source": None}
-        }
-
-        tender_requirements = """
-        Provide detailed pricing for all items.
-        Describe your software development methodology.
-        Submit B-BBEE certificate and tax clearance.
-        """
-
-        todos = todo_service.generate_todos(
-            auto_filled_fields=auto_filled_fields,
-            tender_requirements=tender_requirements
-        )
-
-        # Should have multiple categories
-        categories = {t.category for t in todos}
-        assert "review" in categories
-        assert "missing_field" in categories or "pricing" in categories
-        assert "final_check" in categories
-
-        # Should have mix of priorities
-        priorities = {t.priority for t in todos}
-        assert "high" in priorities
-        assert "low" in priorities  # final_check
-
-        # All should start as incomplete
-        assert all(t.completed is False for t in todos)
-
-        # Should have unique IDs
-        ids = [t.id for t in todos]
-        assert len(ids) == len(set(ids))

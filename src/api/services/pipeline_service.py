@@ -481,6 +481,17 @@ class PipelineService:
                 await service.update_job_status(job_id, "running", total_items=total)
                 await service.add_log(job_id, f"Found {total} tenders to score")
 
+                # Load user's default criteria for keyword fallback and criteria_id
+                from ..models.criteria import UserCriteria
+
+                criteria_result = await db.execute(
+                    select(UserCriteria).where(
+                        UserCriteria.user_id == job.user_id,
+                        UserCriteria.is_default == True,
+                    )
+                )
+                default_criteria = criteria_result.scalar_one_or_none()
+
                 # Try to use LLM scorer, fall back to keyword matching
                 try:
                     from src.llm import ModelManager
@@ -509,14 +520,13 @@ class PipelineService:
                                 raw_response="",
                             )
 
-                            result = await asyncio.to_thread(
-                                scorer.score, tender_info
-                            )
+                            result = await scorer.score_single(tender_info)
 
                             # Create score record
                             score = Score(
                                 tender_id=tender.id,
                                 user_id=job.user_id,
+                                criteria_id=default_criteria.id if default_criteria else None,
                                 score=result.score,
                                 explanation=result.explanation,
                                 relevance_category=result.category,
@@ -545,20 +555,25 @@ class PipelineService:
                         job_id, "LLM not available, using keyword matching", level="warning"
                     )
 
-                    keywords = ["water", "pipe", "treatment", "supply", "maintenance"]
+                    keywords = (
+                        default_criteria.keywords
+                        if default_criteria and default_criteria.keywords
+                        else ["water", "pipe", "treatment", "supply", "maintenance"]
+                    )
                     scored = 0
 
                     for i, tender in enumerate(tenders):
                         try:
                             text = (tender.raw_text or "").lower()
-                            matches = sum(1 for kw in keywords if kw in text)
-                            score_value = min(100, matches * 20)
+                            matches = sum(1 for kw in keywords if kw.lower() in text)
+                            score_value = min(100, max(20, matches * 12))
 
                             score = Score(
                                 tender_id=tender.id,
                                 user_id=job.user_id,
+                                criteria_id=default_criteria.id if default_criteria else None,
                                 score=score_value,
-                                explanation=f"Matched {matches} keywords",
+                                explanation=f"Matched {matches}/{len(keywords)} keywords",
                                 relevance_category="Good" if score_value >= 60 else "Moderate",
                             )
                             db.add(score)

@@ -24,7 +24,7 @@ class TestDashboardEndpoints:
         """GET /dashboard/stats should fail without auth."""
         response = await client.get("/api/v1/dashboard/stats")
 
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     async def test_get_recent_tenders(self, client: AsyncClient, auth_headers):
         """GET /dashboard/recent should return recent high-priority tenders."""

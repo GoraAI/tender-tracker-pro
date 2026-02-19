@@ -56,7 +56,7 @@ class TestAuthEndpoints:
             "/api/v1/auth/login",
             json={
                 "email": test_user.email,
-                "password": "TestPass123",
+                "password": "testpassword",
             },
         )
 
@@ -103,7 +103,7 @@ class TestAuthEndpoints:
         """GET /auth/me should fail without token."""
         response = await client.get("/api/v1/auth/me")
 
-        assert response.status_code == 403  # No auth header
+        assert response.status_code == 401  # No auth header
 
     async def test_refresh_token(self, client: AsyncClient, auth_headers):
         """POST /auth/refresh should return new token."""

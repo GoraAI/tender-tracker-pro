@@ -235,18 +235,35 @@ async def trigger_scoring(
             _t = _res.scalar_one_or_none()
             if not _t or not _t.raw_text:
                 return
-            _keywords = [
-                "water", "pipe", "treatment", "supply", "maintenance",
-                "infrastructure", "construction", "sanitation", "civil",
-            ]
+
+            # Load user's default criteria for keywords and criteria_id
+            from src.api.models.criteria import UserCriteria
+
+            _crit_res = await _db.execute(
+                select(UserCriteria).where(
+                    UserCriteria.user_id == u_id,
+                    UserCriteria.is_default == True,
+                )
+            )
+            _criteria = _crit_res.scalar_one_or_none()
+
+            _keywords = (
+                _criteria.keywords
+                if _criteria and _criteria.keywords
+                else [
+                    "water", "pipe", "treatment", "supply", "maintenance",
+                    "infrastructure", "construction", "sanitation", "civil",
+                ]
+            )
             _text = (_t.raw_text or "").lower()
-            _matches = sum(1 for kw in _keywords if kw in _text)
+            _matches = sum(1 for kw in _keywords if kw.lower() in _text)
             _score_value = min(100, max(20, _matches * 12))
             _score = Score(
                 tender_id=_t.id,
                 user_id=u_id,
+                criteria_id=_criteria.id if _criteria else None,
                 score=_score_value,
-                explanation=f"Keyword relevance: {_matches} matching terms found.",
+                explanation=f"Keyword relevance: {_matches}/{len(_keywords)} matching terms found.",
                 relevance_category="Good" if _score_value >= 60 else "Moderate",
             )
             _db.add(_score)

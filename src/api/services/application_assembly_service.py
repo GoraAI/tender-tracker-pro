@@ -79,13 +79,8 @@ class ApplicationAssemblyService:
                 "auto_filled": True,
                 "source": "CompanyProfile",
             }
-            auto_filled_fields["registration_number"] = {
-                "value": profile.registration_number or "",
-                "auto_filled": True,
-                "source": "CompanyProfile",
-            }
-            auto_filled_fields["contact_details"] = {
-                "value": f"{profile.contact_name or ''} - {profile.contact_email or ''} - {profile.contact_phone or ''}",
+            auto_filled_fields["industry"] = {
+                "value": profile.industry or "",
                 "auto_filled": True,
                 "source": "CompanyProfile",
             }

@@ -1,5 +1,6 @@
 """To-do generator service for tender applications."""
 
+import copy
 from datetime import datetime, timezone
 from typing import Optional
 from uuid import UUID
@@ -204,8 +205,8 @@ class ToDoGeneratorService:
         if not application:
             raise ValueError(f"Application {application_id} not found")
 
-        # Update to-do item
-        todos = application.to_do_items.copy()
+        # Update to-do item (deep copy to ensure SQLAlchemy detects mutation)
+        todos = copy.deepcopy(application.to_do_items)
         for todo in todos:
             if todo["id"] == todo_id:
                 todo["completed"] = completed

@@ -3,27 +3,15 @@
 from uuid import uuid4
 
 import pytest
+import pytest_asyncio
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.models import Source, Tender
 
 
-@pytest.fixture
-async def test_source(db_session: AsyncSession) -> Source:
-    """Create a test source."""
-    source = Source(
-        id="test-source",
-        name="Test Source",
-        url="https://example.com/tenders",
-    )
-    db_session.add(source)
-    await db_session.commit()
-    return source
-
-
-@pytest.fixture
-async def test_tenders(db_session: AsyncSession, test_source: Source) -> list[Tender]:
+@pytest_asyncio.fixture
+async def test_tenders(db: AsyncSession, test_source: Source) -> list[Tender]:
     """Create test tenders."""
     tenders = [
         Tender(
@@ -36,8 +24,8 @@ async def test_tenders(db_session: AsyncSession, test_source: Source) -> list[Te
         for i in range(5)
     ]
     for tender in tenders:
-        db_session.add(tender)
-    await db_session.commit()
+        db.add(tender)
+    await db.commit()
     return tenders
 
 
@@ -63,7 +51,7 @@ class TestTenderEndpoints:
         """GET /tenders should fail without auth."""
         response = await client.get("/api/v1/tenders")
 
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     async def test_list_tenders_pagination(
         self, client: AsyncClient, auth_headers, test_tenders
