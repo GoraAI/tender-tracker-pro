@@ -103,6 +103,13 @@ fun TenderDetailScreen(
         applicationViewModel.checkQualification(tenderId)
     }
 
+    // Re-check qualification when score changes (e.g. after rescore)
+    LaunchedEffect(state.tender?.score) {
+        if (state.tender != null) {
+            applicationViewModel.checkQualification(tenderId)
+        }
+    }
+
     // Handle events from ViewModel
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
