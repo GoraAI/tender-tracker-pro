@@ -484,6 +484,7 @@ class PipelineService:
 
                 # Load user's default criteria for keyword fallback and criteria_id
                 from ..models.criteria import UserCriteria
+                from ..models.company_profile import CompanyProfile
 
                 criteria_result = await db.execute(
                     select(UserCriteria).where(
@@ -493,6 +494,14 @@ class PipelineService:
                 )
                 default_criteria = criteria_result.scalar_one_or_none()
 
+                # Load user's company profile for real company name/industry
+                profile_result = await db.execute(
+                    select(CompanyProfile).where(
+                        CompanyProfile.user_id == job.user_id
+                    )
+                )
+                company_profile = profile_result.scalar_one_or_none()
+
                 # Try to use LLM scorer, fall back to keyword matching
                 try:
                     from src.llm import ModelManager
@@ -501,12 +510,19 @@ class PipelineService:
                     await service.add_log(job_id, "Loading LLM model for scoring...")
                     model_manager = ModelManager()
 
-                    # Build criteria dict from user's DB criteria
+                    # Build criteria dict from user's DB criteria + company profile
                     criteria_dict = None
                     if default_criteria:
                         criteria_dict = {
-                            "company_name": "User Company",
-                            "industry": "Government Contracting",
+                            "company_name": (
+                                company_profile.trading_name
+                                or company_profile.legal_name
+                                if company_profile else "General Business"
+                            ),
+                            "industry": (
+                                company_profile.industry
+                                if company_profile else "Government Contracting"
+                            ),
                             "capabilities": default_criteria.capabilities or [],
                             "preferred_sectors": default_criteria.preferred_sectors or [],
                             "preferred_locations": default_criteria.preferred_locations or [],
@@ -585,11 +601,22 @@ class PipelineService:
                         job_id, "LLM not available, using keyword matching", level="warning"
                     )
 
-                    keywords = (
-                        default_criteria.keywords
-                        if default_criteria and default_criteria.keywords
-                        else ["water", "pipe", "treatment", "supply", "maintenance"]
-                    )
+                    # Build keywords from all criteria fields
+                    keywords = []
+                    if default_criteria:
+                        keywords.extend(default_criteria.keywords or [])
+                        keywords.extend(default_criteria.capabilities or [])
+                        keywords.extend(default_criteria.preferred_sectors or [])
+
+                    if not keywords:
+                        await service.add_log(
+                            job_id, "No user criteria configured — skipping keyword scoring",
+                            level="warning",
+                        )
+                        await service.update_job_status(job_id, "completed", progress=100)
+                        await service.add_log(job_id, "Scoring complete: 0 tenders (no criteria)")
+                        return
+
                     scored = 0
 
                     for i, tender in enumerate(tenders):

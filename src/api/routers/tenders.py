@@ -7,6 +7,7 @@ from uuid import UUID
 
 import pdfplumber
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, status
+from pydantic import BaseModel, Field
 from sqlalchemy import select
 
 from src.api.database import async_session_maker as _session_factory
@@ -195,20 +196,27 @@ async def trigger_extraction(
     )
 
 
+class ScoreSubmissionBody(BaseModel):
+    """Optional body for submitting a pre-computed score (e.g. from on-device Gemma)."""
+
+    score: int = Field(..., ge=0, le=100)
+    explanation: str = ""
+    scored_at: Optional[str] = None
+
+
 @router.post("/{tender_id}/score", response_model=TenderResponse)
 async def trigger_scoring(
     tender_id: UUID,
     db: DbSession,
     current_user: CurrentUser,
     background_tasks: BackgroundTasks,
+    body: Optional[ScoreSubmissionBody] = None,
 ) -> TenderResponse:
     """
-    Trigger relevance scoring for a specific tender based on user's criteria.
+    Score a tender. Accepts two modes:
 
-    This endpoint is useful when:
-    - A tender has no score yet
-    - User has updated their criteria and wants to re-score
-    - User wants to refresh the scoring with latest algorithms
+    1. **With body** (from Android/Gemma): saves the submitted score directly.
+    2. **Without body**: runs server-side keyword scoring using user's criteria.
     """
     # Verify tender exists
     result = await db.execute(
@@ -222,71 +230,17 @@ async def trigger_scoring(
             detail="Tender not found",
         )
 
-    # Check if tender has been extracted (needs raw_text for keyword scoring)
-    if not tender.raw_text and not tender.requirements_summary:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Tender must be extracted before scoring. Call /extract first.",
-        )
-
-    async def _score_tender(t_id: UUID, u_id: UUID) -> None:
-        async with _session_factory() as _db:
-            _res = await _db.execute(select(Tender).where(Tender.id == t_id))
-            _t = _res.scalar_one_or_none()
-            if not _t or (not _t.raw_text and not _t.requirements_summary):
-                return
-
-            # Load user's default criteria for keywords and criteria_id
-            from src.api.models.criteria import UserCriteria
-
-            _crit_res = await _db.execute(
-                select(UserCriteria).where(
-                    UserCriteria.user_id == u_id,
-                    UserCriteria.is_default == True,
-                )
+    if body is not None:
+        # Mode 1: Accept pre-computed score from Android (Gemma LLM)
+        await _upsert_score(db, tender.id, current_user.id, body.score, body.explanation)
+    else:
+        # Mode 2: Server-side keyword scoring
+        if not tender.raw_text and not tender.requirements_summary:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Tender must be extracted before scoring. Call /extract first.",
             )
-            _criteria = _crit_res.scalar_one_or_none()
-
-            _keywords = (
-                _criteria.keywords
-                if _criteria and _criteria.keywords
-                else [
-                    "water", "pipe", "treatment", "supply", "maintenance",
-                    "infrastructure", "construction", "sanitation", "civil",
-                ]
-            )
-            _text = (_t.raw_text or _t.requirements_summary or "").lower()
-            _matches = sum(1 for kw in _keywords if kw.lower() in _text)
-            _score_value = min(100, max(20, _matches * 12))
-            _criteria_id = _criteria.id if _criteria else None
-
-            # Upsert: update existing score or insert new
-            _existing = await _db.execute(
-                select(Score).where(
-                    Score.tender_id == _t.id,
-                    Score.user_id == u_id,
-                    Score.criteria_id == _criteria_id if _criteria_id else Score.criteria_id.is_(None),
-                )
-            )
-            _existing_score = _existing.scalar_one_or_none()
-
-            if _existing_score:
-                _existing_score.score = _score_value
-                _existing_score.explanation = f"Keyword relevance: {_matches}/{len(_keywords)} matching terms found."
-                _existing_score.relevance_category = "Good" if _score_value >= 70 else ("Moderate" if _score_value >= 50 else "Weak")
-            else:
-                _score = Score(
-                    tender_id=_t.id,
-                    user_id=u_id,
-                    criteria_id=_criteria_id,
-                    score=_score_value,
-                    explanation=f"Keyword relevance: {_matches}/{len(_keywords)} matching terms found.",
-                    relevance_category="Good" if _score_value >= 70 else ("Moderate" if _score_value >= 50 else "Weak"),
-                )
-                _db.add(_score)
-            await _db.commit()
-
-    background_tasks.add_task(_score_tender, tender.id, current_user.id)
+        background_tasks.add_task(_keyword_score_tender, tender.id, current_user.id)
 
     user_score = getattr(tender, "_user_score", None)
 
@@ -305,7 +259,118 @@ async def trigger_scoring(
         extraction_confidence=tender.extraction_confidence,
         discovered_at=tender.discovered_at,
         extracted_at=tender.extracted_at,
-        score=user_score.score if user_score else None,
-        relevance_category=user_score.category if user_score else None,
-        score_explanation=(user_score.explanation if user_score else "Scoring queued. Check back in a few moments."),
+        score=body.score if body else (user_score.score if user_score else None),
+        relevance_category=_category_for_score(body.score) if body else (user_score.category if user_score else None),
+        score_explanation=body.explanation if body else (user_score.explanation if user_score else "Scoring queued. Check back in a few moments."),
     )
+
+
+# ---------------------------------------------------------------------------
+# Helper functions for scoring
+# ---------------------------------------------------------------------------
+
+def _category_for_score(score: int) -> str:
+    """Compute relevance category from a numeric score."""
+    if score >= 90:
+        return "Excellent"
+    if score >= 70:
+        return "Good"
+    if score >= 50:
+        return "Moderate"
+    if score >= 30:
+        return "Weak"
+    return "Poor"
+
+
+def _build_keyword_set(criteria) -> list[str]:
+    """Build a combined keyword list from criteria fields."""
+    keywords: list[str] = []
+    if criteria:
+        keywords.extend(criteria.keywords or [])
+        keywords.extend(criteria.capabilities or [])
+        keywords.extend(criteria.preferred_sectors or [])
+    return keywords
+
+
+async def _upsert_score(
+    db, tender_id: UUID, user_id: UUID, score_value: int, explanation: str,
+    criteria_id: UUID | None = None,
+) -> None:
+    """Insert or update a score row."""
+    from src.api.models.criteria import UserCriteria
+
+    # If no criteria_id given, look up the user's default
+    if criteria_id is None:
+        _crit_res = await db.execute(
+            select(UserCriteria).where(
+                UserCriteria.user_id == user_id,
+                UserCriteria.is_default == True,
+            )
+        )
+        _criteria = _crit_res.scalar_one_or_none()
+        criteria_id = _criteria.id if _criteria else None
+
+    category = _category_for_score(score_value)
+
+    if criteria_id:
+        where_clause = (
+            (Score.tender_id == tender_id)
+            & (Score.user_id == user_id)
+            & (Score.criteria_id == criteria_id)
+        )
+    else:
+        where_clause = (
+            (Score.tender_id == tender_id)
+            & (Score.user_id == user_id)
+            & (Score.criteria_id.is_(None))
+        )
+
+    existing = await db.execute(select(Score).where(where_clause))
+    existing_score = existing.scalar_one_or_none()
+
+    if existing_score:
+        existing_score.score = score_value
+        existing_score.explanation = explanation
+        existing_score.relevance_category = category
+    else:
+        db.add(Score(
+            tender_id=tender_id,
+            user_id=user_id,
+            criteria_id=criteria_id,
+            score=score_value,
+            explanation=explanation,
+            relevance_category=category,
+        ))
+    await db.commit()
+
+
+async def _keyword_score_tender(t_id: UUID, u_id: UUID) -> None:
+    """Background task: score a tender using keyword matching against user criteria."""
+    async with _session_factory() as _db:
+        _res = await _db.execute(select(Tender).where(Tender.id == t_id))
+        _t = _res.scalar_one_or_none()
+        if not _t or (not _t.raw_text and not _t.requirements_summary):
+            return
+
+        from src.api.models.criteria import UserCriteria
+
+        _crit_res = await _db.execute(
+            select(UserCriteria).where(
+                UserCriteria.user_id == u_id,
+                UserCriteria.is_default == True,
+            )
+        )
+        _criteria = _crit_res.scalar_one_or_none()
+
+        _keywords = _build_keyword_set(_criteria)
+        if not _keywords:
+            # No criteria configured — can't score meaningfully
+            return
+
+        _text = (_t.raw_text or _t.requirements_summary or "").lower()
+        _matches = sum(1 for kw in _keywords if kw.lower() in _text)
+        _score_value = min(100, max(20, _matches * 12))
+        _criteria_id = _criteria.id if _criteria else None
+        _explanation = f"Keyword relevance: {_matches}/{len(_keywords)} matching terms found."
+
+        await _upsert_score(_db, _t.id, u_id, _score_value, _explanation, _criteria_id)
